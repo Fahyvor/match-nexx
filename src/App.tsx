@@ -1,0 +1,31 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ApplicantDashboard from './pages/applicant/Dashboard';
+import CVBuilder from './pages/applicant/CVBuilder';
+import RecruiterDashboard from './pages/recruiter/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        {/* Applicant Routes */}
+        <Route element={<ProtectedRoute role="applicant" />}>
+          <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
+          <Route path="/applicant/cv-builder" element={<CVBuilder />} />
+        </Route>
+
+        {/* Recruiter Routes */}
+        <Route element={<ProtectedRoute role="recruiter" />}>
+          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+}
