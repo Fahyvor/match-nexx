@@ -5,6 +5,7 @@ import Register from './pages/auth/Register';
 import ApplicantDashboard from './pages/applicant/Dashboard';
 import CVBuilder from './pages/applicant/CVBuilder';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
+import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -24,6 +25,11 @@ export default function App() {
         {/* Recruiter Routes */}
         <Route element={<ProtectedRoute role="recruiter" />}>
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+        </Route>
+
+        {/* Settings Route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>
