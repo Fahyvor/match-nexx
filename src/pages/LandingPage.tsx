@@ -2,34 +2,9 @@ import React from 'react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-zinc-100 font-sans antialiased selection:bg-[#FF0055] selection:text-white overflow-x-hidden">
-      
-      {/* ─── NAVIGATION (Raw, High-Contrast Grid Line) ───────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <div className="flex items-center gap-3 cursor-pointer group">
-          {/* Kinetic asymmetric logo concept */}
-          <div className="relative w-6 h-6">
-            <div className="absolute inset-0 bg-[#00E5FF] transform -skew-x-12 group-hover:translate-x-1 transition-transform duration-300" />
-            <div className="absolute inset-0 bg-[#FF0055] transform skew-x-12 translate-x-1 group-hover:-translate-x-1 transition-transform duration-300 mix-blend-screen" />
-          </div>
-          <span className="text-xl font-black tracking-tighter uppercase font-mono">
-            HIRE<span className="text-[#00E5FF]">.</span>FLOW
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-8">
-          <button className="text-xs font-mono tracking-widest text-zinc-400 hover:text-[#00E5FF] transition-colors">
-            // AUTH_LOGIN
-          </button>
-          <button className="relative px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-[#FF0055] hover:shadow-[0_0_20px_rgba(255,0,85,0.4)] transition-all duration-300 overflow-hidden group">
-            <span className="relative z-10">Get Started</span>
-            <div className="absolute inset-0 bg-[#FF0055] transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
-          </button>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-[#FF0055] selection:text-white overflow-x-hidden">
 
-      {/* ─── HERO & SPLIT COMPOSITION ──────────────────── */}
-      <main className="max-w-[1400px] mx-auto px-6 lg:px-16 pt-20 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <main className="w-full mx-auto px-6 lg:px-16 pt-20 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         {/* Left Side: Heavyweight Futuristic Typography */}
         <div className="lg:col-span-6 space-y-8 relative">
@@ -105,15 +80,6 @@ export default function LandingPage() {
 
         </div>
       </main>
-
-      {/* ─── FOOTER (Industrial Blueprint Subtext) ───────────────────────────────── */}
-      <footer className="border-t border-zinc-900 bg-[#070708] py-8 px-6 lg:px-16 flex flex-col sm:flex-row justify-between items-center text-[10px] font-mono text-zinc-600 tracking-wider gap-4">
-        <div className="flex items-center gap-6">
-          <span>STATUS: <span className="text-[#00E5FF]">ONLINE</span></span>
-          <span>NET_TRAFFIC: <span className="text-[#FF0055]">STABLE</span></span>
-        </div>
-        <div>HIREFLOW ENGINE VERSION 4.1.2 // © 2026</div>
-      </footer>
     </div>
   );
 }

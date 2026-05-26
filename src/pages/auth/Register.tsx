@@ -37,7 +37,6 @@ export default function Register() {
               <span className="text-lg font-black tracking-tighter uppercase font-mono">HIRE.FLOW</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tighter uppercase mb-2">Join the Network</h1>
-            <p className="text-xs font-mono tracking-widest text-zinc-500">ENROLLMENT_PROTOCOL_V2</p>
           </div>
 
           {/* Background glow */}
@@ -139,12 +138,6 @@ export default function Register() {
               </p>
             </div>
           </form>
-
-          {/* Footer Info */}
-          <div className="mt-8 text-center text-[10px] font-mono text-zinc-700 space-y-1">
-            <p>SECURE_ENROLLMENT_ACTIVE</p>
-            <p>DATA_ENCRYPTED • 256-BIT_HASH</p>
-          </div>
         </div>
       </div>
     </div>

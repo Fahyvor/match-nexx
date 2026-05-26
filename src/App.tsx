@@ -7,10 +7,12 @@ import CVBuilder from './pages/applicant/CVBuilder';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
 import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import Footer from './components/Footer';
+import Nav from './components/Nav';
 export default function App() {
   return (
     <Router>
+      <Nav />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -32,6 +34,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
+      <Footer />
     </Router>
   );
 }

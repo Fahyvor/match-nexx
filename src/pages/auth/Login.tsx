@@ -14,8 +14,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
-      <div className="flex items-center justify-center min-h-screen px-6">
+    <div className="h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <div className="flex items-center justify-center h-screen px-6">
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-12 text-center">
@@ -91,12 +91,6 @@ export default function Login() {
               </p>
             </div>
           </form>
-
-          {/* Footer Info */}
-          <div className="mt-8 text-center text-[10px] font-mono text-zinc-700 space-y-1">
-            <p>SECURE_CONNECTION_ESTABLISHED</p>
-            <p>TLS_1.3 • AES_256_ENCRYPTION</p>
-          </div>
         </div>
       </div>
     </div>
