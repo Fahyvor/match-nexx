@@ -79,6 +79,89 @@ export default function LandingPage() {
 
         </div>
       </main>
+
+      {/* ================= TRUST STRIP ================= */}
+      <section className="border-y border-zinc-900 py-10 text-center">
+        <p className="text-xs text-zinc-500 uppercase tracking-widest mb-6">
+          Trusted by engineering teams & modern hiring systems
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-10 text-zinc-600 text-sm font-mono">
+          <span>High-Scale Startups</span>
+          <span>Remote Engineering Teams</span>
+          <span>AI Hiring Pipelines</span>
+          <span>Talent Platforms</span>
+        </div>
+      </section>
+
+      {/* ================= FEATURES ================= */}
+      <section className="px-6 lg:px-16 py-24 grid md:grid-cols-3 gap-8">
+        <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
+          <h3 className="font-bold uppercase text-sm mb-3">Smart Matching Engine</h3>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            AI-driven candidate scoring system that maps skills, experience, and intent into structured hiring signals.
+          </p>
+        </div>
+
+        <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
+          <h3 className="font-bold uppercase text-sm mb-3">Real-Time Pipeline Tracking</h3>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Monitor applicant flow from application to decision in a live synchronized hiring dashboard.
+          </p>
+        </div>
+
+        <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
+          <h3 className="font-bold uppercase text-sm mb-3">Structured CV Intelligence</h3>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Automatically transforms resumes into recruiter-ready structured data for instant evaluation.
+          </p>
+        </div>
+      </section>
+
+      {/* ================= HOW IT WORKS ================= */}
+      <section className="px-6 lg:px-16 py-24 border-t border-zinc-900">
+        <h2 className="text-3xl font-bold mb-12 uppercase tracking-tight">
+          How It Works
+        </h2>
+
+        <div className="grid md:grid-cols-3 gap-10 font-mono text-xs">
+          <div>
+            <p className="text-[#00E5FF] mb-2">01</p>
+            <p className="text-zinc-400">
+              Users create structured applicant or recruiter profiles within the system.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-[#FF0055] mb-2">02</p>
+            <p className="text-zinc-400">
+              The engine analyzes, indexes, and maps skills into a searchable talent graph.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-zinc-400 mb-2">03</p>
+            <p className="text-zinc-400">
+              Matches are streamed instantly into a live hiring pipeline interface.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= FINAL CTA ================= */}
+      <section className="px-6 lg:px-16 py-28 text-center border-t border-zinc-900">
+        <h2 className="text-4xl md:text-5xl font-extrabold uppercase mb-6">
+          Build Smarter Hiring Systems
+        </h2>
+
+        <p className="text-zinc-500 max-w-xl mx-auto mb-10">
+          Replace fragmented hiring workflows with a unified, intelligent talent infrastructure built for speed and precision.
+        </p>
+
+        <button className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-10 py-4 text-black font-bold tracking-widest uppercase">
+          Get Started
+        </button>
+      </section>
     </div>
   );
 }
