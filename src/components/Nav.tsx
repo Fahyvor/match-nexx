@@ -8,7 +8,7 @@ const Nav = () => {
             <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12 group-hover:translate-x-1 transition-transform duration-300" />
             <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 group-hover:-translate-x-1 transition-transform duration-300 mix-blend-screen" />
           </div>
-          <span className="text-xl font-black text-accent-cyan tracking-tighter uppercase font-mono">
+          <span className="text-xl font-black text-accent-cyan tracking-tighter uppercase font-mono" onClick={() => window.location.href="/"}>
             HIRE<span className="text-accent-cyan">.</span>FLOW
           </span>
         </div>
