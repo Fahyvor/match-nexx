@@ -265,12 +265,6 @@ export const dbHelpers = {
     db.jobOffers.set(id, updated);
     return updated;
   },
-
-  // Direct access to databases (for controller use)
-  getApplicantById: (id: string) => db.applicants.get(id),
-  getInterviewById: (id: string) => db.interviews.get(id),
-  getJobOfferById: (id: string) => db.jobOffers.get(id),
-  getApplicationById: (id: string) => db.applications.get(id),
 };
 
 // Export database directly for direct access if needed

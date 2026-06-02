@@ -158,7 +158,7 @@ export default function LandingPage() {
           Replace fragmented hiring workflows with a unified, intelligent talent infrastructure built for speed and precision.
         </p>
 
-        <button className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-10 py-4 text-black font-bold tracking-widest uppercase">
+        <button className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-10 py-4 text-black font-bold tracking-widest uppercase cursor-pointer" onClick={() => window.location.href="/login"}>
           Get Started
         </button>
       </section>

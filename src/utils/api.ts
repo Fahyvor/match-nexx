@@ -3,6 +3,68 @@ import type { AxiosInstance, AxiosError } from 'axios';
 
 const API_BASE_URL = '/api';
 
+export interface RegisterData {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  state: string;
+  country: string;
+  years_of_experience: number;
+  email: string;
+  password: string;
+  userType: 'applicant' | 'recruiter';
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface JobData {
+  title: string;
+  description: string;
+  location: string;
+  salary?: number;
+  type?: 'full-time' | 'part-time' | 'contract' | 'remote';
+}
+
+export interface ApplicantProfileData {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  state?: string;
+  country?: string;
+  years_of_experience?: number;
+  skills?: string[];
+  bio?: string;
+}
+
+export interface RecruiterProfileData {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  company?: string;
+  position?: string;
+  bio?: string;
+}
+
+export interface InterviewData {
+  date: string;
+  time: string;
+  location?: string;
+  notes?: string;
+}
+
+export interface OfferData {
+  salary: number;
+  startDate: string;
+  notes?: string;
+}
+
+// ─── Client ───────────────────────────────────────────────────────────────────
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -14,7 +76,6 @@ class ApiClient {
       },
     });
 
-    // Add auth token to requests
     this.client.interceptors.request.use((config) => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -23,58 +84,62 @@ class ApiClient {
       return config;
     });
 
-    // Handle responses
     this.client.interceptors.response.use(
       (response) => response.data,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          // Token expired or invalid
           localStorage.removeItem('token');
           localStorage.removeItem('userRole');
           window.location.href = '/login';
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   // Auth endpoints
   auth = {
-    register: (data: {
-      name: string;
-      email: string;
-      password: string;
-      userType: 'applicant' | 'recruiter';
-    }) => this.client.post('/auth/register', data),
+    register: (data: RegisterData) =>
+      this.client.post('/auth/register', data),
 
-    login: (data: { email: string; password: string }) =>
+    login: (data: LoginData) =>
       this.client.post('/auth/login', data),
 
-    logout: () => this.client.post('/auth/logout'),
+    logout: () =>
+      this.client.post('/auth/logout'),
 
-    refreshToken: () => this.client.post('/auth/refresh-token'),
+    refreshToken: () =>
+      this.client.post('/auth/refresh-token'),
   };
 
   // Job endpoints
   jobs = {
-    list: () => this.client.get('/jobs'),
+    list: () =>
+      this.client.get('/jobs'),
 
-    get: (id: string) => this.client.get(`/jobs/${id}`),
+    get: (id: string) =>
+      this.client.get(`/jobs/${id}`),
 
-    create: (data: any) => this.client.post('/jobs', data),
+    create: (data: JobData) =>
+      this.client.post('/jobs', data),
 
-    update: (id: string, data: any) => this.client.put(`/jobs/${id}`, data),
+    update: (id: string, data: Partial<JobData>) =>
+      this.client.put(`/jobs/${id}`, data),
 
-    delete: (id: string) => this.client.delete(`/jobs/${id}`),
+    delete: (id: string) =>
+      this.client.delete(`/jobs/${id}`),
   };
 
   // Applicant endpoints
   applicants = {
-    getProfile: () => this.client.get('/applicants/profile'),
+    getProfile: () =>
+      this.client.get('/applicants/profile'),
 
-    updateProfile: (data: any) => this.client.put('/applicants/profile', data),
+    updateProfile: (data: ApplicantProfileData) =>
+      this.client.put('/applicants/profile', data),
 
-    getApplications: () => this.client.get('/applicants/applications'),
+    getApplications: () =>
+      this.client.get('/applicants/applications'),
 
     submitApplication: (jobId: string) =>
       this.client.post('/applicants/applications', { jobId }),
@@ -82,20 +147,25 @@ class ApiClient {
 
   // Recruiter endpoints
   recruiters = {
-    getDashboard: () => this.client.get('/recruiters/dashboard'),
+    getDashboard: () =>
+      this.client.get('/recruiters/dashboard'),
 
-    getProfile: () => this.client.get('/recruiters/profile'),
+    getProfile: () =>
+      this.client.get('/recruiters/profile'),
 
-    updateProfile: (data: any) => this.client.put('/recruiters/profile', data),
+    updateProfile: (data: RecruiterProfileData) =>
+      this.client.put('/recruiters/profile', data),
 
-    getCandidates: () => this.client.get('/recruiters/candidates'),
+    getCandidates: () =>
+      this.client.get('/recruiters/candidates'),
 
-    getCandidate: (id: string) => this.client.get(`/recruiters/candidates/${id}`),
+    getCandidate: (id: string) =>
+      this.client.get(`/recruiters/candidates/${id}`),
 
-    scheduleInterview: (candidateId: string, data: any) =>
+    scheduleInterview: (candidateId: string, data: InterviewData) =>
       this.client.post(`/recruiters/candidates/${candidateId}/interview`, data),
 
-    sendOffer: (candidateId: string, data: any) =>
+    sendOffer: (candidateId: string, data: OfferData) =>
       this.client.post(`/recruiters/candidates/${candidateId}/offer`, data),
   };
 }

@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 
 export default new Elysia({ prefix: '/applicants' })
   .get('/', async () => {
@@ -9,7 +9,7 @@ export default new Elysia({ prefix: '/applicants' })
     };
   })
 
-  .get('/profile', async ({ bearer }: any) => {
+  .get('/profile', async () => {
     // TODO: Fetch current user's applicant profile
     return {
       success: true,
@@ -27,7 +27,7 @@ export default new Elysia({ prefix: '/applicants' })
     };
   })
 
-  .put('/profile', async ({ bearer, body }: any) => {
+  .put('/profile', async ({ body }) => {
     // TODO: Update applicant profile
     return {
       success: true,
@@ -36,7 +36,7 @@ export default new Elysia({ prefix: '/applicants' })
     };
   })
 
-  .get('/applications', async ({ bearer }: any) => {
+  .get('/applications', async () => {
     // TODO: Fetch user's applications
     return {
       success: true,
@@ -53,7 +53,7 @@ export default new Elysia({ prefix: '/applicants' })
     };
   })
 
-  .post('/applications', async ({ bearer, body }: any) => {
+  .post('/applications', async ({ body }) => {
     // TODO: Submit job application
     return {
       success: true,
@@ -66,7 +66,7 @@ export default new Elysia({ prefix: '/applicants' })
       }
     };
   }, {
-    body: t => t.Object({
+    body: t.Object({
       jobId: t.String()
     })
   });

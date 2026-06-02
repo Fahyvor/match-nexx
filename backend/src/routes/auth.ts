@@ -1,60 +1,85 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
+import { authMiddleware } from '../middlewares/auth';
+import { authController } from '../controllers/authController';
 
-export default new Elysia({ prefix: '/auth' })
-  .post('/register', async ({ body }: any) => {
-    // TODO: Implement registration logic
-    return {
-      success: true,
-      message: 'User registered successfully',
-      data: {
-        id: '1',
-        email: body.email,
-        role: body.userType
-      }
-    };
-  }, {
-    body: t => t.Object({
-      name: t.String(),
-      email: t.String({ format: 'email' }),
-      password: t.String({ minLength: 8 }),
-      userType: t.Union([t.Literal('applicant'), t.Literal('recruiter')])
-    })
-  })
+const app = new Elysia({ prefix: '/auth' })
 
-  .post('/login', async ({ body }: any) => {
-    // TODO: Implement login logic
-    return {
-      success: true,
-      message: 'Login successful',
-      data: {
-        token: 'mock-jwt-token',
-        user: {
-          id: '1',
-          email: body.email,
-          role: 'applicant'
-        }
-      }
-    };
-  }, {
-    body: t => t.Object({
-      email: t.String({ format: 'email' }),
-      password: t.String()
-    })
-  })
+  // =========================
+  // PUBLIC ROUTES
+  // =========================
+  .post(
+    '/register',
+    async ({ body }) => authController.register(body),
+    {
+      body: t.Object({
+        firstName: t.String(),
+        lastName: t.String(),
+        phone: t.String(),
+        address: t.String(),
+        state: t.String(),
+        country: t.String(),
+        years_of_experience: t.Number(),
+        email: t.String({ format: 'email' }),
+        password: t.String({ minLength: 8 }),
+        userType: t.Union([t.Literal('applicant'), t.Literal('recruiter')]),
+      }),
+    },
+  )
 
-  .post('/logout', async () => {
-    return {
-      success: true,
-      message: 'Logged out successfully'
-    };
-  })
+  .post(
+    '/login',
+    async ({ body }) => authController.login(body.email, body.password),
+    {
+      body: t.Object({
+        email: t.String({ format: 'email' }),
+        password: t.String(),
+      }),
+    },
+  )
 
-  .post('/refresh-token', async ({ bearer }: any) => {
-    // TODO: Implement token refresh logic
-    return {
-      success: true,
-      data: {
-        token: 'new-jwt-token'
-      }
-    };
-  });
+  .post(
+    '/forgot-password',
+    async () => ({ success: true, message: 'Password reset link sent to email' }),
+    {
+      body: t.Object({
+        email: t.String({ format: 'email' }),
+      }),
+    },
+  )
+
+  .post(
+    '/reset-password',
+    async () => ({ success: true, message: 'Password reset successful' }),
+    {
+      body: t.Object({
+        token: t.String(),
+        newPassword: t.String({ minLength: 8 }),
+      }),
+    },
+  )
+
+  // =========================
+  // PROTECTED ROUTES
+  // =========================
+  .group('/user', (group) =>
+    group
+      .use(authMiddleware)
+
+      .put('/profile', async ({ user, body }) => ({
+        success: true,
+        message: 'Profile updated successfully',
+        data: { user, updates: body },
+      }))
+
+      .post('/logout', async () => authController.logout()),
+  )
+
+  // =========================
+  // REFRESH TOKEN
+  // =========================
+  .post(
+    '/refresh-token',
+    async ({ headers }) => authController.refreshToken(headers.authorization),
+  );
+
+export default app;

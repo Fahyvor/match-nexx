@@ -1,4 +1,4 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 
 export default new Elysia({ prefix: '/jobs' })
   .get('/', async () => {
@@ -18,7 +18,7 @@ export default new Elysia({ prefix: '/jobs' })
     };
   })
 
-  .get('/:id', async ({ params }: any) => {
+  .get('/:id', async ({ params }) => {
     // TODO: Fetch single job by ID
     return {
       success: true,
@@ -35,7 +35,7 @@ export default new Elysia({ prefix: '/jobs' })
     };
   })
 
-  .post('/', async ({ body, bearer }: any) => {
+  .post('/', async ({ body }) => {
     // TODO: Create new job (requires authentication)
     return {
       success: true,
@@ -46,7 +46,7 @@ export default new Elysia({ prefix: '/jobs' })
       }
     };
   }, {
-    body: t => t.Object({
+    body: t.Object({
       title: t.String(),
       company: t.String(),
       description: t.String(),
@@ -55,8 +55,8 @@ export default new Elysia({ prefix: '/jobs' })
     })
   })
 
-  .put('/:id', async ({ params, body, bearer }: any) => {
-    // TODO: Update job (requires authentication)
+  .put('/:id', async ({ params, body }) => {
+    // TODO: Update job
     return {
       success: true,
       message: 'Job updated successfully',
@@ -67,7 +67,7 @@ export default new Elysia({ prefix: '/jobs' })
     };
   })
 
-  .delete('/:id', async ({ params, bearer }: any) => {
+  .delete('/:id', async () => {
     // TODO: Delete job (requires authentication)
     return {
       success: true,

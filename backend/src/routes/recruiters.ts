@@ -1,7 +1,7 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 
 export default new Elysia({ prefix: '/recruiters' })
-  .get('/dashboard', async ({ bearer }: any) => {
+  .get('/dashboard', async () => {
     // TODO: Fetch recruiter dashboard data
     return {
       success: true,
@@ -14,7 +14,7 @@ export default new Elysia({ prefix: '/recruiters' })
     };
   })
 
-  .get('/profile', async ({ bearer }: any) => {
+  .get('/profile', async () => {
     // TODO: Fetch recruiter profile
     return {
       success: true,
@@ -27,7 +27,7 @@ export default new Elysia({ prefix: '/recruiters' })
     };
   })
 
-  .put('/profile', async ({ bearer, body }: any) => {
+  .put('/profile', async ({ body }) => {
     // TODO: Update recruiter profile
     return {
       success: true,
@@ -36,7 +36,7 @@ export default new Elysia({ prefix: '/recruiters' })
     };
   })
 
-  .get('/candidates', async ({ bearer }: any) => {
+  .get('/candidates', async () => {
     // TODO: Fetch all candidates for recruiter
     return {
       success: true,
@@ -53,7 +53,7 @@ export default new Elysia({ prefix: '/recruiters' })
     };
   })
 
-  .get('/candidates/:id', async ({ params, bearer }: any) => {
+  .get('/candidates/:id', async ({ params }) => {
     // TODO: Fetch single candidate profile
     return {
       success: true,
@@ -73,7 +73,7 @@ export default new Elysia({ prefix: '/recruiters' })
     };
   })
 
-  .post('/candidates/:id/interview', async ({ params, bearer, body }: any) => {
+  .post('/candidates/:id/interview', async ({ params, body }) => {
     // TODO: Schedule interview
     return {
       success: true,
@@ -85,13 +85,13 @@ export default new Elysia({ prefix: '/recruiters' })
       }
     };
   }, {
-    body: t => t.Object({
+    body: t.Object({
       scheduledAt: t.String({ format: 'date-time' }),
       interviewType: t.String()
     })
   })
 
-  .post('/candidates/:id/offer', async ({ params, bearer, body }: any) => {
+  .post('/candidates/:id/offer', async ({ params, body }) => {
     // TODO: Send job offer
     return {
       success: true,

@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    state: '',
+    country: '',
+    years_of_experience: 0,
     email: '',
     password: '',
     userType: 'applicant' as 'applicant' | 'recruiter',
@@ -25,8 +31,8 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
-      <div className="flex items-center justify-center min-h-screen px-6 py-12">
-        <div className="w-full max-w-md">
+      <div className="flex items-center justify-center min-h-screen px-6 lg:py-12 py-4">
+        <div className="w-full">
           {/* Header */}
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -40,23 +46,35 @@ export default function Register() {
           </div>
 
           {/* Background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-linear-to-r from-accent-cyan/10 to-accent-pink/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full bg-linear-to-r from-accent-cyan/10 to-accent-pink/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
           {/* Form Container */}
-          <form onSubmit={handleSubmit} className="relative bg-panel-bg border border-panel-border p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="relative bg-panel-bg border border-panel-border p-8 space-y-6 grid grid-cols-2 gap-4 w-5/6 mx-auto">
             {/* Status Indicator */}
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
               READY
             </div>
 
-            {/* Full Name Field */}
+            {/* First Name Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Full Name</label>
+              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">First Name</label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
                 placeholder="John Doe"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
