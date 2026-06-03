@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from "../../redux/store";
 
 export default function Register() {
+
+  const { states } = useSelector((state: RootState) => state.states);
+  console.log("All States", states);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -90,6 +95,43 @@ export default function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="user@company.com"
+                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Phone Number</label>
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+              <select
+              className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700'
+              required
+            >
+              <option value="" disabled>Select State</option>
+              {states?.map((state: string) => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Years of Experience</label>
+              <input
+                type="number"
+                name="years_of_experience"
+                value={formData.years_of_experience}
+                onChange={handleChange}
+                placeholder="John Doe"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
