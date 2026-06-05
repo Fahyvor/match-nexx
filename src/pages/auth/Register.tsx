@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from "../../redux/store";
+import axios from 'axios';
+import SleekToast, { toast } from 'sleek-toast';
 
 export default function Register() {
 
   const { states } = useSelector((state: RootState) => state.states);
-  console.log("All States", states);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -19,6 +20,7 @@ export default function Register() {
     password: '',
     userType: 'applicant' as 'applicant' | 'recruiter',
   });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -26,16 +28,27 @@ export default function Register() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Connect to backend API
-    localStorage.setItem('token', 'mock-token');
-    localStorage.setItem('userRole', formData.userType);
-    navigate(formData.userType === 'applicant' ? '/applicant/dashboard' : '/recruiter/dashboard');
+    setIsLoading(true);
+    try {
+      const response = await axios.post('/api/auth/register', formData);
+      if (response.data.success) {
+        navigate('/login');
+      } else {
+        toast.error(response.data.message || 'Registration failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred during registration');
+      console.log('Registration error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <SleekToast />
       <div className="flex items-center justify-center min-h-screen px-6 lg:py-12 py-4">
         <div className="w-full">
           {/* Header */}
@@ -54,7 +67,8 @@ export default function Register() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full bg-linear-to-r from-accent-cyan/10 to-accent-pink/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
           {/* Form Container */}
-          <form onSubmit={handleSubmit} className="relative bg-panel-bg border border-panel-border p-8 space-y-6 grid grid-cols-2 gap-4 w-5/6 mx-auto">
+          <form onSubmit={handleSubmit} className="w-5/6 mx-auto bg-panel-bg border border-panel-border p-8 relative">
+          <div className=" space-y-6 grid grid-cols-2 gap-4 ">
             {/* Status Indicator */}
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
@@ -175,7 +189,8 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Terms Checkbox */}
+          </div>
+          <div className="flex flex-col gap-6">
             <label className="flex items-start gap-3 text-[11px] text-zinc-400">
               <input type="checkbox" className="w-4 h-4 accent-accent-cyan mt-0.5" required />
               I agree to the Terms of Service and Privacy Policy
@@ -185,8 +200,9 @@ export default function Register() {
             <button
               type="submit"
               className="w-full relative px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:shadow-[0_0_30px_rgba(0,229,255,0.3)] transition-all duration-300 overflow-hidden group"
+              disabled={isLoading}
             >
-              <span className="relative z-10">Initialize Account</span>
+              <span className="relative z-10">{isLoading ? 'Creating Account...' : 'Create Account'}</span>
               <div className="absolute inset-0 bg-accent-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0 opacity-20" />
             </button>
 
@@ -197,6 +213,8 @@ export default function Register() {
                 <a href="/login" className="text-accent-pink hover:underline font-mono">Sign In →</a>
               </p>
             </div>
+          </div>
+          {/* Terms Checkbox */}
           </form>
         </div>
       </div>

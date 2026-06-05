@@ -9,7 +9,16 @@ import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 import Footer from './components/Footer';
 import Nav from './components/Nav';
+import { useEffect } from 'react';
+import { useAppDispatch } from "./redux/hooks";
+import { fetchStatesAndLgas } from './redux/slices/stateSlice';
 export default function App() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchStatesAndLgas());
+  }, [dispatch]);
+
   return (
     <Router>
       <Nav />

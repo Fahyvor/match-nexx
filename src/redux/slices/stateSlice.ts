@@ -23,7 +23,6 @@ export const fetchStatesAndLgas = createAsyncThunk(
       const statesResponse = await axios.get('https://nga-states-lga.onrender.com/fetch');
       const states: string[] = statesResponse.data;
       states.sort();
-      console.log("States:", states);
 
       const lgaPromises = states.map(async (stateName) => {
         const res = await axios.get(`https://nga-states-lga.onrender.com/?state=${stateName}`);
