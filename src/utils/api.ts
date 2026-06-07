@@ -63,8 +63,6 @@ export interface OfferData {
   notes?: string;
 }
 
-// ─── Client ───────────────────────────────────────────────────────────────────
-
 class ApiClient {
   private client: AxiosInstance;
 

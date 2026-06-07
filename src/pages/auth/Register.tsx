@@ -32,7 +32,11 @@ export default function Register() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/auth/register', formData);
+      const payload = {
+        ...formData,
+        years_of_experience: Number(formData.years_of_experience)
+      }
+      const response = await axios.post('/api/auth/register', payload);
       if (response.data.success) {
         navigate('/login');
       } else {
@@ -145,7 +149,7 @@ export default function Register() {
                 name="years_of_experience"
                 value={formData.years_of_experience}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="Years of Experience"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>

@@ -56,13 +56,13 @@ if (isProd) {
 }
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📚 Swagger documentation: http://localhost:${PORT}/swagger`);
+  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Swagger documentation: http://localhost:${PORT}/swagger`);
 
   if (isProd) {
-    console.log(`🎨 Frontend: http://localhost:${PORT}`);
+    console.log(`Frontend: http://localhost:${PORT}`);
   } else {
-    console.log(`🎨 Frontend: http://localhost:5173`);
+    console.log(`Frontend: http://localhost:5173`);
   }
 });
 

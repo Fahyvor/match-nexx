@@ -53,14 +53,14 @@ export const registerUser = (data: {
   email: string;
   password: string;
   role: 'applicant' | 'recruiter';
-}): { success: boolean; user?: User; error?: string } => {
+}): { success: boolean; user?: User; message?: string } => {
   const existingUser = dbHelpers.getUserByEmail(data.email);
   if (existingUser) {
-    return { success: false, error: 'Email already registered' };
+    return { success: false, message: 'Email already registered' };
   }
 
   if (data.password.length < 8) {
-    return { success: false, error: 'Password must be at least 8 characters' };
+    return { success: false, message: 'Password must be at least 8 characters' };
   }
 
   const userId = generateId();

@@ -1,20 +1,34 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SleekToast, { toast } from 'sleek-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Connect to backend API
-    localStorage.setItem('token', 'mock-token');
-    navigate('/applicant/dashboard');
+    try {
+      const response = await axios.post('/api/auth/login', { email, password });
+      if (response.data.success) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userRole', response.data.role);
+        navigate(response.data.role === 'applicant' ? '/applicant/dashboard' : '/recruiter/dashboard');
+        toast.success(response.data.message)
+      } else {
+        toast.error('Login failed: ' + response.data.message);
+      }
+    } catch (error) {
+      toast.error('An error occurred during login');
+      console.error('Login error:', error);
+    }
   };
 
   return (
     <div className="h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <SleekToast />
       <div className="flex items-center justify-center h-screen px-6">
         <div className="w-full max-w-md">
           {/* Header */}
