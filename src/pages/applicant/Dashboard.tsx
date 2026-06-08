@@ -20,21 +20,8 @@ export default function ApplicantDashboard() {
 
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-cyber-dark/80 backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="relative w-5 h-5">
-            <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12" />
-            <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 mix-blend-screen" />
-          </div>
-          <span className="text-lg font-black tracking-tighter uppercase font-mono">HIRE.FLOW</span>
-        </div>
-        <button onClick={() => navigate('/settings')} className="text-xs font-mono tracking-widest text-zinc-400 hover:text-accent-cyan transition-colors">
-          // SETTINGS
-        </button>
-      </nav>
 
-      <main className="max-w-6xl mx-auto px-6 lg:px-16 py-12 pb-20">
+      <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
         <div className="mb-12 space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan">

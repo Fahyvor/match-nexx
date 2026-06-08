@@ -1,103 +1,149 @@
-import { registerUser, loginUser, createToken, verifyBearerToken } from '../utils/auth';
+import { registerUser, loginUser } from "../modules/auth";
+import { createToken, verifyToken } from "../utils/jwt";
+import type { Context } from "elysia";
+
+type AppError = {
+  status?: number;
+  error?: string;
+};
+
+type RegisterBody = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  state: string;
+  country: string;
+  years_of_experience: number;
+  email: string;
+  password: string;
+  userType: "applicant" | "recruiter";
+};
 
 export const authController = {
+  register: async ({
+    body,
+    set,
+  }: Context & { body: RegisterBody }) => {
+    try {
+      const result = await registerUser({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        state: body.state,
+        country: body.country,
+        years_of_experience: body.years_of_experience,
+        email: body.email,
+        password: body.password,
+        role: body.userType,
+      });
 
-  register: async (data: {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    address: string;
-    state: string;
-    country: string;
-    years_of_experience: number;
-    email: string;
-    password: string;
-    userType: 'applicant' | 'recruiter';
-  }): Promise<{
-    success: boolean;
-    message: string;
-    data?: { id: string; email: string; firstName: string; lastName: string; role: string };
-    error?: string;
-  }> => {
-    const result = registerUser({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      state: data.state,
-      country: data.country,
-      years_of_experience: data.years_of_experience,
-      email: data.email,
-      password: data.password,
-      role: data.userType,
-    });
+      set.status = 201;
 
-    if (!result.success) {
-      return { success: false, message: 'Registration failed', error: result.error };
+      return {
+        success: true,
+        message: "User registered successfully",
+        data: {
+          id: result.user.id,
+          email: result.user.email,
+          role: result.user.role,
+        },
+      };
+    } catch (err: unknown) {
+      console.error("REGISTER ERROR FULL:", err);
+      const error = err as AppError;
+
+      set.status = error.status ?? 500;
+
+      return {
+        success: false,
+        message: "Registration failed",
+        error: error.error || "Unknown error",
+      };
     }
+  }, // 👈 IMPORTANT COMMA
 
-    const user = result.user!;
+  login: async (email: string, password: string) => {
+    try {
+      const result = await loginUser(email, password);
+
+      const token = createToken(
+        result.user.id,
+        result.user.email,
+        result.user.role
+      );
+
+      return {
+        success: true,
+        message: "Login successful",
+        data: {
+          token,
+          user: result.user,
+        },
+      };
+    } catch (err: unknown) {
+      const error = err as AppError;
+
+      return {
+        success: false,
+        message: "Login failed",
+        error: error.error || "Invalid credentials",
+      };
+    }
+  },
+
+  logout: async () => {
     return {
       success: true,
-      message: 'User registered successfully',
-      data: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      message: "Logged out successfully",
     };
   },
 
-  login: async (
-    email: string,
-    password: string,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: { token: string; user: { id: string; email: string; firstName: string; lastName: string; role: string } };
-    error?: string;
-  }> => {
-    const result = loginUser(email, password);
+  refreshToken: async (authHeader?: string) => {
+    try {
+      if (!authHeader) {
+        return {
+          success: false,
+          message: "No token provided",
+          error: "Unauthorized",
+        };
+      }
 
-    if (!result.success) {
-      return { success: false, message: 'Login failed', error: result.error };
+      const token = authHeader.replace("Bearer ", "");
+      const payload = verifyToken(token);
+
+      if (!payload) {
+        return {
+          success: false,
+          message: "Invalid or expired token",
+          error: "Unauthorized",
+        };
+      }
+
+      const newToken = createToken(
+        payload.userId,
+        payload.email,
+        payload.role
+      );
+
+      return {
+        success: true,
+        message: "Token refreshed successfully",
+        data: { token: newToken },
+      };
+    } catch {
+      return {
+        success: false,
+        message: "Token refresh failed",
+        error: "Unauthorized",
+      };
     }
+  },
 
-    const user = result.user!;
-    const token = result.token!;
-
+  allUsers: async () => {
     return {
       success: true,
-      message: 'Login successful',
-      data: {
-        token,
-        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-      },
+      message: "Fetched all users",
+      data: { users: [] },
     };
   },
-
-  logout: async (): Promise<{ success: boolean; message: string }> => {
-    return { success: true, message: 'Logged out successfully' };
-  },
-
-  refreshToken: async (
-    authHeader?: string,
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: { token: string };
-    error?: string;
-  }> => {
-    const payload = verifyBearerToken(authHeader);
-
-    if (!payload) {
-      return { success: false, message: 'Invalid or expired token', error: 'Unauthorized' };
-    }
-
-    const token = createToken(payload.userId, payload.email, payload.role);
-    return { success: true, message: 'Token refreshed successfully', data: { token } };
-  },
-
-  // Stubs — implement when ready
-  // getAllUsers
-  // getCurrentUser
-  // getUserById
-  // updateUser
-  // deleteUser
-  // updatePassword
-  // forgotPassword
 };

@@ -7,9 +7,10 @@ const app = new Elysia({ prefix: '/auth' })
   // =========================
   // PUBLIC ROUTES
   // =========================
+  .get('/all-users', async () => authController.allUsers())
   .post(
     '/register',
-    async ({ body }) => authController.register(body),
+    (ctx) => authController.register(ctx),
     {
       body: t.Object({
         firstName: t.String(),
@@ -21,14 +22,17 @@ const app = new Elysia({ prefix: '/auth' })
         years_of_experience: t.Number(),
         email: t.String({ format: 'email' }),
         password: t.String({ minLength: 8 }),
-        userType: t.Union([t.Literal('applicant'), t.Literal('recruiter')]),
+        userType: t.Union([
+          t.Literal('applicant'),
+          t.Literal('recruiter'),
+        ]),
       }),
     },
   )
 
   .post(
     '/login',
-    async ({ body }) => authController.login(body.email, body.password),
+    (ctx) => authController.login(ctx.body.email, ctx.body.password),
     {
       body: t.Object({
         email: t.String({ format: 'email' }),
@@ -80,6 +84,7 @@ const app = new Elysia({ prefix: '/auth' })
   .post(
     '/refresh-token',
     async ({ headers }) => authController.refreshToken(headers.authorization),
-  );
+  )
+
 
 export default app;

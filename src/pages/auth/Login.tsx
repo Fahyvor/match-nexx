@@ -17,14 +17,17 @@ export default function Login() {
       const response = await axios.post('/api/auth/login', { email, password });
 
       if (response.data.success) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', response.data.role);
+        localStorage.setItem('token', response.data.data.token);
+        localStorage.setItem('userRole', response.data.data.user.role);
 
-        navigate(
-          response.data.role === 'applicant'
-            ? '/applicant/dashboard'
-            : '/recruiter/dashboard'
-        );
+        setTimeout(() => {
+          navigate(
+            response.data.data.user.role === 'applicant'
+              ? '/applicant/dashboard'
+              : '/recruiter/dashboard'
+          );
+        }, 3000)
+
 
         toast.success(response.data.message || 'Login successful');
       } else {

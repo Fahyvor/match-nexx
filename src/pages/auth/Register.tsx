@@ -33,20 +33,34 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       const payload = {
         ...formData,
-        years_of_experience: Number(formData.years_of_experience)
-      }
-      const response = await axios.post('/api/auth/register', payload);
-      if (response.data.success) {
-        navigate('/login');
+        years_of_experience: Number(formData.years_of_experience),
+      };
+
+      const response = await axios.post("/api/auth/register", payload);
+
+      toast.success(response.data.message || "Registration successful");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+
+        toast.error(message);
+        console.log("API Error:", error.response?.data);
       } else {
-        toast.error(response.data.message || 'Registration failed');
+        toast.error("An unexpected error occurred");
+        console.log("Unknown error:", error);
       }
-    } catch (error) {
-      toast.error('An error occurred during registration');
-      console.log('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +103,7 @@ export default function Register() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="John"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
@@ -101,7 +115,7 @@ export default function Register() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="Doe"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
@@ -126,7 +140,7 @@ export default function Register() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder="090xxxxxxxxxxx"
                 className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
@@ -134,14 +148,46 @@ export default function Register() {
             <div className="space-y-2">
               <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
               <select
-              className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700'
-              required
-            >
-              <option value="" disabled>Select State</option>
-              {states?.map((state: string) => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
+                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+                required
+                value={formData.country}
+                onChange={handleChange}
+                name='country'
+              >
+                <option value="" disabled>Select Country</option>
+                <option value="Nigeria">Nigeria</option>
+                {/* {states?.map((state: string) => (
+                  <option key={state} value={state}>{state}</option>
+                ))} */}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+              <select
+                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+                required
+                value={formData.state}
+                onChange={handleChange}
+                name='state'
+              >
+                <option value="" disabled>Select State</option>
+                {states?.map((state: string) => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Address</label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="123 Main St, City, Country"
+                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+              />
             </div>
 
             <div className="space-y-2">
@@ -161,7 +207,7 @@ export default function Register() {
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
               <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
