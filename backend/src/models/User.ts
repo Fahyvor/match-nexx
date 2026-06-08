@@ -2,8 +2,12 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   password: string;
+  state: string;
+  country: string;
+  years_of_experience: number;
   role: 'applicant' | 'recruiter';
   profileComplete: boolean;
   createdAt: Date;

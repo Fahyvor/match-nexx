@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from "../../redux/store";
 import axios from 'axios';
 import SleekToast, { toast } from 'sleek-toast';
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 export default function Register() {
 
@@ -21,6 +22,7 @@ export default function Register() {
     userType: 'applicant' as 'applicant' | 'recruiter',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -157,14 +159,17 @@ export default function Register() {
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
-              />
+              <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className=" w-full text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 bg-transparent autofill:bg-transparent"
+                />
+                {showPassword ? <FaEye className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/> : <FaEyeSlash className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/>}
+              </div>
             </div>
 
             {/* User Type Selection */}

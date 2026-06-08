@@ -2,27 +2,50 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SleekToast, { toast } from 'sleek-toast';
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       const response = await axios.post('/api/auth/login', { email, password });
+
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', response.data.role);
-        navigate(response.data.role === 'applicant' ? '/applicant/dashboard' : '/recruiter/dashboard');
-        toast.success(response.data.message)
+
+        navigate(
+          response.data.role === 'applicant'
+            ? '/applicant/dashboard'
+            : '/recruiter/dashboard'
+        );
+
+        toast.success(response.data.message || 'Login successful');
       } else {
-        toast.error('Login failed: ' + response.data.message);
+        toast.error(response.data.error || 'Login failed');
       }
-    } catch (error) {
-      toast.error('An error occurred during login');
-      console.error('Login error:', error);
+
+    } catch (err) {
+      console.error('Login error:', err);
+
+      let message = 'Something went wrong';
+
+      if (axios.isAxiosError(err)) {
+        message =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          `Request failed with status ${err.response?.status}`;
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+
+      toast.error(message);
     }
   };
 
@@ -70,13 +93,16 @@ export default function Login() {
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
-              />
+              <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                />
+                {showPassword ? <FaEye className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/> : <FaEyeSlash className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/>}
+              </div>
             </div>
 
             {/* Remember & Forgot */}

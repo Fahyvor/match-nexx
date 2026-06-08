@@ -49,25 +49,33 @@ export const verifyToken = (token: string): { userId: string; email: string; rol
 
 // Register new user
 export const registerUser = (data: {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  state: string;
+  country: string;
+  years_of_experience: number;
   role: 'applicant' | 'recruiter';
-}): { success: boolean; user?: User; message?: string } => {
+}): { success: boolean; user?: User; error?: string } => {
   const existingUser = dbHelpers.getUserByEmail(data.email);
   if (existingUser) {
-    return { success: false, message: 'Email already registered' };
+    throw { success: false, error: 'Email already registered', status: 409 };
   }
 
   if (data.password.length < 8) {
-    return { success: false, message: 'Password must be at least 8 characters' };
+    throw { success: false, error: 'Password must be at least 8 characters', status: 400 };
   }
 
   const userId = generateId();
   const user: User = {
     id: userId,
     email: data.email,
-    name: data.name,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    state: data.state,
+    country: data.country,
+    years_of_experience: data.years_of_experience,
     password: hashPassword(data.password),
     role: data.role,
     profileComplete: false,
@@ -87,11 +95,11 @@ export const loginUser = (
   const user = dbHelpers.getUserByEmail(email);
 
   if (!user) {
-    return { success: false, error: 'User not found' };
+    throw { success: false, error: 'User not found', status: 404 };
   }
 
   if (!verifyPassword(password, user.password)) {
-    return { success: false, error: 'Invalid password' };
+    throw { success: false, error: 'Invalid Email or password', status: 401 };
   }
 
   const token = createToken(user.id, user.email, user.role);

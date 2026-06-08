@@ -16,11 +16,15 @@ export const authController = {
   }): Promise<{
     success: boolean;
     message: string;
-    data?: { id: string; email: string; name: string; role: string };
+    data?: { id: string; email: string; firstName: string; lastName: string; role: string };
     error?: string;
   }> => {
     const result = registerUser({
-      name: `${data.firstName} ${data.lastName}`,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      state: data.state,
+      country: data.country,
+      years_of_experience: data.years_of_experience,
       email: data.email,
       password: data.password,
       role: data.userType,
@@ -34,7 +38,7 @@ export const authController = {
     return {
       success: true,
       message: 'User registered successfully',
-      data: { id: user.id, email: user.email, name: user.name, role: user.role },
+      data: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
     };
   },
 
@@ -44,7 +48,7 @@ export const authController = {
   ): Promise<{
     success: boolean;
     message: string;
-    data?: { token: string; user: { id: string; email: string; name: string; role: string } };
+    data?: { token: string; user: { id: string; email: string; firstName: string; lastName: string; role: string } };
     error?: string;
   }> => {
     const result = loginUser(email, password);
@@ -61,7 +65,7 @@ export const authController = {
       message: 'Login successful',
       data: {
         token,
-        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
       },
     };
   },
