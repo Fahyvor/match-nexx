@@ -1,31 +1,22 @@
 import { registerUser, loginUser } from "../modules/auth";
 import { createToken, verifyToken } from "../utils/jwt";
 import type { Context } from "elysia";
+import type { User } from "../models/User";
+import { users } from "../db/schema";
+import { db } from "../db/db";
 
 type AppError = {
   status?: number;
   error?: string;
 };
 
-type RegisterBody = {
-  firstName: string;
-  lastName: string;
-  phone: string;
-  address: string;
-  state: string;
-  country: string;
-  years_of_experience: number;
-  email: string;
-  password: string;
-  userType: "applicant" | "recruiter";
-};
-
 export const authController = {
   register: async ({
     body,
     set,
-  }: Context & { body: RegisterBody }) => {
+  }: Context & { body: User }) => {
     try {
+      console.log("REGISTER BODY:", body);
       const result = await registerUser({
         firstName: body.firstName,
         lastName: body.lastName,
@@ -60,7 +51,7 @@ export const authController = {
         error: error.error || "Unknown error",
       };
     }
-  }, // 👈 IMPORTANT COMMA
+  },
 
   login: async (email: string, password: string) => {
     try {
@@ -83,11 +74,18 @@ export const authController = {
     } catch (err: unknown) {
       const error = err as AppError;
 
-      return {
-        success: false,
-        message: "Login failed",
-        error: error.error || "Invalid credentials",
-      };
+      throw new Response(
+        JSON.stringify({
+          success: false,
+          message: error.error || "Invalid credentials",
+        }),
+        {
+          status: error.status || 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
   },
 
@@ -140,10 +138,44 @@ export const authController = {
   },
 
   allUsers: async () => {
-    return {
-      success: true,
-      message: "Fetched all users",
-      data: { users: [] },
-    };
+    try {
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          role: users.role,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          state: users.state,
+          country: users.country,
+          years_of_experience: users.years_of_experience,
+          createdAt: users.createdAt,
+        })
+        .from(users);
+
+      if (allUsers.length === 0) {
+        return {
+          success: true,
+          message: "No users found",
+          data: { users: [] },
+          status: 200,
+        };
+      }
+
+      return {
+        success: true,
+        message: "Fetched all users",
+        data: { users: allUsers },
+        status: 200,
+      };
+    } catch (error) {
+      console.error("FETCH USERS ERROR:", error);
+      return {
+        success: false,
+        message: "Failed to fetch users",
+        error: "Internal Server Error",
+        status: 500,
+      };
+    }
   },
 };

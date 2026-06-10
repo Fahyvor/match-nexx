@@ -1,5 +1,3 @@
-// Applicant Controller
-import { dbHelpers, generateId } from '../utils/database';
 import type {
   Applicant,
   Experience,

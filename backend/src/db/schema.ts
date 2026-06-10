@@ -11,6 +11,11 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("firstName").notNull(),
+  lastName: text("lastName").notNull(),
+  state: text("state").notNull(),
+  country: text("country").notNull(),
+  years_of_experience: integer("years_of_experience").notNull(),
   role: text("role").notNull(),
 
   createdAt: timestamp("created_at").defaultNow(),

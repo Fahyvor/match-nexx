@@ -7,6 +7,7 @@ const app = new Elysia({ prefix: '/auth' })
   // =========================
   // PUBLIC ROUTES
   // =========================
+  // .use(authMiddleware)
   .get('/all-users', async () => authController.allUsers())
   .post(
     '/register',

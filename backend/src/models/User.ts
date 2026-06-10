@@ -8,7 +8,7 @@ export interface User {
   state: string;
   country: string;
   years_of_experience: number;
-  role: 'applicant' | 'recruiter';
+  userType: 'applicant' | 'recruiter';
   profileComplete: boolean;
   createdAt: Date;
   updatedAt: Date;

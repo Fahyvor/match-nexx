@@ -1,11 +1,12 @@
 import { Elysia, t } from 'elysia';
+import { authMiddleware } from '../middlewares/auth';
 
 export default new Elysia({ prefix: '/applicants' })
-  .get('/', async () => {
-    // TODO: Fetch all applicants
+  .use(authMiddleware)
+  .get('/all-applicants', async () => {
     return {
       success: true,
-      data: []
+      data: [],
     };
   })
 

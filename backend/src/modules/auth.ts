@@ -46,6 +46,11 @@ export const registerUser = async (data: {
     id: randomUUID(),
     email: data.email,
     password: hashPassword(data.password),
+    firstName: data.firstName,
+    lastName: data.lastName,
+    state: data.state,
+    country: data.country,
+    years_of_experience: data.years_of_experience,
     role: data.role,
   };
 

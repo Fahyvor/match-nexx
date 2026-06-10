@@ -3,6 +3,9 @@ import { swagger } from '@elysiajs/swagger';
 import { bearer } from '@elysiajs/bearer';
 import { staticPlugin } from '@elysiajs/static';
 import path from 'path';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Import routes
 import authRoutes from './routes/auth';
