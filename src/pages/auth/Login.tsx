@@ -1,54 +1,66 @@
-import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SleekToast, { toast } from 'sleek-toast';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { useAppDispatch } from '../../redux/hooks';
+import { loginUser } from '../../redux/slices/userSlice';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const dispatch = useAppDispatch()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoggingIn(true);
 
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const result = await dispatch(loginUser({ email, password }));
 
-      if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('userRole', response.data.data.user.role);
+      console.log("DISPATCH RESULT:", result);
 
-        setTimeout(() => {
-          navigate(
-            response.data.data.user.role === 'applicant'
-              ? '/applicant/dashboard'
-              : '/recruiter/dashboard'
-          );
-        }, 3000)
+      if (loginUser.fulfilled.match(result)) {
+        const user = result.payload.user;
 
+        console.log("User data", user)
 
-        toast.success(response.data.message || 'Login successful');
+        toast.success('Login successful');
+
+        navigate(
+          user.role === 'applicant'
+            ? '/applicant/dashboard'
+            : '/recruiter/dashboard'
+        );
       } else {
-        toast.error(response.data.error || 'Login failed');
+        let errorMessage = 'Login failed';
+
+        if (typeof result.payload === 'string') {
+          errorMessage = result.payload;
+        } else if (
+          result.payload &&
+          typeof result.payload === 'object' &&
+          'error' in result.payload
+        ) {
+          errorMessage = String((result.payload as { error?: string }).error);
+        }
+
+        toast.error(errorMessage);
       }
-
-    } catch (err) {
-      console.error('Login error:', err);
-
+    } catch (err: unknown) {
       let message = 'Something went wrong';
 
-      if (axios.isAxiosError(err)) {
-        message =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          `Request failed with status ${err.response?.status}`;
-      } else if (err instanceof Error) {
+      if (err instanceof Error) {
         message = err.message;
       }
 
       toast.error(message);
+      console.log(err);
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -121,8 +133,9 @@ export default function Login() {
             <button
               type="submit"
               className="w-full relative px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-pink hover:shadow-[0_0_30px_rgba(255,0,85,0.3)] transition-all duration-300 overflow-hidden group"
+              disabled={isLoggingIn}
             >
-              <span className="relative z-10">Authenticate</span>
+              <span className="relative z-10">{isLoggingIn ? 'Authenticating...' : 'Authenticate'}</span>
               <div className="absolute inset-0 bg-accent-pink transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
             </button>
 

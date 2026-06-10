@@ -4,9 +4,13 @@ import api from '../../utils/api';
 interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  state: string;
+  country: string;
+  years_of_experience: string;
+  address: string;
   role: 'applicant' | 'recruiter';
-  profileComplete: boolean;
   createdAt: string;
 }
 
@@ -46,8 +50,8 @@ export const registerUser = createAsyncThunk(
   ) => {
     try {
       const response = await api.auth.register(data);
-      localStorage.setItem('token', response.token);
-      return { user: response.user, token: response.token };
+      localStorage.setItem('token', response.data.token);
+      return { user: response.data.user, token: response.data.token };
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
       return rejectWithValue(apiError.response?.data?.error || 'Registration failed');
@@ -62,18 +66,46 @@ export const loginUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.auth.login(data);
-      const { token, user } = response.data;
+      const res = await api.auth.login(data);
 
-      // Store token in localStorage
+      // handle both shapes: res.data.data OR res.data
+      const payload = res.data?.data ?? res.data;
+      const { token, user } = payload;
+
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', user.role);
-      localStorage.setItem('userId', user.id);
+      localStorage.setItem('user', JSON.stringify(user));
 
       return { user, token };
     } catch (error: unknown) {
-      const apiError = error as { response?: { data?: { error?: string } } };
-      return rejectWithValue(apiError.response?.data?.error || 'Login failed');
+      console.error('LOGIN THUNK ERROR:', error);
+
+      let message = 'Login failed';
+
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error
+      ) {
+        const err = error as {
+          response?: {
+            data?: {
+              message?: string;
+              error?: string;
+              detail?: string;
+            };
+          };
+        };
+
+        message =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.response?.data?.detail ||
+          message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      return rejectWithValue(message);
     }
   }
 );
@@ -139,7 +171,9 @@ const userSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -153,6 +187,8 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("REDUX UPDATE:", action.payload);
+
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
