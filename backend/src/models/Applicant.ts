@@ -18,6 +18,7 @@ export interface Experience {
   applicantId: string;
   title: string;
   company: string;
+  role: string;
   location?: string;
   description?: string;
   startDate: Date;

@@ -22,12 +22,36 @@ interface UserState {
   isAuthenticated: boolean;
 }
 
+const loadAuth = () => {
+  const raw = sessionStorage.getItem('auth');
+  if (!raw) return { token: null, user: null };
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (Date.now() > parsed.expiry) {
+      sessionStorage.removeItem('auth');
+      return { token: null, user: null };
+    }
+
+    return {
+      token: parsed.token,
+      user: parsed.user,
+    };
+  } catch {
+    sessionStorage.removeItem('auth');
+    return { token: null, user: null };
+  }
+};
+
+const auth = loadAuth();
+
 const initialState: UserState = {
-  user: null,
-  token: localStorage.getItem('token'),
+  user: auth.user,
+  token: auth.token,
   loading: false,
   error: null,
-  isAuthenticated: !!localStorage.getItem('token'),
+  isAuthenticated: !!auth.token,
 };
 
 // Async Thunks
@@ -50,7 +74,7 @@ export const registerUser = createAsyncThunk(
   ) => {
     try {
       const response = await api.auth.register(data);
-      localStorage.setItem('token', response.data.token);
+      sessionStorage.setItem('token', response.data.token);
       return { user: response.data.user, token: response.data.token };
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
@@ -72,8 +96,12 @@ export const loginUser = createAsyncThunk(
       const payload = res.data?.data ?? res.data;
       const { token, user } = payload;
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      const expiry = Date.now() + 24 * 60 * 60 * 1000;
+
+      sessionStorage.setItem(
+        'auth',
+        JSON.stringify({ token, user, expiry })
+      );
 
       return { user, token };
     } catch (error: unknown) {
@@ -116,31 +144,13 @@ export const logoutUser = createAsyncThunk(
     try {
       await api.auth.logout();
 
-      // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userId');
+      // Clear sessionStorage
+      sessionStorage.removeItem('auth');
 
       return null;
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
       return rejectWithValue(apiError.response?.data?.error || 'Logout failed');
-    }
-  }
-);
-
-export const refreshToken = createAsyncThunk(
-  'user/refreshToken',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.auth.refreshToken();
-      const { token } = response.data;
-
-      localStorage.setItem('token', token);
-      return token;
-    } catch (error: unknown) {
-      const apiError = error as { response?: { data?: { error?: string } } };
-      return rejectWithValue(apiError.response?.data?.error || 'Token refresh failed');
     }
   }
 );
@@ -187,8 +197,6 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log("REDUX UPDATE:", action.payload);
-
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
@@ -215,21 +223,6 @@ const userSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
-
-    // Refresh Token
-    builder
-      .addCase(refreshToken.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.loading = false;
-        state.token = action.payload;
-      })
-      .addCase(refreshToken.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-        state.isAuthenticated = false;
       });
   },
 });

@@ -2,37 +2,35 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Settings() {
+  const applyTheme = (theme: string) => {
+
+    const root = document.documentElement;
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
+    localStorage.setItem('theme', theme);
+  };
+  
   const navigate = useNavigate();
   const [settings, setSettings] = useState({
     notifications: true,
     emailUpdates: true,
-    theme: 'dark',
+    theme: localStorage.getItem('theme') || 'dark',
     privacy: 'private',
   });
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
+    localStorage.removeItem('auth');
     navigate('/login');
   };
 
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-cyber-dark/80 backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="relative w-5 h-5">
-            <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12" />
-            <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 mix-blend-screen" />
-          </div>
-          <span className="text-lg font-black tracking-tighter uppercase font-mono">HIRE.FLOW</span>
-        </div>
-        <button onClick={() => navigate(-1)} className="text-xs font-mono tracking-widest text-zinc-400 hover:text-accent-cyan transition-colors">
-          // BACK
-        </button>
-      </nav>
 
-      <main className="max-w-4xl mx-auto px-6 lg:px-16 py-12 pb-20">
+      <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
         <div className="mb-12 space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan">
@@ -67,7 +65,7 @@ export default function Settings() {
 
               <div>
                 <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
-                  Full Name
+                  FirstName
                 </label>
                 <input
                   type="text"
@@ -95,7 +93,7 @@ export default function Settings() {
           </section>
 
           {/* Notification Settings */}
-          <section className="bg-panel-bg border border-panel-border p-8">
+          {/* <section className="bg-panel-bg border border-panel-border p-8">
             <div className="flex items-center gap-3 mb-6">
               <span className="w-2 h-2 bg-accent-pink" />
               <h2 className="text-xl font-bold tracking-tight uppercase">Notifications</h2>
@@ -123,10 +121,10 @@ export default function Settings() {
                 </label>
               ))}
             </div>
-          </section>
+          </section> */}
 
           {/* Privacy & Security */}
-          <section className="bg-panel-bg border border-panel-border p-8">
+          {/* <section className="bg-panel-bg border border-panel-border p-8">
             <div className="flex items-center gap-3 mb-6">
               <span className="w-2 h-2 bg-accent-lime" />
               <h2 className="text-xl font-bold tracking-tight uppercase">Privacy & Security</h2>
@@ -165,7 +163,7 @@ export default function Settings() {
                 <div className="absolute inset-0 bg-accent-pink transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0 opacity-20" />
               </button>
             </div>
-          </section>
+          </section> */}
 
           {/* Theme Settings */}
           <section className="bg-panel-bg border border-panel-border p-8">
@@ -179,26 +177,38 @@ export default function Settings() {
                 Theme
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {['dark', 'light'].map((val) => (
+                {(['dark', 'light'] as const).map((val) => (
                   <label key={val} className="cursor-pointer">
                     <input
                       type="radio"
                       name="theme"
                       value={val}
                       checked={settings.theme === val}
-                      onChange={(e) => setSettings(prev => ({ ...prev, theme: e.target.value }))}
+                      onChange={() => {
+                        setSettings(prev => ({ ...prev, theme: val }));
+                        applyTheme(val);
+                      }}
                       className="sr-only"
                     />
-                    <div className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
-                      settings.theme === val
-                        ? 'bg-accent-purple/20 border-accent-purple'
-                        : 'bg-cyber-dark/50 border-zinc-800'
-                    }`}>
+                    <div
+                      className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
+                        settings.theme === val
+                          ? 'bg-accent-purple/20 border-accent-purple text-white'
+                          : 'bg-cyber-dark/50 border-zinc-800 text-zinc-400 hover:border-zinc-600'
+                      }`}
+                    >
                       {val === 'dark' ? '🌙 Dark' : '☀️ Light'}
                     </div>
                   </label>
                 ))}
               </div>
+
+              <p className="mt-3 text-xs text-zinc-500 font-mono">
+                Current:{' '}
+                <span className="text-accent-purple uppercase tracking-widest">
+                  {settings.theme}
+                </span>
+              </p>
             </div>
           </section>
 

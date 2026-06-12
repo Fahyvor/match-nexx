@@ -1,9 +1,10 @@
-import { registerUser, loginUser } from "../modules/auth";
+import { registerUser, loginUser, updateUser } from "../modules/auth";
 import { createToken, verifyToken } from "../utils/jwt";
 import type { Context } from "elysia";
 import type { User } from "../models/User";
 import { users } from "../db/schema";
 import { db } from "../db/db";
+import { eq } from "drizzle-orm";
 
 type AppError = {
   status?: number;
@@ -16,7 +17,6 @@ export const authController = {
     set,
   }: Context & { body: User }) => {
     try {
-      console.log("REGISTER BODY:", body);
       const result = await registerUser({
         firstName: body.firstName,
         lastName: body.lastName,
@@ -88,6 +88,129 @@ export const authController = {
       );
     }
   },
+
+  updateUser: async ({
+    body,
+    set,
+  }: Context & { body: User }) => {
+    try {
+      const result = await updateUser({
+        id: body.id,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        state: body.state,
+        country: body.country,
+        years_of_experience: body.years_of_experience,
+        email: body.email,
+        password: body.password,
+        role: body.userType,
+      });
+
+      set.status = 201;
+
+      return {
+        success: true,
+        message: "User registered successfully",
+        data: {
+          id: result.user.id,
+          email: result.user.email,
+          role: result.user.role,
+        },
+      };
+    } catch (err: unknown) {
+      console.error("REGISTER ERROR FULL:", err);
+      const error = err as AppError;
+
+      set.status = error.status ?? 500;
+
+      return {
+        success: false,
+        message: "Registration failed",
+        error: error.error || "Unknown error",
+      };
+    }
+  },
+
+deleteUser: async ({
+  body,
+  user,
+}: Context & {
+  body: { id: string };
+  user: User;
+}) => {
+  try {
+    if (user.userType !== "admin") {
+      throw {
+        status: 403,
+        error: "Forbidden: Admins only",
+      };
+    }
+
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, body.id))
+      .limit(1);
+
+    if (existingUser.length === 0) {
+      throw {
+        status: 404,
+        error: "User not found",
+      };
+    }
+
+    await db.delete(users).where(eq(users.id, body.id));
+
+    return {
+      success: true,
+      message: "User deleted successfully",
+    };
+  } catch (error: unknown) {
+    const err = error as { status?: number; error?: string };
+
+    throw {
+      status: err.status || 500,
+      error: err.error || "Internal server error",
+    };
+  }
+},
+
+deleteOwnAccount: async ({
+  user,
+}: Context & {
+  user: User;
+}) => {
+  try {
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+
+    if (existingUser.length === 0) {
+      throw {
+        status: 404,
+        error: "User not found",
+      };
+    }
+
+    await db
+      .delete(users)
+      .where(eq(users.id, user.id));
+
+    return {
+      success: true,
+      message: "Account deleted successfully",
+    };
+  } catch (error: unknown) {
+    const err = error as { status?: number; error?: string };
+
+    throw {
+      status: err.status || 500,
+      error: err.error || "Internal server error",
+    };
+  }
+},
 
   logout: async () => {
     return {

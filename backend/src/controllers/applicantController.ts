@@ -1,8 +1,14 @@
+import { db } from '../db/db';
+import {
+  applicants,
+  applications,
+  experiences,
+  educations,
+  jobs,
+  users,
+} from '../db/schema';
+import { eq, and } from 'drizzle-orm';
 import type {
-  Applicant,
-  Experience,
-  Education,
-  Application,
   CreateApplicantInput,
   UpdateApplicantInput,
   CreateExperienceInput,
@@ -10,13 +16,14 @@ import type {
 } from '../models/Applicant';
 
 export const applicantController = {
-  // Get applicant profile
-  getProfile: async (userId: string): Promise<{
-    success: boolean;
-    data?: Applicant;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+
+  // ─── PROFILE ────────────────────────────────────────────────────────────────
+  getProfile: async (userId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
       return { success: false, error: 'Applicant profile not found' };
@@ -25,16 +32,14 @@ export const applicantController = {
     return { success: true, data: applicant };
   },
 
-  // Create applicant profile
-  createProfile: async (userId: string, data: CreateApplicantInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Applicant;
-    error?: string;
-  }> => {
-    const existingApplicant = dbHelpers.getApplicantByUserId(userId);
+  createProfile: async (userId: string, data: CreateApplicantInput) => {
+    const [existing] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
-    if (existingApplicant) {
+    if (existing) {
       return {
         success: false,
         message: 'Profile already exists',
@@ -42,330 +47,431 @@ export const applicantController = {
       };
     }
 
-    const applicant: Applicant = {
-      id: generateId(),
-      userId,
-      headline: data.headline,
-      bio: data.bio,
-      location: data.location,
-      phone: data.phone,
-      portfolio: data.portfolio,
-      resume: data.resume,
-      skills: data.skills || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const createdApplicant = dbHelpers.createApplicant(applicant);
+    const [created] = await db
+      .insert(applicants)
+      .values({
+        userId,
+        headline: data.headline,
+        // summary: data.summary,
+      })
+      .returning();
 
     return {
       success: true,
       message: 'Profile created successfully',
-      data: createdApplicant,
+      data: created,
     };
   },
 
-  // Update applicant profile
-  updateProfile: async (userId: string, updates: UpdateApplicantInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Applicant;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  updateProfile: async (userId: string, updates: UpdateApplicantInput) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const updatedApplicant = dbHelpers.updateApplicant(applicant.id, updates);
+    const [updated] = await db
+      .update(applicants)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(applicants.id, applicant.id))
+      .returning();
 
     return {
       success: true,
       message: 'Profile updated successfully',
-      data: updatedApplicant || undefined,
+      data: updated,
     };
   },
 
-  // Get user applications
-  getApplications: async (userId: string): Promise<{
-    success: boolean;
-    data: (Application & { jobTitle?: string; company?: string })[];
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  // ─── APPLICATIONS ────────────────────────────────────────────────────────────
+
+  getApplications: async (userId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
       return { success: true, data: [] };
     }
 
-    const applications = dbHelpers.getApplicationsByApplicant(applicant.id);
-    const enrichedApplications = applications.map(app => {
-      const job = dbHelpers.getJobById(app.jobId);
-      return {
-        ...app,
-        jobTitle: job?.title,
-        company: job?.company,
-      };
-    });
+    const rows = await db
+      .select({
+        id: applications.id,
+        jobId: applications.jobId,
+        status: applications.status,
+        createdAt: applications.createdAt,
+        updatedAt: applications.updatedAt,
+        jobTitle: jobs.title,
+        company: jobs.location,
+      })
+      .from(applications)
+      .leftJoin(jobs, eq(applications.jobId, jobs.id))
+      .where(eq(applications.applicantId, applicant.id));
 
-    return { success: true, data: enrichedApplications };
+    return { success: true, data: rows };
   },
 
-  // Apply for a job
-  applyForJob: async (
-    userId: string,
-    jobId: string,
-    coverLetter?: string
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data?: Application;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  applyForJob: async (userId: string, jobId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile required', error: 'Create an applicant profile first' };
+      return {
+        success: false,
+        message: 'Profile required',
+        error: 'Create an applicant profile first',
+      };
     }
 
-    const job = dbHelpers.getJobById(jobId);
+    const [job] = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.id, jobId))
+      .limit(1);
 
     if (!job) {
       return { success: false, message: 'Job not found', error: 'Job does not exist' };
     }
 
-    // Check if already applied
-    const applications = dbHelpers.getApplicationsByApplicant(applicant.id);
-    const alreadyApplied = applications.some(app => app.jobId === jobId);
+    const [alreadyApplied] = await db
+      .select()
+      .from(applications)
+      .where(
+        and(
+          eq(applications.applicantId, applicant.id),
+          eq(applications.jobId, jobId)
+        )
+      )
+      .limit(1);
 
     if (alreadyApplied) {
-      return { success: false, message: 'Already applied', error: 'You have already applied for this job' };
+      return {
+        success: false,
+        message: 'Already applied',
+        error: 'You have already applied for this job',
+      };
     }
 
-    const application: Application = {
-      id: generateId(),
-      applicantId: applicant.id,
-      jobId,
-      status: 'pending',
-      coverLetter,
-      appliedAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const createdApplication = dbHelpers.createApplication(application);
+    const [created] = await db
+      .insert(applications)
+      .values({
+        applicantId: applicant.id,
+        jobId,
+        status: 'pending',
+      })
+      .returning();
 
     return {
       success: true,
       message: 'Application submitted successfully',
-      data: createdApplication,
+      data: created,
     };
   },
 
-  // Withdraw application
-  withdrawApplication: async (userId: string, applicationId: string): Promise<{
-    success: boolean;
-    message: string;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  withdrawApplication: async (userId: string, applicationId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const application = dbHelpers.getApplicationsByApplicant(applicant.id).find(
-      app => app.id === applicationId
-    );
+    const [application] = await db
+      .select()
+      .from(applications)
+      .where(
+        and(
+          eq(applications.id, applicationId),
+          eq(applications.applicantId, applicant.id)
+        )
+      )
+      .limit(1);
 
     if (!application) {
-      return { success: false, message: 'Application not found', error: 'Application does not exist' };
+      return {
+        success: false,
+        message: 'Application not found',
+        error: 'Application does not exist or does not belong to you',
+      };
     }
 
-    dbHelpers.updateApplication(applicationId, { status: 'withdrawn' });
+    await db
+      .update(applications)
+      .set({ status: 'withdrawn', updatedAt: new Date() })
+      .where(eq(applications.id, applicationId));
 
-    return {
-      success: true,
-      message: 'Application withdrawn successfully',
-    };
+    return { success: true, message: 'Application withdrawn successfully' };
   },
 
-  // Add experience
-  addExperience: async (userId: string, data: CreateExperienceInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Experience;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  // ─── EXPERIENCE ──────────────────────────────────────────────────────────────
+
+  addExperience: async (userId: string, data: CreateExperienceInput) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const experience: Experience = {
-      id: generateId(),
-      applicantId: applicant.id,
-      title: data.title,
-      company: data.company,
-      location: data.location,
-      description: data.description,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      current: data.current,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const createdExperience = dbHelpers.createExperience(experience);
+    const [created] = await db
+      .insert(experiences)
+      .values({
+        applicantId: users.id,
+        company: data.company,
+        role: data.role,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        description: data.description,
+      })
+      .returning();
 
     return {
       success: true,
       message: 'Experience added successfully',
-      data: createdExperience,
+      data: created,
     };
   },
 
-  // Update experience
-  updateExperience: async (userId: string, experienceId: string, updates: Partial<Experience>): Promise<{
-    success: boolean;
-    message: string;
-    data?: Experience;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  updateExperience: async (
+    userId: string,
+    experienceId: string,
+    updates: Partial<CreateExperienceInput>
+  ) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const experience = dbHelpers.getExperienceById(experienceId);
+    const [experience] = await db
+      .select()
+      .from(experiences)
+      .where(
+        and(
+          eq(experiences.id, experienceId),
+          eq(experiences.applicantId, applicant.id)
+        )
+      )
+      .limit(1);
 
-    if (!experience || experience.applicantId !== applicant.id) {
-      return { success: false, message: 'Experience not found', error: 'Experience does not exist' };
+    if (!experience) {
+      return {
+        success: false,
+        message: 'Experience not found',
+        error: 'Experience does not exist or does not belong to you',
+      };
     }
 
-    const updated = dbHelpers.updateExperience(experienceId, updates);
+    const [updated] = await db
+      .update(experiences)
+      .set(updates)
+      .where(eq(experiences.id, experienceId))
+      .returning();
 
     return {
       success: true,
       message: 'Experience updated successfully',
-      data: updated || undefined,
+      data: updated,
     };
   },
 
-  // Delete experience
-  deleteExperience: async (userId: string, experienceId: string): Promise<{
-    success: boolean;
-    message: string;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  deleteExperience: async (userId: string, experienceId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const experience = dbHelpers.getExperienceById(experienceId);
+    const [experience] = await db
+      .select()
+      .from(experiences)
+      .where(
+        and(
+          eq(experiences.id, experienceId),
+          eq(experiences.applicantId, applicant.id)
+        )
+      )
+      .limit(1);
 
-    if (!experience || experience.applicantId !== applicant.id) {
-      return { success: false, message: 'Experience not found', error: 'Experience does not exist' };
+    if (!experience) {
+      return {
+        success: false,
+        message: 'Experience not found',
+        error: 'Experience does not exist or does not belong to you',
+      };
     }
 
-    dbHelpers.deleteExperience(experienceId);
+    await db.delete(experiences).where(eq(experiences.id, experienceId));
 
-    return {
-      success: true,
-      message: 'Experience deleted successfully',
-    };
+    return { success: true, message: 'Experience deleted successfully' };
   },
 
-  // Add education
-  addEducation: async (userId: string, data: CreateEducationInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Education;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  // ─── EDUCATION ───────────────────────────────────────────────────────────────
+
+  addEducation: async (userId: string, data: CreateEducationInput) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const education: Education = {
-      id: generateId(),
-      applicantId: applicant.id,
-      school: data.school,
-      degree: data.degree,
-      field: data.field,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      grade: data.grade,
-      description: data.description,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const createdEducation = dbHelpers.createEducation(education);
+    const [created] = await db
+      .insert(educations)
+      .values({
+        applicantId: applicant.id,
+        school: data.school,
+        degree: data.degree,
+        field: data.field,
+        // startYear: data.startYear,
+        // endYear: data.endYear,
+      })
+      .returning();
 
     return {
       success: true,
       message: 'Education added successfully',
-      data: createdEducation,
+      data: created,
     };
   },
 
-  // Update education
-  updateEducation: async (userId: string, educationId: string, updates: Partial<Education>): Promise<{
-    success: boolean;
-    message: string;
-    data?: Education;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  updateEducation: async (
+    userId: string,
+    educationId: string,
+    updates: Partial<CreateEducationInput>
+  ) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const education = dbHelpers.getEducationById(educationId);
+    const [education] = await db
+      .select()
+      .from(educations)
+      .where(
+        and(
+          eq(educations.id, educationId),
+          eq(educations.applicantId, applicant.id)
+        )
+      )
+      .limit(1);
 
-    if (!education || education.applicantId !== applicant.id) {
-      return { success: false, message: 'Education not found', error: 'Education does not exist' };
+    if (!education) {
+      return {
+        success: false,
+        message: 'Education not found',
+        error: 'Education does not exist or does not belong to you',
+      };
     }
 
-    const updated = dbHelpers.updateEducation(educationId, updates);
+    const [updated] = await db
+      .update(educations)
+      .set(updates)
+      .where(eq(educations.id, educationId))
+      .returning();
 
     return {
       success: true,
       message: 'Education updated successfully',
-      data: updated || undefined,
+      data: updated,
     };
   },
 
-  // Delete education
-  deleteEducation: async (userId: string, educationId: string): Promise<{
-    success: boolean;
-    message: string;
-    error?: string;
-  }> => {
-    const applicant = dbHelpers.getApplicantByUserId(userId);
+  deleteEducation: async (userId: string, educationId: string) => {
+    const [applicant] = await db
+      .select()
+      .from(applicants)
+      .where(eq(applicants.userId, userId))
+      .limit(1);
 
     if (!applicant) {
-      return { success: false, message: 'Profile not found', error: 'Applicant profile does not exist' };
+      return {
+        success: false,
+        message: 'Profile not found',
+        error: 'Applicant profile does not exist',
+      };
     }
 
-    const education = dbHelpers.getEducationById(educationId);
+    const [education] = await db
+      .select()
+      .from(educations)
+      .where(
+        and(
+          eq(educations.id, educationId),
+          eq(educations.applicantId, applicant.id)
+        )
+      )
+      .limit(1);
 
-    if (!education || education.applicantId !== applicant.id) {
-      return { success: false, message: 'Education not found', error: 'Education does not exist' };
+    if (!education) {
+      return {
+        success: false,
+        message: 'Education not found',
+        error: 'Education does not exist or does not belong to you',
+      };
     }
 
-    dbHelpers.deleteEducation(educationId);
+    await db.delete(educations).where(eq(educations.id, educationId));
 
-    return {
-      success: true,
-      message: 'Education deleted successfully',
-    };
+    return { success: true, message: 'Education deleted successfully' };
   },
 };

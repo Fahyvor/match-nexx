@@ -65,7 +65,6 @@ export const registerUser = async (data: {
 /* =========================
    LOGIN USER
 ========================= */
-
 export const loginUser = async (email: string, password: string) => {
   const result = await db
     .select()
@@ -88,5 +87,58 @@ export const loginUser = async (email: string, password: string) => {
   return {
     success: true,
     user,
+  };
+};
+
+export const updateUser = async (data: {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  state?: string;
+  country?: string;
+  years_of_experience?: number;
+  role?: "applicant" | "recruiter" | "admin";
+}) => {
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, data.id))
+    .limit(1);
+
+  if (existing.length === 0) {
+    throw { status: 404, error: "User not found" };
+  }
+
+  const updatedUser: any = {
+    updatedAt: new Date(),
+  };
+
+  if (data.firstName) updatedUser.firstName = data.firstName;
+  if (data.lastName) updatedUser.lastName = data.lastName;
+  if (data.email) updatedUser.email = data.email;
+  if (data.state) updatedUser.state = data.state;
+  if (data.country) updatedUser.country = data.country;
+  if (data.years_of_experience !== undefined)
+    updatedUser.years_of_experience = data.years_of_experience;
+  if (data.role) updatedUser.role = data.role;
+
+  if (data.password) {
+    if (data.password.length < 8) {
+      throw { status: 400, error: "Password must be at least 8 characters" };
+    }
+    updatedUser.password = hashPassword(data.password);
+  }
+
+  const updated = await db
+    .update(users)
+    .set(updatedUser)
+    .where(eq(users.id, data.id))
+    .returning();
+
+  return {
+    success: true,
+    user: updated[0],
   };
 };

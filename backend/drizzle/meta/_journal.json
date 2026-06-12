@@ -8,6 +8,13 @@
       "when": 1780899667966,
       "tag": "0000_green_crystal",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781081031630,
+      "tag": "0001_cuddly_archangel",
+      "breakpoints": true
     }
   ]
 }

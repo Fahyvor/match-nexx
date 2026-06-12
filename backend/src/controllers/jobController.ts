@@ -1,19 +1,23 @@
-// Job Controller
-import { dbHelpers, generateId } from '../utils/database';
 import type { Job, CreateJobInput, UpdateJobInput } from '../models/Job';
+import { jobs } from '../db/schema';
+import { db } from "../db/db"
 
 export const jobController = {
-  // Get all active jobs
-  getAllJobs: async (page = 1, limit = 20): Promise<{
+  getAllJobs: async (
+    page = 1,
+    limit = 20
+  ): Promise<{
     success: boolean;
     data: Job[];
     total: number;
     page: number;
     limit: number;
   }> => {
-    const allJobs = dbHelpers.getAllActiveJobs();
+    const allJobs = await db.select().from(jobs);
+
     const start = (page - 1) * limit;
     const end = start + limit;
+
     const paginatedJobs = allJobs.slice(start, end);
 
     return {
@@ -25,13 +29,8 @@ export const jobController = {
     };
   },
 
-  // Get single job by ID
-  getJobById: async (jobId: string): Promise<{
-    success: boolean;
-    data?: Job;
-    error?: string;
-  }> => {
-    const job = dbHelpers.getJobById(jobId);
+  getJobById: async (jobId: string) => {
+    const job = Job.getJobById(jobId);
 
     if (!job) {
       return { success: false, error: 'Job not found' };
@@ -40,23 +39,12 @@ export const jobController = {
     return { success: true, data: job };
   },
 
-  // Get jobs by recruiter
-  getJobsByRecruiter: async (recruiterId: string): Promise<{
-    success: boolean;
-    data: Job[];
-  }> => {
+  getJobsByRecruiter: async (recruiterId: string) => {
     const jobs = dbHelpers.getJobsByRecruiter(recruiterId);
     return { success: true, data: jobs };
   },
 
-  // Create new job
-  createJob: async (recruiterId: string, jobData: CreateJobInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Job;
-    error?: string;
-  }> => {
-    // Validate required fields
+  createJob: async (recruiterId: string, jobData: CreateJobInput) => {
     if (!jobData.title || !jobData.description) {
       return {
         success: false,
@@ -97,13 +85,7 @@ export const jobController = {
     };
   },
 
-  // Update job
-  updateJob: async (jobId: string, recruiterId: string, updates: UpdateJobInput): Promise<{
-    success: boolean;
-    message: string;
-    data?: Job;
-    error?: string;
-  }> => {
+  updateJob: async (jobId: string, recruiterId: string, updates: UpdateJobInput) => {
     const job = dbHelpers.getJobById(jobId);
 
     if (!job) {
@@ -127,12 +109,7 @@ export const jobController = {
     };
   },
 
-  // Close/Archive job
-  closeJob: async (jobId: string, recruiterId: string): Promise<{
-    success: boolean;
-    message: string;
-    error?: string;
-  }> => {
+  closeJob: async (jobId: string, recruiterId: string) => {
     const job = dbHelpers.getJobById(jobId);
 
     if (!job) {
@@ -155,12 +132,7 @@ export const jobController = {
     };
   },
 
-  // Delete job
-  deleteJob: async (jobId: string, recruiterId: string): Promise<{
-    success: boolean;
-    message: string;
-    error?: string;
-  }> => {
+  deleteJob: async (jobId: string, recruiterId: string) => {
     const job = dbHelpers.getJobById(jobId);
 
     if (!job) {
@@ -183,33 +155,34 @@ export const jobController = {
     };
   },
 
-  // Search jobs
-  searchJobs: async (query: string, filters?: {
-    location?: string;
-    jobType?: string;
-    salaryMin?: number;
-    salaryMax?: number;
-  }): Promise<{
-    success: boolean;
-    data: Job[];
-  }> => {
+  searchJobs: async (
+    query: string,
+    filters?: {
+      location?: string;
+      jobType?: string;
+      salaryMin?: number;
+      salaryMax?: number;
+    }
+  ) => {
     let results = dbHelpers.getAllActiveJobs();
 
-    // Search by title, description, company
-    if (query) {
-      const lowerQuery = query.toLowerCase();
+    const lowerQuery = query?.toLowerCase() || '';
+
+    // Search
+    if (lowerQuery) {
       results = results.filter(
         job =>
-          job.title.toLowerCase().includes(lowerQuery) ||
-          job.description.toLowerCase().includes(lowerQuery) ||
-          job.company.toLowerCase().includes(lowerQuery)
+          job.title?.toLowerCase().includes(lowerQuery) ||
+          job.description?.toLowerCase().includes(lowerQuery) ||
+          job.company?.toLowerCase().includes(lowerQuery)
       );
     }
 
-    // Apply filters
+    // Filters (SAFE optional chaining)
     if (filters?.location) {
+      const loc = filters.location.toLowerCase();
       results = results.filter(
-        job => job.location.toLowerCase().includes(filters.location!.toLowerCase())
+        job => job.location?.toLowerCase().includes(loc)
       );
     }
 
