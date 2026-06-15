@@ -3,6 +3,8 @@ import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
+type UpdateUserType = Partial<typeof users.$inferInsert>;
+
 /* =========================
    PASSWORD HELPERS
 ========================= */
@@ -25,7 +27,7 @@ export const registerUser = async (data: {
   state: string;
   country: string;
   years_of_experience: number;
-  role: "applicant" | "recruiter";
+  role: "applicant" | "recruiter" | "admin";
 }) => {
   // check if user exists
   const existing = await db
@@ -111,7 +113,7 @@ export const updateUser = async (data: {
     throw { status: 404, error: "User not found" };
   }
 
-  const updatedUser: any = {
+  const updatedUser: UpdateUserType = {
     updatedAt: new Date(),
   };
 

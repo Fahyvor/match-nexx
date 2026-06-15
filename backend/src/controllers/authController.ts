@@ -12,23 +12,29 @@ type AppError = {
 };
 
 export const authController = {
-  register: async ({
-    body,
-    set,
-  }: Context & { body: User }) => {
+  register: async (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    address: string;
+    state: string;
+    country: string;
+    years_of_experience: number;
+    email: string;
+    password: string;
+    userType: "applicant" | "recruiter" | "admin";
+  }) => {
     try {
       const result = await registerUser({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        state: body.state,
-        country: body.country,
-        years_of_experience: body.years_of_experience,
-        email: body.email,
-        password: body.password,
-        role: body.userType,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        state: data.state,
+        country: data.country,
+        years_of_experience: data.years_of_experience,
+        email: data.email,
+        password: data.password,
+        role: data.userType,
       });
-
-      set.status = 201;
 
       return {
         success: true,
@@ -41,14 +47,24 @@ export const authController = {
       };
     } catch (err: unknown) {
       console.error("REGISTER ERROR FULL:", err);
-      const error = err as AppError;
 
-      set.status = error.status ?? 500;
+      let message = "Unknown error";
+
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (
+        typeof err === "object" &&
+        err !== null &&
+        "error" in err
+      ) {
+        const e = err as { error?: string };
+        message = e.error || message;
+      }
 
       return {
         success: false,
         message: "Registration failed",
-        error: error.error || "Unknown error",
+        error: message,
       };
     }
   },

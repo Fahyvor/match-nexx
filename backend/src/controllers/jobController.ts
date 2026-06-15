@@ -1,210 +1,156 @@
-import type { Job, CreateJobInput, UpdateJobInput } from '../models/Job';
-import { jobs } from '../db/schema';
-import { db } from "../db/db"
+import { eq } from "drizzle-orm";
+import { db } from "../db/db";
+import { jobs } from "../db/schema";
+import { randomUUID } from "crypto";
 
 export const jobController = {
-  getAllJobs: async (
-    page = 1,
-    limit = 20
-  ): Promise<{
-    success: boolean;
-    data: Job[];
-    total: number;
-    page: number;
-    limit: number;
-  }> => {
-    const allJobs = await db.select().from(jobs);
+  /* =========================
+     GET ALL JOBS
+  ========================= */
+  getAllJobs: async (page = 1, limit = 20) => {
+    const offset = (page - 1) * limit;
 
-    const start = (page - 1) * limit;
-    const end = start + limit;
+    const allJobs = await db.select().from(jobs).limit(limit).offset(offset);
 
-    const paginatedJobs = allJobs.slice(start, end);
+    const total = await db.select().from(jobs);
 
     return {
       success: true,
-      data: paginatedJobs,
-      total: allJobs.length,
+      data: allJobs,
+      total: total.length,
       page,
       limit,
     };
   },
 
+  /* =========================
+     GET JOB BY ID
+  ========================= */
   getJobById: async (jobId: string) => {
-    const job = Job.getJobById(jobId);
+    const result = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.id, jobId))
+      .limit(1);
+
+    const job = result[0];
 
     if (!job) {
-      return { success: false, error: 'Job not found' };
+      return { success: false, error: "Job not found" };
     }
 
     return { success: true, data: job };
   },
 
-  getJobsByRecruiter: async (recruiterId: string) => {
-    const jobs = dbHelpers.getJobsByRecruiter(recruiterId);
-    return { success: true, data: jobs };
-  },
-
-  createJob: async (recruiterId: string, jobData: CreateJobInput) => {
+  /* =========================
+     CREATE JOB
+  ========================= */
+  createJob: async (recruiterId: string, jobData: {
+    title: string;
+    description: string;
+    location?: string;
+    type?: string;
+  }) => {
     if (!jobData.title || !jobData.description) {
       return {
         success: false,
-        message: 'Missing required fields',
-        error: 'Title and description are required',
+        error: "Title and description are required",
       };
     }
 
-    const job: Job = {
-      id: generateId(),
+    const newJob = {
+      id: randomUUID(),
       recruiterId,
       title: jobData.title,
       description: jobData.description,
-      company: jobData.company,
       location: jobData.location,
-      locationType: jobData.locationType,
-      salaryMin: jobData.salaryMin,
-      salaryMax: jobData.salaryMax,
-      currency: jobData.currency,
-      jobType: jobData.jobType,
-      skills: jobData.skills || [],
-      requirements: jobData.requirements || [],
-      benefits: jobData.benefits,
-      experienceLevel: jobData.experienceLevel,
-      applicationDeadline: jobData.applicationDeadline,
-      status: 'active',
+      type: jobData.type,
+      status: "active",
       totalApplicants: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const createdJob = dbHelpers.createJob(job);
+    const inserted = await db.insert(jobs).values(newJob).returning();
 
     return {
       success: true,
-      message: 'Job created successfully',
-      data: createdJob,
+      message: "Job created successfully",
+      data: inserted[0],
     };
   },
 
-  updateJob: async (jobId: string, recruiterId: string, updates: UpdateJobInput) => {
-    const job = dbHelpers.getJobById(jobId);
-
-    if (!job) {
-      return { success: false, message: 'Job not found', error: 'Job does not exist' };
-    }
-
-    if (job.recruiterId !== recruiterId) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-        error: 'You can only update your own jobs',
-      };
-    }
-
-    const updatedJob = dbHelpers.updateJob(jobId, updates);
-
-    return {
-      success: true,
-      message: 'Job updated successfully',
-      data: updatedJob || undefined,
-    };
-  },
-
-  closeJob: async (jobId: string, recruiterId: string) => {
-    const job = dbHelpers.getJobById(jobId);
-
-    if (!job) {
-      return { success: false, message: 'Job not found', error: 'Job does not exist' };
-    }
-
-    if (job.recruiterId !== recruiterId) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-        error: 'You can only close your own jobs',
-      };
-    }
-
-    dbHelpers.updateJob(jobId, { status: 'closed' });
-
-    return {
-      success: true,
-      message: 'Job closed successfully',
-    };
-  },
-
-  deleteJob: async (jobId: string, recruiterId: string) => {
-    const job = dbHelpers.getJobById(jobId);
-
-    if (!job) {
-      return { success: false, message: 'Job not found', error: 'Job does not exist' };
-    }
-
-    if (job.recruiterId !== recruiterId) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-        error: 'You can only delete your own jobs',
-      };
-    }
-
-    dbHelpers.deleteJob(jobId);
-
-    return {
-      success: true,
-      message: 'Job deleted successfully',
-    };
-  },
-
-  searchJobs: async (
-    query: string,
-    filters?: {
-      location?: string;
-      jobType?: string;
-      salaryMin?: number;
-      salaryMax?: number;
-    }
+  /* =========================
+     UPDATE JOB
+  ========================= */
+  updateJob: async (
+    jobId: string,
+    recruiterId: string,
+    updates: Partial<typeof jobs.$inferInsert>
   ) => {
-    let results = dbHelpers.getAllActiveJobs();
+    const existing = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.id, jobId))
+      .limit(1);
 
-    const lowerQuery = query?.toLowerCase() || '';
+    const job = existing[0];
 
-    // Search
-    if (lowerQuery) {
-      results = results.filter(
-        job =>
-          job.title?.toLowerCase().includes(lowerQuery) ||
-          job.description?.toLowerCase().includes(lowerQuery) ||
-          job.company?.toLowerCase().includes(lowerQuery)
-      );
+    if (!job) {
+      return { success: false, error: "Job not found" };
     }
 
-    // Filters (SAFE optional chaining)
-    if (filters?.location) {
-      const loc = filters.location.toLowerCase();
-      results = results.filter(
-        job => job.location?.toLowerCase().includes(loc)
-      );
+    if (job.recruiterId !== recruiterId) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
     }
 
-    if (filters?.jobType) {
-      results = results.filter(job => job.jobType === filters.jobType);
-    }
-
-    if (filters?.salaryMin !== undefined) {
-      results = results.filter(
-        job => job.salaryMax === undefined || job.salaryMax >= filters.salaryMin!
-      );
-    }
-
-    if (filters?.salaryMax !== undefined) {
-      results = results.filter(
-        job => job.salaryMin === undefined || job.salaryMin <= filters.salaryMax!
-      );
-    }
+    const updated = await db
+      .update(jobs)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(jobs.id, jobId))
+      .returning();
 
     return {
       success: true,
-      data: results,
+      message: "Job updated successfully",
+      data: updated[0],
+    };
+  },
+
+  /* =========================
+     DELETE JOB
+  ========================= */
+  deleteJob: async (jobId: string, recruiterId: string) => {
+    const existing = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.id, jobId))
+      .limit(1);
+
+    const job = existing[0];
+
+    if (!job) {
+      return { success: false, error: "Job not found" };
+    }
+
+    if (job.recruiterId !== recruiterId) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+
+    await db.delete(jobs).where(eq(jobs.id, jobId));
+
+    return {
+      success: true,
+      message: "Job deleted successfully",
     };
   },
 };
