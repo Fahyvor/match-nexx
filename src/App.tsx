@@ -12,6 +12,9 @@ import Nav from './components/Nav';
 import { useEffect } from 'react';
 import { useAppDispatch } from "./redux/hooks";
 import { fetchStatesAndLgas } from './redux/slices/stateSlice';
+import PageNotFound from './pages/PageNotFound';
+import AllJobs from './pages/jobs/AllJobs';
+import CreateJobPage from './pages/jobs/CreateJobs';
 export default function App() {
   const dispatch = useAppDispatch();
 
@@ -36,12 +39,16 @@ export default function App() {
         {/* Recruiter Routes */}
         <Route element={<ProtectedRoute role="recruiter" />}>
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+          <Route path="/recruiter/create-job" element={<CreateJobPage />} />
         </Route>
 
         {/* Settings Route */}
         <Route element={<ProtectedRoute />}>
           <Route path="/settings" element={<Settings />} />
         </Route>
+
+        <Route path="/jobs" element={<AllJobs />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
       <Footer />
     </Router>

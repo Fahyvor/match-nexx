@@ -74,10 +74,7 @@ export default function RecruiterDashboard() {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/40 group-hover:text-accent-cyan transition-colors">
-              [ ACTION_01 ]
-            </div>
+          <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden" onClick={() => window.location.href="/recruiter/create-job"}>
             <div className="space-y-4">
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Post New <br /><span className="text-accent-cyan">Job</span>
