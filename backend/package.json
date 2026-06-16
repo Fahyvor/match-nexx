@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "tsc",
+    "build": "bun install --frozen-lockfile && bun build src/index.ts --outdir dist --target bun --sourcemap",
     "start": "bun run dist/index.js",
-    "test": "bun test"
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@elysiajs/bearer": "^0.8.0",
