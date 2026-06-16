@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
+import { useSelector } from 'react-redux';
+import type { RootState } from "../../redux/store";
 
 export default function CreateJobPage() {
   const [form, setForm] = useState({
@@ -7,11 +9,26 @@ export default function CreateJobPage() {
     description: "",
     location: "",
     type: "",
+    experienceLevel: "",
+    salaryMin: "",
+    salaryMax: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const { states } = useSelector((state: RootState) => state.states);
+  const token = useSelector((state: RootState) => state.user.token);
 
-  const token = localStorage.getItem("token");
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,17 +64,71 @@ export default function CreateJobPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl bg-[#0f0f12] border border-zinc-800 p-8 space-y-6"
+        className="w-full bg-[#0f0f12] border border-zinc-800 p-8 space-y-6 grid lg:grid-cols-2 gap-4"
       >
         <input
           placeholder="Job Title"
           value={form.title}
-          onChange={(e) =>
-            setForm({ ...form, title: e.target.value })
-          }
-          className="w-full bg-black border border-zinc-700 px-4 py-3"
+          name="title"
+          onChange={handleChange}
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
           required
         />
+
+        <select
+          value={form.type}
+          title="type"
+          onChange={handleChange}
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+        >
+          <option value="" disabled>
+            Select Job Type
+          </option>
+
+          <option value="full-time">Full-time</option>
+          <option value="part-time">Part-time</option>
+          <option value="contract">Contract</option>
+          <option value="internship">Internship</option>
+          <option value="remote">Remote</option>
+          <option value="hybrid">Hybrid</option>
+        </select>
+
+        <select
+          value={form.experienceLevel}
+          name="experienceLevel"
+          onChange={handleChange}
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+        >
+          <option value="" disabled>
+            Experience Level
+          </option>
+
+          <option value="junior">Junior (0–2 years)</option>
+          <option value="mid">Mid-level (2–5 years)</option>
+          <option value="senior">Senior (5+ years)</option>
+          <option value="lead">Lead / Manager</option>
+        </select>
+
+        <div className="flex gap-4">
+          <input
+            type="number"
+            placeholder="Min Salary"
+            value={form.salaryMin}
+            name="salaryMin"
+            onChange={handleChange}
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
+          />
+
+          <input
+            type="number"
+            placeholder="Max Salary"
+            value={form.salaryMax}
+            onChange={(e) =>
+              setForm({ ...form, salaryMax: e.target.value })
+            }
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
+          />
+        </div>
 
         <textarea
           placeholder="Job Description"
@@ -65,27 +136,25 @@ export default function CreateJobPage() {
           onChange={(e) =>
             setForm({ ...form, description: e.target.value })
           }
-          className="w-full bg-black border border-zinc-700 px-4 py-3"
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
           required
         />
 
-        <input
-          placeholder="Location"
-          value={form.location}
-          onChange={(e) =>
-            setForm({ ...form, location: e.target.value })
-          }
-          className="w-full bg-black border border-zinc-700 px-4 py-3"
-        />
-
-        <input
-          placeholder="Job Type (Remote, Full-time...)"
-          value={form.type}
-          onChange={(e) =>
-            setForm({ ...form, type: e.target.value })
-          }
-          className="w-full bg-black border border-zinc-700 px-4 py-3"
-        />
+        <div className="space-y-2">
+              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+              <select
+                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+                required
+                value={form.location}
+                onChange={handleChange}
+                name='state'
+              >
+                <option value="" disabled>Select State</option>
+                {states?.map((state: string) => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
 
         <div className="flex gap-4">
           <button
