@@ -53,10 +53,16 @@ export const jobs = pgTable("jobs", {
 
   title: text("title").notNull(),
   description: text("description"),
+
   location: text("location"),
   type: text("type"),
-  status: text("status").default("active"),
 
+  // NEW FIELDS 👇
+  experienceLevel: text("experience_level"), // junior | mid | senior | lead
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+
+  status: text("status").default("active"),
   totalApplicants: integer("total_applicants").default(0),
 
   createdAt: timestamp("created_at").defaultNow(),
