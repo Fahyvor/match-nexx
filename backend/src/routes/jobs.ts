@@ -15,7 +15,7 @@ export default new Elysia({ prefix: "/jobs" })
   })
 
   .post(
-    "/",
+    "/create-job",
     ({ body, headers }) => {
       const recruiterId = headers["x-user-id"];
       return jobController.createJob(recruiterId, body);

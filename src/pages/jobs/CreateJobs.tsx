@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useSelector } from 'react-redux';
 import type { RootState } from "../../redux/store";
+import SleekToast, { toast } from "sleek-toast";
+import type { AxiosError } from "axios";
 
 export default function CreateJobPage() {
   const [form, setForm] = useState({
@@ -12,6 +14,9 @@ export default function CreateJobPage() {
     experienceLevel: "",
     salaryMin: "",
     salaryMax: "",
+    company: "",
+    salary: "",
+    requirements: []
   });
 
   const [loading, setLoading] = useState(false);
@@ -36,8 +41,8 @@ export default function CreateJobPage() {
     try {
       setLoading(true);
 
-      await axios.post(
-        "http://localhost:3000/jobs",
+      const response = await axios.post(
+        "/api/jobs/create-job",
         form,
         {
           headers: {
@@ -46,11 +51,28 @@ export default function CreateJobPage() {
         }
       );
 
-      // redirect after success
-      window.location.href = "/jobs";
-    } catch (err) {
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        window.location.href = "/jobs";
+      }
+
+    } catch (err: unknown) {
       console.error(err);
-      alert("Failed to create job");
+
+      if (axios.isAxiosError(err)) {
+        const error = err as AxiosError<{ message?: string; error?: string }>;
+
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Request failed";
+
+        toast.error(message);
+      } else {
+        toast.error("Something went wrong");
+      }
+
     } finally {
       setLoading(false);
     }
@@ -58,6 +80,7 @@ export default function CreateJobPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white px-6 lg:px-16 py-16">
+      <SleekToast />
       <h1 className="text-4xl font-extrabold mb-10 uppercase">
         Create Job
       </h1>
@@ -75,10 +98,20 @@ export default function CreateJobPage() {
           required
         />
 
+        <input
+          placeholder="Company"
+          value={form.company}
+          name="company"
+          onChange={handleChange}
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+          required
+        />
+
         <select
           value={form.type}
           title="type"
           onChange={handleChange}
+          name="type"
           className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
         >
           <option value="" disabled>
@@ -109,23 +142,13 @@ export default function CreateJobPage() {
           <option value="lead">Lead / Manager</option>
         </select>
 
-        <div className="flex gap-4">
+        <div className="">
           <input
             type="number"
-            placeholder="Min Salary"
-            value={form.salaryMin}
-            name="salaryMin"
+            name="salary"
+            placeholder="Salary"
+            value={form.salary}
             onChange={handleChange}
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
-          />
-
-          <input
-            type="number"
-            placeholder="Max Salary"
-            value={form.salaryMax}
-            onChange={(e) =>
-              setForm({ ...form, salaryMax: e.target.value })
-            }
             className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
           />
         </div>
@@ -133,11 +156,25 @@ export default function CreateJobPage() {
         <textarea
           placeholder="Job Description"
           value={form.description}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
+          onChange={handleChange}
+          name="description"
           className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
           required
+        />
+
+        <input
+          placeholder="Requirements (e.g. React, Node, SQL)"
+          value={form.requirements.join(", ")}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              requirements: e.target.value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean),
+            })
+          }
+          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm"
         />
 
         <div className="space-y-2">
@@ -147,7 +184,7 @@ export default function CreateJobPage() {
                 required
                 value={form.location}
                 onChange={handleChange}
-                name='state'
+                name='location'
               >
                 <option value="" disabled>Select State</option>
                 {states?.map((state: string) => (
@@ -160,17 +197,17 @@ export default function CreateJobPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-8 py-3 font-bold text-black"
+            className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-8 py-3 font-bold text-black cursor-pointer"
           >
             {loading ? "Creating..." : "Create Job"}
           </button>
 
           <button
             type="button"
-            onClick={() => (window.location.href = "/jobs")}
+            onClick={() => (window.history.back())}
             className="border border-zinc-700 px-8 py-3"
           >
-            Cancel
+            Back
           </button>
         </div>
       </form>
