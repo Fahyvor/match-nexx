@@ -59,8 +59,8 @@ export const jobs = pgTable("jobs", {
 
   // NEW FIELDS 👇
   experienceLevel: text("experience_level"), // junior | mid | senior | lead
-  salaryMin: integer("salary_min"),
-  salaryMax: integer("salary_max"),
+  salary: integer("salary"),
+  requirements: text("requirements").array(),
 
   status: text("status").default("active"),
   totalApplicants: integer("total_applicants").default(0),

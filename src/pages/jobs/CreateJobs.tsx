@@ -6,7 +6,18 @@ import SleekToast, { toast } from "sleek-toast";
 import type { AxiosError } from "axios";
 
 export default function CreateJobPage() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    location: string;
+    type: string;
+    experienceLevel: string;
+    salaryMin: string;
+    salaryMax: string;
+    company: string;
+    salary: string;
+    requirements: string[];
+  }>({
     title: "",
     description: "",
     location: "",
@@ -16,7 +27,7 @@ export default function CreateJobPage() {
     salaryMax: "",
     company: "",
     salary: "",
-    requirements: []
+    requirements: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -162,20 +173,48 @@ export default function CreateJobPage() {
           required
         />
 
-        <input
-          placeholder="Requirements (e.g. React, Node, SQL)"
-          value={form.requirements.join(", ")}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              requirements: e.target.value
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean),
-            })
-          }
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm"
-        />
+        <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-3 py-2 flex flex-wrap gap-2">
+          {form.requirements.map((req, index) => (
+            <span
+              key={index}
+              className="bg-[#1a1a1f] text-xs px-3 py-1 rounded-full flex items-center gap-2"
+            >
+              {req}
+              <button
+                type="button"
+                onClick={() => {
+                  setForm((prev) => ({
+                    ...prev,
+                    requirements: prev.requirements.filter((_, i) => i !== index),
+                  }));
+                }}
+                className="text-red-400 text-xs"
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+
+          <input
+            type="text"
+            placeholder="Add requirement and press Enter"
+            className="flex-1 bg-transparent outline-none text-sm min-w-[120px]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                e.preventDefault();
+
+                const value = e.currentTarget.value.trim();
+
+                setForm((prev) => ({
+                  ...prev,
+                  requirements: [...prev.requirements, value],
+                }));
+
+                e.currentTarget.value = "";
+              }
+            }}
+          />
+        </div>
 
         <div className="space-y-2">
               <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>

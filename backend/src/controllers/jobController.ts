@@ -65,6 +65,8 @@ export const jobController = {
       description: jobData.description,
       location: jobData.location,
       type: jobData.type,
+      recruiment: jobData.requirement,
+      salary: jobData.salary,
       status: "active",
       totalApplicants: 0,
       createdAt: new Date(),
