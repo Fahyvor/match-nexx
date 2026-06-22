@@ -2,28 +2,45 @@ import Elysia from "elysia";
 import { verifyToken } from "../utils/jwt";
 
 export type AuthUser = {
-  id: string;
+  sub: string;
   email: string;
   role: "applicant" | "recruiter" | "admin";
 };
 
-/* =========================
-   AUTH + ROLE GUARD (COMBINED)
-========================= */
 export const authMiddleware = (roles?: AuthUser["role"][]) =>
   new Elysia({ name: "auth-guard" }).derive(
     { as: "scoped" },
     ({ headers }) => {
-      const authHeader = headers.authorization;
+      const authHeader =
+        headers.authorization ||
+        headers.Authorization ||
+        headers["authorization"];
 
-      if (!authHeader || Array.isArray(authHeader)) {
+      // console.log("Authorization header", authHeader)
+
+      if (!authHeader || typeof authHeader !== "string") {
         throw new Response("Unauthorized: No token provided", {
           status: 401,
         });
       }
 
-      const token = authHeader.replace("Bearer ", "").trim();
-      const payload = verifyToken(token) as AuthUser | null;
+      if (!authHeader.startsWith("Bearer ")) {
+        throw new Response("Unauthorized: Invalid token format", {
+          status: 401,
+        });
+      }
+
+      const token = authHeader.slice(7).trim();
+
+      let payload: AuthUser | null = null;
+
+      try {
+        payload = verifyToken(token) as AuthUser;
+      } catch {
+        throw new Response("Unauthorized: Invalid token", {
+          status: 401,
+        });
+      }
 
       if (!payload) {
         throw new Response("Unauthorized: Invalid token", {
@@ -31,13 +48,10 @@ export const authMiddleware = (roles?: AuthUser["role"][]) =>
         });
       }
 
-      // ROLE CHECK (only if roles are provided)
-      if (roles && roles.length > 0) {
-        if (!roles.includes(payload.role)) {
-          throw new Response("Forbidden: Insufficient permissions", {
-            status: 403,
-          });
-        }
+      if (roles?.length && !roles.includes(payload.role)) {
+        throw new Response("Forbidden: Insufficient permissions", {
+          status: 403,
+        });
       }
 
       return {

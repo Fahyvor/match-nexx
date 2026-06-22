@@ -12,10 +12,8 @@ export default function CreateJobPage() {
     location: string;
     type: string;
     experienceLevel: string;
-    salaryMin: string;
-    salaryMax: string;
     company: string;
-    salary: string;
+    salary: number;
     requirements: string[];
   }>({
     title: "",
@@ -23,16 +21,15 @@ export default function CreateJobPage() {
     location: "",
     type: "",
     experienceLevel: "",
-    salaryMin: "",
-    salaryMax: "",
     company: "",
-    salary: "",
+    salary: 0,
     requirements: [],
   });
 
   const [loading, setLoading] = useState(false);
   const { states } = useSelector((state: RootState) => state.states);
   const token = useSelector((state: RootState) => state.user.token);
+  // console.log("Token", token)
 
 
   const handleChange = (
@@ -40,9 +37,15 @@ export default function CreateJobPage() {
   ) => {
     const { name, value } = e.target;
 
+    const numericFields = ["salary"];
+
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: numericFields.includes(name)
+        ? value === ""
+          ? 0
+          : Number(value)
+        : value,
     }));
   };
 

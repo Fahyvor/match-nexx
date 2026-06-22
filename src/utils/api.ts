@@ -26,6 +26,7 @@ export interface JobData {
   description: string;
   location: string;
   salary?: number;
+  requirements: string[];
   type?: 'full-time' | 'part-time' | 'contract' | 'remote';
 }
 

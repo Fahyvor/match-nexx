@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { jobController } from "../controllers/jobController";
+import { authMiddleware } from "../middlewares/auth";
 
 export default new Elysia({ prefix: "/jobs" })
 
@@ -14,10 +15,15 @@ export default new Elysia({ prefix: "/jobs" })
     return jobController.getJobById(params.id);
   })
 
+  .use(authMiddleware(["recruiter"]))
   .post(
     "/create-job",
-    ({ body, headers }) => {
-      const recruiterId = headers["x-user-id"];
+    ({ body, user}) => {
+      const recruiterId = user?.sub
+      // console.log("User", user)
+      if (!user?.sub) {
+        throw new Error("Unauthorized - missing user");
+      }
       return jobController.createJob(recruiterId, body);
     },
     {
@@ -26,17 +32,22 @@ export default new Elysia({ prefix: "/jobs" })
         company: t.String(),
         description: t.String(),
         requirements: t.Array(t.String()),
-        salary: t.String(),
+        experienceLevel: t.String(),
+        salary: t.Number(),
+        type: t.String(),
+        location: t.String(),
       }),
     }
   )
 
-  .put("/:id", ({ params, body, headers }) => {
-    const recruiterId = headers["x-user-id"];
+  .use(authMiddleware(["recruiter"]))
+  .put("/update-job/:id", ({ params, body, user }) => {
+    const recruiterId = user.id
     return jobController.updateJob(params.id, recruiterId, body);
   })
 
-  .delete("/:id", ({ params, headers }) => {
-    const recruiterId = headers["x-user-id"];
+  .use(authMiddleware(["recruiter"]))
+  .delete("/delete-job/:id", ({ params, user }) => {
+    const recruiterId = user.id
     return jobController.deleteJob(params.id, recruiterId);
   });

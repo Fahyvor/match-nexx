@@ -49,7 +49,9 @@ export const recruiters = pgTable("recruiters", {
 /* JOBS */
 export const jobs = pgTable("jobs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  recruiterId: uuid("recruiter_id").notNull(),
+  recruiterId: uuid("recruiter_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
 
   title: text("title").notNull(),
   description: text("description"),
@@ -57,10 +59,10 @@ export const jobs = pgTable("jobs", {
   location: text("location"),
   type: text("type"),
 
-  // NEW FIELDS 👇
-  experienceLevel: text("experience_level"), // junior | mid | senior | lead
+  experienceLevel: text("experience_level"),
   salary: integer("salary"),
   requirements: text("requirements").array(),
+  company: text("company"),
 
   status: text("status").default("active"),
   totalApplicants: integer("total_applicants").default(0),

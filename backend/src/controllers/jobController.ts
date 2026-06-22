@@ -45,12 +45,21 @@ export const jobController = {
   /* =========================
      CREATE JOB
   ========================= */
-  createJob: async (recruiterId: string, jobData: {
-    title: string;
-    description: string;
-    location?: string;
-    type?: string;
-  }) => {
+  createJob: async (
+    recruiterId: string,
+    jobData: {
+      title: string;
+      description: string;
+      location?: string;
+      type?: string;
+      requirements?: string[];
+      salary?: number | string;
+      company: string;
+      experienceLevel: string;
+    }
+  ) => {
+    console.log("Job Data", jobData)
+    console.log("Recruiter ID", recruiterId)
     if (!jobData.title || !jobData.description) {
       return {
         success: false,
@@ -60,15 +69,27 @@ export const jobController = {
 
     const newJob = {
       id: randomUUID(),
+
       recruiterId,
+
       title: jobData.title,
       description: jobData.description,
-      location: jobData.location,
-      type: jobData.type,
-      recruiment: jobData.requirement,
-      salary: jobData.salary,
+
+      experienceLevel: jobData.experienceLevel ?? "",
+
+      location: jobData.location ?? "",
+      type: jobData.type ?? "",
+      company: jobData.company ?? "",
+
+      requirements: jobData.requirements ?? [],
+
+      salary: typeof jobData.salary === "string"
+        ? Number(jobData.salary)
+        : jobData.salary ?? 0,
+
       status: "active",
       totalApplicants: 0,
+
       createdAt: new Date(),
       updatedAt: new Date(),
     };
