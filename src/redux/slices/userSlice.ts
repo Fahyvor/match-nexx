@@ -83,16 +83,16 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<
+  { user: User; token: string },
+  { email: string; password: string },
+  { rejectValue: string }
+>(
   'user/loginUser',
-  async (
-    data: { email: string; password: string },
-    { rejectWithValue }
-  ) => {
+  async (data, { rejectWithValue }) => {
     try {
       const res = await api.auth.login(data);
 
-      // handle both shapes: res.data.data OR res.data
       const payload = res.data?.data ?? res.data;
       const { token, user } = payload;
 
@@ -105,8 +105,6 @@ export const loginUser = createAsyncThunk(
 
       return { user, token };
     } catch (error: unknown) {
-      console.error('LOGIN THUNK ERROR:', error);
-
       let message = 'Login failed';
 
       if (
@@ -114,15 +112,7 @@ export const loginUser = createAsyncThunk(
         error !== null &&
         'response' in error
       ) {
-        const err = error as {
-          response?: {
-            data?: {
-              message?: string;
-              error?: string;
-              detail?: string;
-            };
-          };
-        };
+        const err = error as any;
 
         message =
           err.response?.data?.message ||

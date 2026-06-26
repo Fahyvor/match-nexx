@@ -26,9 +26,7 @@ export default function Login() {
       if (loginUser.fulfilled.match(result)) {
         const user = result.payload.user;
 
-        console.log("User data", user)
-
-        toast.success('Login successful');
+        toast.success('Login successful', 4000);
 
         navigate(
           user.role === 'applicant'
@@ -36,19 +34,15 @@ export default function Login() {
             : '/recruiter/dashboard'
         );
       } else {
-        let errorMessage = 'Login failed';
+        const errorMessage =
+          (result.payload as string) ||
+          result.error.message ||
+          'Login failed';
 
-        if (typeof result.payload === 'string') {
-          errorMessage = result.payload;
-        } else if (
-          result.payload &&
-          typeof result.payload === 'object' &&
-          'error' in result.payload
-        ) {
-          errorMessage = String((result.payload as { error?: string }).error);
-        }
+        console.log("ERROR HANDLED, NO NAVIGATION");
 
-        toast.error(errorMessage);
+        toast.error(errorMessage, 4000);
+        return;
       }
     } catch (err: unknown) {
       let message = 'Something went wrong';
@@ -57,8 +51,9 @@ export default function Login() {
         message = err.message;
       }
 
-      toast.error(message);
+      toast.error(message, 4000);
       console.log(err);
+      return;
     } finally {
       setIsLoggingIn(false);
     }
