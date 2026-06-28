@@ -103,60 +103,74 @@ export default function CreateJobPage() {
         onSubmit={handleSubmit}
         className="w-full bg-[#0f0f12] border border-zinc-800 p-8 space-y-6 grid lg:grid-cols-2 gap-4"
       >
-        <input
-          placeholder="Job Title"
-          value={form.title}
-          name="title"
-          onChange={handleChange}
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
-          required
-        />
+        <div className="job_title">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Title</label>
+          <input
+            placeholder="Job Title"
+            value={form.title}
+            name="title"
+            onChange={handleChange}
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            required
+          />
+        </div>
 
-        <input
-          placeholder="Company"
-          value={form.company}
-          name="company"
-          onChange={handleChange}
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
-          required
-        />
+        <div className="company_name">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Company</label>
+          <input
+            placeholder="Company"
+            value={form.company}
+            name="company"
+            onChange={handleChange}
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            required
+          />
+        </div>
 
-        <select
-          value={form.type}
-          title="type"
-          onChange={handleChange}
-          name="type"
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
-        >
-          <option value="" disabled>
-            Select Job Type
-          </option>
+        <div className="job_type">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Type</label>
+          <select
+            value={form.type}
+            title="type"
+            onChange={handleChange}
+            name="type"
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+          >
+            <option value="" disabled>
+              Select Job Type
+            </option>
 
-          <option value="full-time">Full-time</option>
-          <option value="part-time">Part-time</option>
-          <option value="contract">Contract</option>
-          <option value="internship">Internship</option>
-          <option value="remote">Remote</option>
-          <option value="hybrid">Hybrid</option>
-        </select>
-
-        <select
-          value={form.experienceLevel}
-          name="experienceLevel"
-          onChange={handleChange}
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
-        >
-          <option value="" disabled>
-            Experience Level
-          </option>
-
-          <option value="junior">Junior (0–2 years)</option>
-          <option value="mid">Mid-level (2–5 years)</option>
-          <option value="senior">Senior (5+ years)</option>
-          <option value="lead">Lead / Manager</option>
-        </select>
+            <option value="full-time">Full-time</option>
+            <option value="part-time">Part-time</option>
+            <option value="contract">Contract</option>
+            <option value="internship">Internship</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
 
         <div className="">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Experience Level</label>
+          <select
+            value={form.experienceLevel}
+            name="experienceLevel"
+            onChange={handleChange}
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+          >
+            <option value="" disabled>
+              Experience Level
+            </option>
+
+            <option value="junior">Junior (0–2 years)</option>
+            <option value="mid">Mid-level (2–5 years)</option>
+            <option value="senior">Senior (5+ years)</option>
+            <option value="lead">Lead / Manager</option>
+          </select>
+        </div>
+
+
+        <div className="">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Salary</label>
           <input
             type="number"
             name="salary"
@@ -167,73 +181,90 @@ export default function CreateJobPage() {
           />
         </div>
 
-        <textarea
-          placeholder="Job Description"
-          value={form.description}
-          onChange={handleChange}
-          name="description"
-          className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
-          required
-        />
-
-        <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-3 py-2 flex flex-wrap gap-2">
-          {form.requirements.map((req, index) => (
-            <span
-              key={index}
-              className="bg-[#1a1a1f] text-xs px-3 py-1 rounded-full flex items-center gap-2"
-            >
-              {req}
-              <button
-                type="button"
-                onClick={() => {
-                  setForm((prev) => ({
-                    ...prev,
-                    requirements: prev.requirements.filter((_, i) => i !== index),
-                  }));
-                }}
-                className="text-red-400 text-xs"
-              >
-                ✕
-              </button>
-            </span>
-          ))}
-
-          <input
-            type="text"
-            placeholder="Add requirement and press Enter"
-            className="flex-1 bg-transparent outline-none text-sm min-w-[120px]"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                e.preventDefault();
-
-                const value = e.currentTarget.value.trim();
-
-                setForm((prev) => ({
-                  ...prev,
-                  requirements: [...prev.requirements, value],
-                }));
-
-                e.currentTarget.value = "";
-              }
-            }}
-          />
+        <div className="space-y-2">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+          <select
+            className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+            required
+            value={form.location}
+            onChange={handleChange}
+            name='location'
+          >
+            <option value="" disabled>Select State</option>
+            {states?.map((state: string) => (
+              <option key={state} value={state}>{state}</option>
+            ))}
+          </select>
         </div>
 
-        <div className="space-y-2">
-              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
-              <select
-                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
-                required
-                value={form.location}
-                onChange={handleChange}
-                name='location'
-              >
-                <option value="" disabled>Select State</option>
-                {states?.map((state: string) => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
+        <div>
+          <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">
+            Requirements
+          </label>
+
+          {/* Input */}
+          <div className="mt-2 w-full bg-cyber-dark/50 border border-zinc-800 px-3 py-2">
+            <input
+              type="text"
+              placeholder="Add requirement and press Enter"
+              className="w-full bg-transparent outline-none text-sm"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                  e.preventDefault();
+
+                  const value = e.currentTarget.value.trim();
+
+                  setForm((prev) => ({
+                    ...prev,
+                    requirements: [...prev.requirements, value],
+                  }));
+
+                  e.currentTarget.value = "";
+                }
+              }}
+            />
+          </div>
+
+          {/* Display Added Requirements */}
+          {form.requirements.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {form.requirements.map((req, index) => (
+                <span
+                  key={index}
+                  className="bg-[#1a1a1f] border border-zinc-700 text-xs px-3 py-2 rounded-md flex items-center gap-2"
+                >
+                  {req}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        requirements: prev.requirements.filter((_, i) => i !== index),
+                      }))
+                    }
+                    className="text-red-400 hover:text-red-500"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
             </div>
+          )}
+        </div>
+        
+        <div className="">
+          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Description</label>
+          <textarea
+            placeholder="Job Description"
+            value={form.description}
+            onChange={handleChange}
+            rows={4}
+            name="description"
+            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            required
+          />
+        </div>
 
         <div className="flex gap-4">
           <button

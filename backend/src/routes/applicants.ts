@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middlewares/auth';
 
 export default new Elysia({ prefix: '/applicants' })
-  .use(authMiddleware)
+  .use(authMiddleware(["admin", "recruiter"]))
   .get('/all-applicants', async () => {
     return {
       success: true,

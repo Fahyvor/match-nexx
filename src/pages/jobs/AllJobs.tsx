@@ -8,6 +8,9 @@ type Job = {
   location?: string;
   type?: string;
   status: string;
+  experienceLevel: string;
+  requriementss: string[];
+  company: string;
 };
 
 export default function AllJobs() {
@@ -17,7 +20,8 @@ export default function AllJobs() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/jobs");
+      const res = await axios.get("/api/jobs/all-jobs");
+      console.log("All jobs", res.data)
       setJobs(res.data.data);
     } catch (err) {
       console.error(err);
@@ -50,6 +54,8 @@ export default function AllJobs() {
               className="border border-zinc-800 bg-[#0f0f12] p-6 hover:border-zinc-600 transition"
             >
               <h3 className="text-xl font-bold mb-2">
+                {job.experienceLevel.charAt(0).toUpperCase() +
+                  job.experienceLevel.slice(1).toLowerCase()}{" "}
                 {job.title}
               </h3>
 
@@ -59,11 +65,14 @@ export default function AllJobs() {
 
               <div className="text-xs text-zinc-500 flex gap-4">
                 <span>{job.location || "N/A"}</span>
-                <span>{job.type || "N/A"}</span>
+                <span>{job.type
+                  ? job.type.charAt(0).toUpperCase() + job.type.slice(1).toLowerCase()
+                  : "N/A"}
+                </span>
               </div>
 
               <div className="mt-4 text-[10px] text-[#00E5FF] uppercase font-mono">
-                {job.status}
+                {job.status === "active" ? "Actively Recruiting" : job.status}
               </div>
             </div>
           ))}

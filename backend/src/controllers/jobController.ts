@@ -16,6 +16,8 @@ export const jobController = {
 
     return {
       success: true,
+      message: "Jobs fetched successfully!",
+      status: 200,
       data: allJobs,
       total: total.length,
       page,
@@ -98,7 +100,8 @@ export const jobController = {
 
     return {
       success: true,
-      message: "Job created successfully",
+      status: 201,
+      message: "Job created successfully!",
       data: inserted[0],
     };
   },
