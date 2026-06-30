@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
 
 type Job = {
   id: string;
@@ -16,11 +18,16 @@ type Job = {
 export default function AllJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
+  const token = useSelector((state: RootState) => state.user.token);
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/jobs/all-jobs");
+      const res = await axios.get("/api/jobs/all-jobs", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       console.log("All jobs", res.data)
       setJobs(res.data.data);
     } catch (err) {

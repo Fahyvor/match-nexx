@@ -1,73 +1,42 @@
-import { Elysia, t } from 'elysia';
-import { authMiddleware } from '../middlewares/auth';
+import Elysia, { t } from "elysia";
+import { ApplicantController } from "../controllers/applicantController";
+import { authMiddleware } from "../middlewares/auth";
 
-export default new Elysia({ prefix: '/applicants' })
-  .use(authMiddleware(["admin", "recruiter"]))
-  .get('/all-applicants', async () => {
-    return {
-      success: true,
-      data: [],
-    };
-  })
+const applicantController = new ApplicantController();
 
-  .get('/profile', async () => {
-    // TODO: Fetch current user's applicant profile
-    return {
-      success: true,
-      data: {
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        profile: {
-          bio: '',
-          skills: [],
-          experience: [],
-          education: []
-        }
-      }
-    };
-  })
+export default new Elysia({ prefix: "/applicant" })
 
-  .put('/profile', async ({ body }) => {
-    // TODO: Update applicant profile
-    return {
-      success: true,
-      message: 'Profile updated successfully',
-      data: body
-    };
-  })
+.use(authMiddleware(["applicant"]))
 
-  .get('/applications', async () => {
-    // TODO: Fetch user's applications
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          jobId: '1',
-          jobTitle: 'Senior Frontend Engineer',
-          company: 'TechCorp',
-          status: 'reviewing',
-          appliedAt: new Date().toISOString()
-        }
-      ]
-    };
-  })
-
-  .post('/applications', async ({ body }) => {
-    // TODO: Submit job application
-    return {
-      success: true,
-      message: 'Application submitted successfully',
-      data: {
-        id: '1',
-        jobId: body.jobId,
-        status: 'pending',
-        appliedAt: new Date().toISOString()
-      }
-    };
-  }, {
+.put(
+  "/complete-profile",
+  applicantController.completeProfile,
+  {
     body: t.Object({
-      jobId: t.String()
-    })
-  });
+      headline: t.Optional(t.String()),
+      summary: t.Optional(t.String()),
+      phone: t.Optional(t.String()),
+      location: t.Optional(t.String()),
+      portfolio: t.Optional(t.String()),
+      github: t.Optional(t.String()),
+      linkedin: t.Optional(t.String()),
+    }),
+  }
+)
+
+.put(
+  "/upload-cv",
+  applicantController.uploadCV,
+  {
+    body: t.Object({
+      cv: t.File({
+        type: "application/pdf",
+      }),
+    }),
+  }
+)
+
+.post(
+  "/apply/:jobId",
+  applicantController.applyForJob
+);

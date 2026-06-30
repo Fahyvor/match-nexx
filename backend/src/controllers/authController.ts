@@ -24,7 +24,6 @@ export const authController = {
     password: string;
     userType: "applicant" | "recruiter" | "admin";
   }) => {
-    console.log("User data", data)
     try {
       const result = await registerUser({
         firstName: data.firstName,
@@ -72,7 +71,6 @@ export const authController = {
 
   login: async (email: string, password: string) => {
     try {
-      console.log("user data", email, password)
       const result = await loginUser(email, password);
 
       const token = createToken(

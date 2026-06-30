@@ -25,12 +25,29 @@ export const users = pgTable("users", {
 /* APPLICANTS */
 export const applicants = pgTable("applicants", {
   id: uuid("id").primaryKey().defaultRandom(),
+
   userId: uuid("user_id").notNull().unique(),
 
   headline: text("headline"),
+
   summary: text("summary"),
 
+  phone: text("phone"),
+
+  location: text("location"),
+
+  portfolio: text("portfolio"),
+
+  github: text("github"),
+
+  linkedin: text("linkedin"),
+
+  cvUrl: text("cv_url"),
+
+  profilePicture: text("profile_picture"),
+
   createdAt: timestamp("created_at").defaultNow(),
+
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

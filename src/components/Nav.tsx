@@ -84,7 +84,7 @@ const Nav = () => {
         </button>
 
         {/* Settings */}
-        <button onClick={handleSettings} className="text-white">
+        <button onClick={handleSettings} className="text-white cursor-pointer">
           <RiUserSettingsFill className="w-5 h-5" />
         </button>
       </div>
