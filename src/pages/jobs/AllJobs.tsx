@@ -59,6 +59,7 @@ export default function AllJobs() {
             <div
               key={job.id}
               className="border border-zinc-800 bg-[#0f0f12] p-6 hover:border-zinc-600 transition"
+              onClick={() => window.location.href=`/applicant/apply-job/${job.id}`}
             >
               <h3 className="text-xl font-bold mb-2">
                 {job.experienceLevel.charAt(0).toUpperCase() +

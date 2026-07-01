@@ -15,6 +15,7 @@ import { fetchStatesAndLgas } from './redux/slices/stateSlice';
 import PageNotFound from './pages/PageNotFound';
 import AllJobs from './pages/jobs/AllJobs';
 import CreateJobPage from './pages/jobs/CreateJobs';
+import JobApplication from './pages/applicant/JobApplication';
 export default function App() {
   const dispatch = useAppDispatch();
 
@@ -34,6 +35,7 @@ export default function App() {
         <Route element={<ProtectedRoute role="applicant" />}>
           <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
           <Route path="/applicant/cv-builder" element={<CVBuilder />} />
+          <Route path="/applicant/apply-job/:jobId" element={<JobApplication />} />
         </Route>
 
         {/* Recruiter Routes */}
@@ -45,9 +47,8 @@ export default function App() {
         {/* Settings Route */}
         <Route element={<ProtectedRoute />}>
           <Route path="/settings" element={<Settings />} />
+          <Route path="/jobs" element={<AllJobs />} />
         </Route>
-
-        <Route path="/jobs" element={<AllJobs />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       <Footer />

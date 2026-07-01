@@ -82,13 +82,15 @@ export class ApplicantController {
         data: updated[0],
       };
 
-    } catch (e: any) {
-
+    } catch (e: unknown) {
       set.status = 500;
+
+      const message =
+        e instanceof Error ? e.message : "Internal server error";
 
       return {
         success: false,
-        message: e.message,
+        message,
       };
     }
   };
