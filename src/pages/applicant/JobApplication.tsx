@@ -34,13 +34,13 @@ const JobApplication = () => {
     linkedin: "",
   });
 
-  // Combined UI states into a cleaner loading manager
+  // Added parsingCV loading indicator state here
   const [status, setStatus] = useState({
     jobLoading: true,
     submitting: false,
+    parsingCV: false,
   });
 
-  // Reusable Axios configuration headers
   const authConfig = useCallback(() => ({
     headers: { Authorization: `Bearer ${token}` },
   }), [token]);
@@ -67,6 +67,51 @@ const JobApplication = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Dedicated parser routine when file is updated
+  const handleCvUploadAndParse = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) return;
+
+    setCV(file);
+    setStatus((p) => ({ ...p, parsingCV: true }));
+
+    try {
+      const form = new FormData();
+      form.append("cv", file);
+
+      // Call your backend utility that reads the CV file
+      const res = await axios.post("/api/applicant/parse-cv", form, {
+        headers: {
+          ...authConfig().headers,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 200 && res.data.data) {
+        const parsedData = res.data.data;
+        
+        // Populate profile inputs automatically with parsed data fallback
+        setProfile((prev) => ({
+          ...prev,
+          headline: parsedData.headline || prev.headline,
+          summary: parsedData.summary || prev.summary,
+          phone: parsedData.phone || prev.phone,
+          location: parsedData.location || prev.location,
+          portfolio: parsedData.portfolio || prev.portfolio,
+          github: parsedData.github || prev.github,
+          linkedin: parsedData.linkedin || prev.linkedin,
+        }));
+        
+        toast.success("CV information parsed and autofilled!");
+      }
+    } catch (err) {
+      console.error("CV extraction fail:", err);
+      toast.error("Could not autofill fields from CV. You can still fill it out manually.");
+    } finally {
+      setStatus((p) => ({ ...p, parsingCV: false }));
+    }
   };
 
   const handleApplyProcess = async () => {
@@ -119,7 +164,6 @@ const JobApplication = () => {
     );
   }
 
-  // Common styling for dynamic layout inputs
   const inputStyle = "w-full border border-zinc-800 bg-[#141419] p-3 text-white placeholder-zinc-500 rounded-md outline-none focus:border-cyan-500 transition-colors duration-200";
 
   return (
@@ -176,10 +220,10 @@ const JobApplication = () => {
             <input name="headline" placeholder="Professional Headline" value={profile.headline} onChange={handleChange} className={inputStyle} />
             <textarea rows={3} name="summary" placeholder="Brief Professional Summary" value={profile.summary} onChange={handleChange} className={`${inputStyle} resize-none`} />
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className=" gap-4">
               <input name="phone" placeholder="Phone Number" value={profile.phone} onChange={handleChange} className={inputStyle} />
-              <input name="location" placeholder="Current City, Country" value={profile.location} onChange={handleChange} className={inputStyle} />
             </div>
+            <input name="location" placeholder="Current City, Country" value={profile.location} onChange={handleChange} className={inputStyle} />
 
             <input name="portfolio" placeholder="Portfolio Website URL" value={profile.portfolio} onChange={handleChange} className={inputStyle} />
             <input name="github" placeholder="GitHub Profile URL" value={profile.github} onChange={handleChange} className={inputStyle} />
@@ -188,22 +232,26 @@ const JobApplication = () => {
 
           <div className="pt-2 border-t border-zinc-800">
             <label className="block text-sm font-semibold text-zinc-400 mb-2">Upload Resume / CV (PDF Only)</label>
-            <div className="w-full bg-[#141419] border border-dashed border-zinc-800 p-4 text-center rounded-md hover:border-zinc-700 transition cursor-pointer relative">
+            <div className={`w-full bg-[#141419] border border-dashed p-4 text-center rounded-md hover:border-zinc-700 transition cursor-pointer relative ${status.parsingCV ? 'border-cyan-500/50 pointer-events-none' : 'border-zinc-800'}`}>
               <input 
                 type="file" 
                 accept=".pdf" 
-                onChange={(e) => setCV(e.target.files?.[0] || null)}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                onChange={handleCvUploadAndParse}
+                disabled={status.parsingCV || status.submitting}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
               />
               <span className="text-sm text-zinc-400 block truncate">
-                {cv ? `📄 ${cv.name}` : "Click to select file or drag drop"}
+                {status.parsingCV 
+                  ? "⚡ Reading data from your CV..." 
+                  : cv ? `📄 ${cv.name}` : "Click to select file or drag drop"
+                }
               </span>
             </div>
           </div>
 
           <button
             onClick={handleApplyProcess}
-            disabled={status.submitting}
+            disabled={status.submitting || status.parsingCV}
             className="w-full mt-2 bg-gradient-to-r from-cyan-400 via-teal-400 to-pink-500 text-black py-3.5 px-4 font-bold rounded-md hover:opacity-95 transition-opacity active:scale-[0.99] transform disabled:opacity-50 disabled:pointer-events-none tracking-wide"
           >
             {status.submitting ? "Processing Application..." : "Submit Application"}

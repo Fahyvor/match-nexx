@@ -7,7 +7,6 @@ const applicantController = new ApplicantController();
 export default new Elysia({ prefix: "/applicant" })
 
 .use(authMiddleware(["applicant"]))
-
 .put(
   "/complete-profile",
   applicantController.completeProfile,
@@ -37,6 +36,23 @@ export default new Elysia({ prefix: "/applicant" })
 )
 
 .post(
+  "/parse-cv",
+  applicantController.parseCV,
+  {
+    body: t.Object({
+      cv: t.File({
+        type: "application/pdf",
+      }),
+    }),
+  }
+)
+
+.post(
   "/apply/:jobId",
-  applicantController.applyForJob
+  applicantController.applyForJob,
+  {
+    params: t.Object({
+      jobId: t.String(),
+    }),
+  }
 );

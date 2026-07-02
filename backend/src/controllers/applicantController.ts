@@ -4,10 +4,11 @@ import {
   applications,
   jobs,
 } from "../db/schema";
-import type { UploadedFile } from "elysia";
+import type { UploadedFile, Context } from "elysia";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { supabase } from "../config/supabase";
+import { PDFParse } from "pdf-parse";
 
 type AuthUser = {
   sub: string;
@@ -23,21 +24,88 @@ type CompleteProfileBody = {
   portfolio?: string;
   github?: string;
   linkedin?: string;
-};
-
-type UploadCVBody = {
-  cv: File;
+  cv?: File; // Added to fix type checking
 };
 
 type ApplyParams = {
   jobId: string;
 };
 
-type ElysiaSet = {
-  status: number;
-};
+// Derived from Elysia's own Context type so `set` always matches what
+// Elysia actually passes in at runtime (status is optional and can be
+// either a number or an HTTP status name string).
+type ElysiaSet = Context["set"];
 
 export class ApplicantController {
+
+  // --- NEW PARSE CV METHOD ---
+  parseCV = async ({
+    body,
+    set,
+  }: {
+    body: { cv: UploadedFile };
+    user: AuthUser;
+    set: ElysiaSet;
+  }) => {
+    try {
+      const file = body.cv;
+
+      if (!file) {
+        set.status = 400;
+        return { success: false, message: "No CV file provided." };
+      }
+
+      // 1. Read file stream into a buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // 2. Extract raw text from the PDF file
+      const parser = new PDFParse({ data: buffer });
+      let rawText: string;
+      try {
+        const pdfData = await parser.getText();
+        rawText = pdfData.text;
+      } finally {
+        await parser.destroy();
+      }
+
+      // 3. Clean and parse details using Regular Expressions (Regex)
+      // Note: For 100% accurate results, you could feed rawText into an LLM API here.
+      const phoneRegex = /(?:\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4,6}/g;
+      const linkedinRegex = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+/i;
+      const githubRegex = /(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9_-]+/i;
+
+      const phoneMatches = rawText.match(phoneRegex);
+      const linkedinMatches = rawText.match(linkedinRegex);
+      const githubMatches = rawText.match(githubRegex);
+
+      // Simple structural fallback strategies for headline & summary
+      const cleanLines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
+      const headline = cleanLines[0] ? `${cleanLines[0]} Professional` : "";
+      const summary = cleanLines.slice(1, 4).join(" ");
+
+      const extractedProfile = {
+        headline: headline.slice(0, 50),
+        summary: summary.slice(0, 200),
+        phone: phoneMatches ? phoneMatches[0] : "",
+        location: "", // Can be filled out manually by user
+        portfolio: "",
+        github: githubMatches ? githubMatches[0] : "",
+        linkedin: linkedinMatches ? linkedinMatches[0] : "",
+      };
+
+      return {
+        success: true,
+        message: "CV successfully parsed.",
+        data: extractedProfile,
+      };
+
+    } catch (e: unknown) {
+      set.status = 500;
+      const message = e instanceof Error ? e.message : "Internal parsing error";
+      return { success: false, message };
+    }
+  };
 
   completeProfile = async ({
       body,
@@ -203,7 +271,7 @@ export class ApplicantController {
         return {
           success: false,
           message: "Job not found.",
-        };
+          };
       }
 
       let applicant = await db.query.applicants.findFirst({
