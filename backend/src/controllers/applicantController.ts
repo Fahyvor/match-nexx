@@ -153,6 +153,8 @@ export class ApplicantController {
     } catch (e: unknown) {
       set.status = 500;
 
+      console.log("Error in completeProfile:", e);
+
       const message =
         e instanceof Error ? e.message : "Internal server error";
 

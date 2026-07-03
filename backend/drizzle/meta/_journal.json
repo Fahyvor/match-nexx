@@ -15,6 +15,13 @@
       "when": 1781081031630,
       "tag": "0001_cuddly_archangel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783032963649,
+      "tag": "0002_yummy_pestilence",
+      "breakpoints": true
     }
   ]
 }
