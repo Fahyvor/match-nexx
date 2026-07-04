@@ -85,6 +85,13 @@ const app = new Elysia({ prefix: "/auth" })
       .post("/logout", async () => authController.logout())
   )
 
+  .use(authMiddleware(["applicant", "recruiter", "admin"]))
+  .delete("/delete-account", async ({ user }) => ({
+    success: true,
+    message: "Account deleted successfully",
+    data: { user },
+  }))
+
   // =========================
   // REFRESH TOKEN
   // =========================

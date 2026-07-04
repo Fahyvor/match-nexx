@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { RootState } from '../redux/store';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import SleekToast, { toast } from 'sleek-toast';
 
 export default function Settings() {
+  const user = useSelector((state: RootState) => state.user.user);
+  const token = useSelector((state: RootState) => state.user.token);
   const applyTheme = (theme: string) => {
-
     const root = document.documentElement;
 
     if (theme === 'dark') {
@@ -22,13 +27,64 @@ export default function Settings() {
     theme: localStorage.getItem('theme') || 'dark',
     privacy: 'private',
   });
+  const [updatedUser, setUpdatedUser] = useState({
+    email: user?.email || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUpdatedUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
   const handleLogout = () => {
     localStorage.removeItem('auth');
     navigate('/login');
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await axios.delete('/api/auth/delete-account', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if(response.status == 200) {
+        toast.success(response.data.message, 4000);
+        console.log('Account deleted successfully:', response.data);
+        handleLogout();
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+    }
+  }
+
+  const handleUpdateAccount = async () => {
+    try {
+      const response = await axios.put('/api/user/update', updatedUser,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if(response.status == 200) {
+        toast.success(response.data.message, 4000);
+        console.log('Account updated successfully:', response.data);
+      }
+    } catch (error) {
+      console.error('Error updating account:', error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <SleekToast />
 
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
@@ -51,14 +107,15 @@ export default function Settings() {
               <h2 className="text-xl font-bold tracking-tight uppercase">Account Settings</h2>
             </div>
 
-            <div className="space-y-6">
+            <form className="space-y-6" onSubmit={handleUpdateAccount}>
               <div>
                 <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  defaultValue="user@example.com"
+                  defaultValue={user?.email || ''}
+                  onChange={handleInputChange}
                   className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
@@ -69,7 +126,20 @@ export default function Settings() {
                 </label>
                 <input
                   type="text"
-                  defaultValue="John Doe"
+                  defaultValue={user?.firstName || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
+                  LastName
+                </label>
+                <input
+                  type="text"
+                  defaultValue={user?.lastName || ''}
+                  onChange={handleInputChange}
                   className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
@@ -85,11 +155,11 @@ export default function Settings() {
                 />
               </div>
 
-              <button className="relative px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300 overflow-hidden group">
+              <button className="relative px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300 overflow-hidden group" type='submit'>
                 <span className="relative z-10">Update Account</span>
                 <div className="absolute inset-0 bg-accent-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0 opacity-20" />
               </button>
-            </div>
+            </form>
           </section>
 
           {/* Notification Settings */}
@@ -230,21 +300,10 @@ export default function Settings() {
                 <div className="absolute inset-0 bg-accent-orange transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0 opacity-20" />
               </button>
 
-              <button className="relative w-full px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-accent-pink border border-accent-pink hover:shadow-[0_0_20px_rgba(255,0,85,0.3)] transition-all duration-300 overflow-hidden group">
+              <button className="relative w-full px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-accent-pink border border-accent-pink hover:shadow-[0_0_20px_rgba(255,0,85,0.3)] transition-all duration-300 overflow-hidden group" onClick={handleDeleteAccount}>
                 <span className="relative z-10">Delete Account</span>
                 <div className="absolute inset-0 bg-accent-pink transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
               </button>
-            </div>
-          </section>
-
-          {/* System Info */}
-          <section className="bg-panel-bg border border-panel-border p-8">
-            <h3 className="text-sm font-mono tracking-widest text-zinc-500 uppercase mb-4">System Information</h3>
-            <div className="grid grid-cols-2 gap-4 text-xs font-mono text-zinc-600 space-y-2">
-              <div>App Version: <span className="text-accent-cyan">4.1.2</span></div>
-              <div>Last Updated: <span className="text-accent-cyan">2026-05-22</span></div>
-              <div>Status: <span className="text-accent-lime">ONLINE</span></div>
-              <div>Encryption: <span className="text-accent-pink">AES-256</span></div>
             </div>
           </section>
         </div>

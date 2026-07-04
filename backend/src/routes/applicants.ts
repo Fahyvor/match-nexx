@@ -55,4 +55,9 @@ export default new Elysia({ prefix: "/applicant" })
       jobId: t.String(),
     }),
   }
+)
+
+.get(
+  "/applications",
+  applicantController.getApplications
 );

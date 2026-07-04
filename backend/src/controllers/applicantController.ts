@@ -24,7 +24,7 @@ type CompleteProfileBody = {
   portfolio?: string;
   github?: string;
   linkedin?: string;
-  cv?: File; // Added to fix type checking
+  cv?: File;
 };
 
 type ApplyParams = {
@@ -206,14 +206,17 @@ export class ApplicantController {
 
       const filename = `${user.sub}/${randomUUID()}.pdf`;
 
-      const { error } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from("cv")
         .upload(filename, file, {
           upsert: true,
           contentType: file.type,
         });
 
-      if (error) throw error;
+      console.log(data);
+      console.error(error);
+
+      // if (error) throw error;
 
       const {
         data: { publicUrl },
@@ -336,6 +339,56 @@ export class ApplicantController {
         success: true,
         message: "Application submitted successfully.",
         data: application[0],
+      };
+
+    } catch (e: unknown) {
+      set.status = 500;
+
+      const message =
+        e instanceof Error ? e.message : "Internal server error";
+
+      return {
+        success: false,
+        message,
+      };
+    }
+
+  };
+
+  getApplications = async ({
+    user,
+    set,
+  }: {
+    user: AuthUser;
+    set: ElysiaSet;
+  }) => {
+
+    try {
+
+      const applicant = await db.query.applicants.findFirst({
+        where: eq(applicants.userId, user.sub),
+      });
+
+      if (!applicant) {
+
+        set.status = 404;
+
+        return {
+          success: false,
+          message: "Applicant profile not found.",
+        };
+      }
+
+      const applicationsList = await db.query.applications.findMany({
+        where: eq(applications.applicantId, applicant.id),
+        with: {
+          job: true,
+        },
+      });
+
+      return {
+        success: true,
+        data: applicationsList,
       };
 
     } catch (e: unknown) {
