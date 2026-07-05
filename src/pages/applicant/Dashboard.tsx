@@ -1,13 +1,29 @@
 import { useNavigate } from 'react-router-dom';
-
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState, AppDispatch } from '../../redux/store';
+import { fetchApplications } from '../../redux/slices/applicantSlice';
 export default function ApplicantDashboard() {
   const navigate = useNavigate();
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const {
+    applications,
+    // loading,
+    // error,
+  } = useSelector((state: RootState) => state.applicant);
+
+  useEffect(() => {
+    dispatch(fetchApplications());
+  }, [dispatch]);
 
   const recentApplications = [
     { id: 1, company: 'TechCorp', position: 'Senior Frontend Engineer', status: 'reviewing', date: '2 days ago' },
     { id: 2, company: 'DataFlow Inc', position: 'Full Stack Developer', status: 'interview', date: '5 days ago' },
     { id: 3, company: 'AI Innovations', position: 'ML Engineer', status: 'pending', date: '1 week ago' },
   ];
+
 
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -37,7 +53,7 @@ export default function ApplicantDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
           {[
-            { label: 'Total Applications', value: '12', accent: 'cyan' },
+            { label: 'Total Applications', value: applications.length, accent: 'cyan' },
             { label: 'Under Review', value: '5', accent: 'pink' },
             { label: 'Interviews', value: '3', accent: 'lime' },
             { label: 'Offers', value: '1', accent: 'purple' },
@@ -105,7 +121,7 @@ export default function ApplicantDashboard() {
               <span className="w-2 h-2 bg-accent-cyan animate-pulse" />
               Recent Applications
             </h2>
-            <span className="text-[10px] font-mono text-zinc-500">[{recentApplications.length}] ACTIVE</span>
+            <span className="text-[10px] font-mono text-zinc-500">[{applications.length}] ACTIVE</span>
           </div>
 
           <div className="space-y-3">

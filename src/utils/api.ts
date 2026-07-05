@@ -16,6 +16,10 @@ export interface RegisterData {
   userType: 'applicant' | 'recruiter';
 }
 
+export interface Cv {
+  cv: File;
+}
+
 export interface LoginData {
   email: string;
   password: string;
@@ -134,14 +138,23 @@ class ApiClient {
     getProfile: () =>
       this.client.get('/applicants/profile'),
 
-    updateProfile: (data: ApplicantProfileData) =>
+    updateApplication: (data: ApplicantProfileData) =>
       this.client.put('/applicants/profile', data),
 
     getApplications: () =>
       this.client.get('/applicants/applications'),
 
+    parseCV: (data: Cv) => 
+      this.client.post('/applicants/parse-cv', data),
+
+    completeProfile: (data: ApplicantProfileData) =>
+      this.client.put('/applicants/complete-profile', data),
+
     submitApplication: (jobId: string) =>
-      this.client.post('/applicants/applications', { jobId }),
+      this.client.post(`/applicants/apply/${jobId}`)
+
+    // submitApplication: (jobId: string) =>
+    //   this.client.post('/applicants/apply', { jobId }),
   };
 
   // Recruiter endpoints

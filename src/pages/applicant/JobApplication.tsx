@@ -4,6 +4,7 @@ import axios, { AxiosError } from "axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
 import SleekToast, { toast } from "sleek-toast";
+import api from "../../utils/api";
 
 type Job = {
   id: string;
@@ -82,12 +83,14 @@ const JobApplication = () => {
       form.append("cv", file);
 
       // Call your backend utility that reads the CV file
-      const res = await axios.post("/api/applicant/parse-cv", form, {
-        headers: {
-          ...authConfig().headers,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // const res = await axios.post("/api/applicant/parse-cv", form, {
+      //   headers: {
+      //     ...authConfig().headers,
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
+
+      const res = await api.applicants.parseCV({ cv: file });
 
       if (res.status === 200 && res.data.data) {
         const parsedData = res.data.data;
@@ -119,22 +122,27 @@ const JobApplication = () => {
       setStatus((p) => ({ ...p, submitting: true }));
 
       // 1. Sync Profile Data
-      await axios.put("/api/applicant/complete-profile", profile, authConfig());
+      // await axios.put("/api/applicant/complete-profile", profile, authConfig());
+
+      await api.applicants.completeProfile(profile)
 
       // 2. Upload CV if chosen
       if (cv) {
         const form = new FormData();
         form.append("cv", cv);
-        await axios.put("/api/applicant/upload-cv", form, {
-          headers: {
-            ...authConfig().headers,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        // await axios.put("/api/applicant/upload-cv", form, {
+        //   headers: {
+        //     ...authConfig().headers,
+        //     "Content-Type": "multipart/form-data",
+        //   },
+        // });
+        await api.applicants.parseCV({ cv });
       }
 
       // 3. Complete Job Application
-      const response = await axios.post(`/api/applicant/apply/${jobId}`, {}, authConfig());
+      // const response = await axios.post(`/api/applicant/apply/${jobId}`, {}, authConfig());
+
+      const response = await api.applicants.submitApplication(jobId || "");
       toast.success(response.data.message || "Application submitted successfully!");
     } catch (err) {
       if (axios.isAxiosError(err)) {

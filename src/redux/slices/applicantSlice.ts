@@ -84,7 +84,7 @@ export const updateApplicantProfile = createAsyncThunk(
   'applicant/updateProfile',
   async (data: Partial<ApplicantProfile>, { rejectWithValue }) => {
     try {
-      const response = await api.applicants.updateProfile(data);
+      const response = await api.applicants.updateApplication(data);
       return response;
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
@@ -98,6 +98,7 @@ export const fetchApplications = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.applicants.getApplications();
+      console.log('Applications fetched:', response);
       return response;
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
