@@ -80,8 +80,9 @@ class ApiClient {
     });
 
     this.client.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
-      if (token) {
+      const data = sessionStorage.getItem('auth');
+      if (data) {
+        const { token } = JSON.parse(data);
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
@@ -136,25 +137,25 @@ class ApiClient {
   // Applicant endpoints
   applicants = {
     getProfile: () =>
-      this.client.get('/applicants/profile'),
+      this.client.get('/applicant/profile'),
 
     updateApplication: (data: ApplicantProfileData) =>
-      this.client.put('/applicants/profile', data),
+      this.client.put('/applicant/profile', data),
 
     getApplications: () =>
-      this.client.get('/applicants/applications'),
+      this.client.get('/applicant/applications'),
 
     parseCV: (data: Cv) => 
-      this.client.post('/applicants/parse-cv', data),
+      this.client.post('/applicant/parse-cv', data),
 
     completeProfile: (data: ApplicantProfileData) =>
-      this.client.put('/applicants/complete-profile', data),
+      this.client.put('/applicant/complete-profile', data),
 
     submitApplication: (jobId: string) =>
-      this.client.post(`/applicants/apply/${jobId}`)
+      this.client.post(`/applicant/apply/${jobId}`)
 
     // submitApplication: (jobId: string) =>
-    //   this.client.post('/applicants/apply', { jobId }),
+    //   this.client.post('/applicant/apply', { jobId }),
   };
 
   // Recruiter endpoints
