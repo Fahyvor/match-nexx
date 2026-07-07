@@ -1,6 +1,7 @@
 import Elysia, { t } from "elysia";
 import { ApplicantController } from "../controllers/applicantController";
 import { authMiddleware } from "../middlewares/auth";
+import app from "..";
 
 const applicantController = new ApplicantController();
 
@@ -57,6 +58,7 @@ export default new Elysia({ prefix: "/applicant" })
   }
 )
 
+.use(authMiddleware(["applicant"]))
 .get(
   "/applications",
   applicantController.getApplications
