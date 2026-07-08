@@ -391,18 +391,16 @@ export class ApplicantController {
         data: applicationsList,
       };
 
-    } catch (e: unknown) {
-      set.status = 500;
+    } catch (e) {
+      console.error("getApplications error:", e);
 
-      const message =
-        e instanceof Error ? e.message : "Internal server error";
+      set.status = 500;
 
       return {
         success: false,
-        message,
+        message: e instanceof Error ? e.message : "Internal server error",
       };
     }
-
   };
 
 }
