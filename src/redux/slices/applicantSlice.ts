@@ -46,6 +46,10 @@ interface Application {
   coverLetter?: string;
   appliedAt: string;
   updatedAt: string;
+  job: {
+    title: string;
+    experienceLevel: string;
+  }
 }
 
 interface ApplicantState {
@@ -98,8 +102,8 @@ export const fetchApplications = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.applicants.getApplications();
-      console.log('Applications fetched:', response);
-      return response;
+      // console.log('Applications fetched:', response);
+      return response.data;
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { error?: string } } };
       return rejectWithValue(apiError.response?.data?.error || 'Failed to fetch applications');

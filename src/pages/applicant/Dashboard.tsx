@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from '../../redux/store';
 import { fetchApplications } from '../../redux/slices/applicantSlice';
+import { formatDate } from '../../utils/formatDate';
 export default function ApplicantDashboard() {
   const navigate = useNavigate();
 
@@ -14,16 +15,11 @@ export default function ApplicantDashboard() {
     // error,
   } = useSelector((state: RootState) => state.applicant);
 
+  console.log('Applications in Dashboard:', applications);
+
   useEffect(() => {
     dispatch(fetchApplications());
   }, [dispatch]);
-
-  const recentApplications = [
-    { id: 1, company: 'TechCorp', position: 'Senior Frontend Engineer', status: 'reviewing', date: '2 days ago' },
-    { id: 2, company: 'DataFlow Inc', position: 'Full Stack Developer', status: 'interview', date: '5 days ago' },
-    { id: 3, company: 'AI Innovations', position: 'ML Engineer', status: 'pending', date: '1 week ago' },
-  ];
-
 
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -121,20 +117,20 @@ export default function ApplicantDashboard() {
               <span className="w-2 h-2 bg-accent-cyan animate-pulse" />
               Recent Applications
             </h2>
-            <span className="text-[10px] font-mono text-zinc-500">[{applications.length}] ACTIVE</span>
+            <span className="text-[10px] font-mono text-white">{applications.length} ACTIVE</span>
           </div>
 
           <div className="space-y-3">
-            {recentApplications.map((app) => (
+            {applications.map((app) => (
               <div
                 key={app.id}
                 className="flex items-center justify-between p-4 bg-cyber-dark/50 border border-zinc-800 group hover:border-zinc-700 transition-all"
               >
                 <div className="flex-1">
                   <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-cyan transition-colors">
-                    {app.position}
+                    {app?.job.experienceLevel} • {app?.job.title}
                   </h3>
-                  <p className="text-xs text-zinc-500 font-mono mt-1">{app.company} • {app.date}</p>
+                  <p className="text-xs text-zinc-500 font-mono mt-1">{app?.company} • {formatDate(app?.updatedAt)}</p>
                 </div>
                 <div className={`px-3 py-1 border rounded text-xs font-mono tracking-widest uppercase ${getStatusColor(app.status)}`}>
                   {app.status}

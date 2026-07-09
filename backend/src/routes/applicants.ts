@@ -1,7 +1,6 @@
 import Elysia, { t } from "elysia";
 import { ApplicantController } from "../controllers/applicantController";
 import { authMiddleware } from "../middlewares/auth";
-import app from "..";
 
 const applicantController = new ApplicantController();
 
