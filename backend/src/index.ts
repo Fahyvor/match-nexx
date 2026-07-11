@@ -58,15 +58,20 @@ if (isProd) {
   });
 }
 
+// app.listen(PORT, () => {
+//   console.log(`Server running at http://localhost:${PORT}`);
+//   console.log(`Swagger documentation: http://localhost:${PORT}/swagger`);
+
+//   if (isProd) {
+//     console.log(`Frontend: http://localhost:${PORT}`);
+//   } else {
+//     console.log(`Frontend: http://localhost:5173`);
+//   }
+// });
+
+// export default app;
+
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`Swagger documentation: http://localhost:${PORT}/swagger`);
-
-  if (isProd) {
-    console.log(`Frontend: http://localhost:${PORT}`);
-  } else {
-    console.log(`Frontend: http://localhost:5173`);
-  }
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Swagger: http://localhost:${PORT}/swagger`);
 });
-
-export default app;
