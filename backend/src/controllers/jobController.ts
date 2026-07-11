@@ -44,6 +44,29 @@ export const jobController = {
     return { success: true, data: job };
   },
 
+  //Get job by a particular recruiter
+  getJobsByRecruiter: async (recruiterId: string) => {
+    const jobsByRecruiter = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.recruiterId, recruiterId));
+
+    if (!jobsByRecruiter || jobsByRecruiter.length === 0) {
+      return {
+        success: false,
+        status: 404,
+        error: "No jobs found for this recruiter",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Jobs fetched successfully!",
+      status: 200,
+      data: jobsByRecruiter,
+    };
+  },
+
   /* =========================
      CREATE JOB
   ========================= */

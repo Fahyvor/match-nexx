@@ -9,17 +9,65 @@ export default function ApplicantDashboard() {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const {
-    applications,
-    // loading,
-    // error,
-  } = useSelector((state: RootState) => state.applicant);
-
-  console.log('Applications in Dashboard:', applications);
+  const { applications } = useSelector((state: RootState) => state.applicant);
+  const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     dispatch(fetchApplications());
   }, [dispatch]);
+
+  const applicationStats = applications.reduce(
+    (stats, application) => {
+      stats.total++;
+
+      switch (application.status.toLowerCase()) {
+        case "pending":
+          stats.pending++;
+          break;
+
+        case "reviewing":
+          stats.reviewing++;
+          break;
+
+        case "interview":
+          stats.interview++;
+          break;
+
+        case "offer":
+          stats.offer++;
+          break;
+
+        case "accepted":
+          stats.accepted++;
+          break;
+
+        case "rejected":
+          stats.rejected++;
+          break;
+
+        default:
+          break;
+      }
+
+      return stats;
+    },
+    {
+      total: 0,
+      pending: 0,
+      reviewing: 0,
+      interview: 0,
+      offer: 0,
+      accepted: 0,
+      rejected: 0,
+    }
+  );
+
+  const percentage = user?.profileCompletion?.percentage ?? 0;
+
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+
+  const dashOffset = circumference - (percentage / 100) * circumference;
 
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -49,10 +97,26 @@ export default function ApplicantDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
           {[
-            { label: 'Total Applications', value: applications.length, accent: 'cyan' },
-            { label: 'Under Review', value: '5', accent: 'pink' },
-            { label: 'Interviews', value: '3', accent: 'lime' },
-            { label: 'Offers', value: '1', accent: 'purple' },
+            {
+              label: "Total Applications",
+              value: applicationStats.total,
+              accent: "cyan",
+            },
+            {
+              label: "Pending",
+              value: applicationStats.pending,
+              accent: "amber",
+            },
+            {
+              label: "Under Review",
+              value: applicationStats.reviewing,
+              accent: "pink",
+            },
+            {
+              label: "Interviews",
+              value: applicationStats.interview,
+              accent: "lime",
+            },
           ].map((stat, i) => (
             <div
               key={i}
@@ -72,7 +136,7 @@ export default function ApplicantDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           <button
             onClick={() => navigate('/applicant/cv-builder')}
-            className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+            className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer"
           >
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/40 group-hover:text-accent-cyan transition-colors">
               [ ACTION_01 ]
@@ -91,7 +155,8 @@ export default function ApplicantDashboard() {
           </button>
 
           <button
-            className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+            className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer"
+            onClick={() => window.location.href="/jobs"}
           >
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-pink/40 group-hover:text-accent-pink transition-colors">
               [ ACTION_02 ]
@@ -153,32 +218,47 @@ export default function ApplicantDashboard() {
             </div>
             <div className="w-24 h-24 relative">
               <svg className="w-full h-full" viewBox="0 0 100 100">
+                {/* Background */}
                 <circle
                   cx="50"
                   cy="50"
-                  r="45"
+                  r={radius}
                   fill="none"
                   stroke="#1a1a1f"
                   strokeWidth="4"
                 />
+
+                {/* Progress */}
                 <circle
                   cx="50"
                   cy="50"
-                  r="45"
+                  r={radius}
                   fill="none"
                   stroke="url(#gradient)"
                   strokeWidth="4"
-                  strokeDasharray="70 282.6"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
                   transform="rotate(-90 50 50)"
+                  className="transition-all duration-700"
                 />
+
                 <defs>
                   <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#00E5FF" />
                     <stop offset="100%" stopColor="#FF0055" />
                   </linearGradient>
                 </defs>
-                <text x="50" y="55" textAnchor="middle" fontSize="24" fill="#00E5FF" fontWeight="bold">
-                  75%
+
+                <text
+                  x="50"
+                  y="55"
+                  textAnchor="middle"
+                  fontSize="24"
+                  fill="#00E5FF"
+                  fontWeight="bold"
+                >
+                  {percentage}%
                 </text>
               </svg>
             </div>

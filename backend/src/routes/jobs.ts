@@ -19,7 +19,7 @@ export default new Elysia({ prefix: "/jobs" })
     }
   )
 
-  .use(authMiddleware(["recruiter"]))
+  .use(authMiddleware(["recruiter", "admin"]))
   .post(
     "/create-job",
     ({ body, user}) => {
@@ -44,7 +44,7 @@ export default new Elysia({ prefix: "/jobs" })
     }
   )
 
-  .use(authMiddleware(["recruiter"]))
+  .use(authMiddleware(["recruiter", "admin"]))
   .put(
     "/update-job/:id",
     ({ params, body, user }) => {
@@ -69,8 +69,14 @@ export default new Elysia({ prefix: "/jobs" })
     }
   )
 
-  .use(authMiddleware(["recruiter"]))
+  .use(authMiddleware(["recruiter", "admin"]))
   .delete("/delete-job/:id", ({ params, user }) => {
     const recruiterId = user?.sub
     return jobController.deleteJob(params.id, recruiterId);
-  });
+  })
+
+  .use(authMiddleware(["recruiter", "admin"]))
+  .get("/recruiter-jobs", ({ user }) => {
+    const recruiterId = user?.sub
+    return jobController.getJobsByRecruiter(recruiterId);
+  })

@@ -28,7 +28,6 @@ export default function AllJobs() {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log("All jobs", res.data)
       setJobs(res.data.data);
     } catch (err) {
       console.error(err);

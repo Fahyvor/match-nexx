@@ -12,6 +12,12 @@ interface User {
   address: string;
   role: 'applicant' | 'recruiter';
   createdAt: string;
+  profileCompletion: {
+    missing: string[];
+    completed: string[];
+    percentage: number;
+  }
+
 }
 
 interface UserState {

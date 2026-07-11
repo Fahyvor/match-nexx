@@ -5,6 +5,7 @@ import type { User } from "../models/User";
 import { users } from "../db/schema";
 import { db } from "../db/db";
 import { eq } from "drizzle-orm";
+import { calculateProfileCompletion } from "../utils/profileCompletion";
 
 type AppError = {
   status?: number;
@@ -79,12 +80,21 @@ export const authController = {
         result.user.role
       );
 
+      let profileCompletion = null;
+
+      if (result.user.role === "applicant") {
+        profileCompletion = await calculateProfileCompletion(result.user.id);
+      }
+
       return {
         success: true,
         message: "Login successful",
         data: {
           token,
-          user: result.user,
+          user: {
+            ...result.user,
+            profileCompletion,
+          },
         },
       };
     } catch (err: unknown) {

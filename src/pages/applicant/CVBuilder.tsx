@@ -65,21 +65,6 @@ export default function CVBuilder() {
 
   return (
     <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-cyber-dark/80 backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="relative w-5 h-5">
-            <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12" />
-            <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 mix-blend-screen" />
-          </div>
-          <span className="text-lg font-black tracking-tighter uppercase font-mono">HIRE.FLOW</span>
-        </div>
-        <button className="relative px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300 overflow-hidden group">
-          <span className="relative z-10">Save CV</span>
-          <div className="absolute inset-0 bg-accent-cyan transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0 opacity-20" />
-        </button>
-      </nav>
-
       <main className="max-w-5xl mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
         <div className="mb-12 space-y-2">

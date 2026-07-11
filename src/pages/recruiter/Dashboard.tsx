@@ -1,4 +1,3 @@
-// src/pages/recruiter/Dashboard.tsx
 import { useState } from 'react';
 
 interface Job {

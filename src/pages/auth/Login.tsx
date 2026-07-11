@@ -21,7 +21,7 @@ export default function Login() {
     try {
       const result = await dispatch(loginUser({ email, password }));
 
-      console.log("DISPATCH RESULT:", result);
+      // console.log("DISPATCH RESULT:", result);
 
       if (loginUser.fulfilled.match(result)) {
         const user = result.payload.user;
