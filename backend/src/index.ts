@@ -14,8 +14,8 @@ import applicantRoutes from "./routes/applicants";
 import recruiterRoutes from "./routes/recruiters";
 
 const PORT = Number(process.env.PORT || 3000);
-// const isProd = process.env.NODE_ENV === "production";
-const isProd = false;
+const isProd = process.env.NODE_ENV === "production";
+// const isProd = false;
 
 console.log("environment", process.env.NODE_ENV);
 
