@@ -14,7 +14,8 @@ import applicantRoutes from "./routes/applicants";
 import recruiterRoutes from "./routes/recruiters";
 
 const PORT = Number(process.env.PORT || 3000);
-const isProd = process.env.NODE_ENV === "production";
+// const isProd = process.env.NODE_ENV === "production";
+const isProd = false;
 
 console.log("environment", process.env.NODE_ENV);
 
@@ -24,12 +25,12 @@ const app = new Elysia()
   .use(swagger())
   .use(bearer())
 
-  .group("/api", (app) =>
+  .group("/api", app =>
     app
       .get("/health", () => ({
         status: "online",
         message: "Server is healthy",
-        version: "1.0.0",
+        version: "1.0.0"
       }))
       .use(authRoutes)
       .use(jobRoutes)
@@ -38,40 +39,24 @@ const app = new Elysia()
   );
 
 if (isProd) {
-  // const distPath = path.join(process.cwd(), "dist");
-  const distPath ="../dist";
-  console.log("Serving frontend from:", distPath);
-
-  console.log("Serving frontend from:", distPath);
+  const publicPath = path.join(process.cwd(), "public");
 
   app.use(
     staticPlugin({
-      assets: distPath,
+      assets: publicPath,
       prefix: "/",
     })
   );
 
-  // React Router SPA fallback
-  app.get("*", async () => {
-    const file = Bun.file(path.join(distPath, "index.html"));
-
-    if (!(await file.exists())) {
-      return new Response("Frontend build not found", {
-        status: 404,
-      });
-    }
-
-    return new Response(file, {
-      headers: {
-        "Content-Type": "text/html",
-      },
-    });
+  app.get("*", () => {
+    return Bun.file(path.join(publicPath, "index.html"));
   });
 }
 
 app.listen(PORT);
 
-console.log(`API running on http://localhost:${PORT}`);
+console.log(`API running on ${PORT}`);
+
 console.log(`Swagger: http://localhost:${PORT}/swagger`);
 
 if (!isProd) {
