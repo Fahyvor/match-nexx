@@ -15,6 +15,8 @@ import recruiterRoutes from "./routes/recruiters";
 const PORT = Number(process.env.PORT || 3000);
 const isProd = process.env.NODE_ENV === "production";
 
+console.log("BOOTING SERVER", new Date().toISOString());
+
 const app = new Elysia()
   .use(swagger())
   .use(bearer())
