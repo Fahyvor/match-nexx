@@ -48,7 +48,19 @@ if (isProd) {
     })
   );
 
-  app.get("*", () => {
+  // Only fallback for client-side routes
+  app.get("/*", ({ request }) => {
+    const pathname = new URL(request.url).pathname;
+
+    // Don't rewrite API or asset requests
+    if (
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/assets") ||
+      pathname.includes(".")
+    ) {
+      return new Response("Not Found", { status: 404 });
+    }
+
     return Bun.file(path.join(publicPath, "index.html"));
   });
 }
