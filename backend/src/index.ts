@@ -37,24 +37,13 @@ if (isProd) {
     staticPlugin({
       assets: path.join(process.cwd(), "dist"),
       prefix: "/",
+      alwaysStatic: true,
     })
   );
 
-  app.get("*", async () => {
-    const file = Bun.file(path.join(process.cwd(), "dist", "index.html"));
-
-    if (!(await file.exists())) {
-      return new Response("Frontend not found", {
-        status: 404,
-      });
-    }
-
-    return new Response(file, {
-      headers: {
-        "Content-Type": "text/html",
-      },
-    });
-  });
+  app.get("*", () =>
+    Bun.file(path.join(process.cwd(), "dist", "index.html"))
+  );
 }
 
 app.listen(PORT);

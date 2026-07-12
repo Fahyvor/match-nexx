@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss()
   ],
   build: {
-    outDir: '../backend/dist',
+    outDir: './backend/dist',
     emptyOutDir: true,
   },
   server: {
