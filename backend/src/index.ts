@@ -65,6 +65,28 @@ if (isProd) {
   });
 }
 
+const publicPath = path.join(process.cwd(), "public");
+
+console.log("cwd =", process.cwd());
+console.log("public =", publicPath);
+
+console.log(
+  "index exists =",
+  await Bun.file(path.join(publicPath, "index.html")).exists()
+);
+
+console.log(
+  "js exists =",
+  await Bun.file(path.join(publicPath, "assets", "index-BQrNP1Fq.js")).exists()
+);
+
+app.get("/debug-index", () => {
+  return Bun.file(path.join(publicPath, "index.html"));
+});
+
+app.get("/debug-js", () => {
+  return Bun.file(path.join(publicPath, "assets", "index-BQrNP1Fq.js"));
+});
 app.listen(PORT);
 
 console.log(`API running on ${PORT}`);
