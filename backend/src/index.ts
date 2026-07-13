@@ -14,8 +14,8 @@ import applicantRoutes from "./routes/applicants";
 import recruiterRoutes from "./routes/recruiters";
 
 const PORT = Number(process.env.PORT || 3000);
-const isProd = process.env.NODE_ENV === "production";
-// const isProd = false;
+// const isProd = process.env.NODE_ENV === "production";
+const isProd = false;
 
 console.log("environment", process.env.NODE_ENV);
 
@@ -87,6 +87,22 @@ app.get("/debug-index", () => {
 app.get("/debug-js", () => {
   return Bun.file(path.join(publicPath, "assets", "index-BQrNP1Fq.js"));
 });
+
+app.get("/check", async () => {
+  return {
+    cwd: process.cwd(),
+    publicPath,
+    indexExists: await Bun.file(path.join(publicPath, "index.html")).exists(),
+    assetExists: await Bun.file(
+      path.join(publicPath, "assets", "index-BQrNP1Fq.js")
+    ).exists(),
+  };
+});
+
+app.get("/asset-test", () => {
+  return Bun.file(path.join(publicPath, "assets", "index-BQrNP1Fq.js"));
+});
+
 app.listen(PORT);
 
 console.log(`API running on ${PORT}`);
