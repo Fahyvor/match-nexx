@@ -67,7 +67,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
       <div className="flex items-center justify-center min-h-screen px-6 lg:py-12 py-4">
         <div className="w-full">
@@ -104,7 +104,7 @@ export default function Register() {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="John"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
@@ -116,7 +116,7 @@ export default function Register() {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Doe"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
@@ -129,7 +129,7 @@ export default function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="user@company.com"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
@@ -141,14 +141,14 @@ export default function Register() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="090xxxxxxxxxxx"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
             <div className="space-y-2">
               <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
               <select
-                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+                className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
                 required
                 value={formData.country}
                 onChange={handleChange}
@@ -165,7 +165,7 @@ export default function Register() {
             <div className="space-y-2">
               <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
               <select
-                className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+                className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
                 required
                 value={formData.state}
                 onChange={handleChange}
@@ -186,7 +186,7 @@ export default function Register() {
                 value={formData.address}
                 onChange={handleChange}
                 placeholder="123 Main St, City, Country"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
@@ -198,14 +198,14 @@ export default function Register() {
                 value={formData.years_of_experience}
                 onChange={handleChange}
                 placeholder="Years of Experience"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
-              <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
+              <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -235,7 +235,7 @@ export default function Register() {
                     <div className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
                       formData.userType === type
                         ? `bg-accent-${type === 'applicant' ? 'cyan' : 'pink'}/20 border-accent-${type === 'applicant' ? 'cyan' : 'pink'}`
-                        : 'bg-cyber-dark/50 border-zinc-800'
+                        : 'bg-white dark:bg-cyber-dark/50 border-zinc-800'
                     }`}>
                       {type === 'applicant' ? '👤 Applicant' : '💼 Recruiter'}
                     </div>

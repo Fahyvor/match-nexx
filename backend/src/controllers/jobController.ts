@@ -59,10 +59,16 @@ export const jobController = {
       };
     }
 
+    const totalApplicants = jobsByRecruiter.reduce(
+      (total, job) => total + (job.totalApplicants ?? 0),
+      0
+    );
+
     return {
       success: true,
       message: "Jobs fetched successfully!",
       status: 200,
+      totalApplicants,
       data: jobsByRecruiter,
     };
   },

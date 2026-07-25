@@ -44,7 +44,7 @@ const Nav = () => {
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-cyber-dark backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
+    <div className="sticky top-0 z-50 bg-white dark:bg-cyber-dark backdrop-blur-xl border-b border-zinc-800/60 px-6 lg:px-16 py-5 flex justify-between items-center">
 
       {/* Logo */}
       <div

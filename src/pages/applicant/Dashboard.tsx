@@ -79,7 +79,7 @@ export default function ApplicantDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
 
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
@@ -189,7 +189,7 @@ export default function ApplicantDashboard() {
             {applications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center justify-between p-4 bg-cyber-dark/50 border border-zinc-800 group hover:border-zinc-700 transition-all"
+                className="flex items-center justify-between p-4 bg-white dark:bg-cyber-dark/50 border border-zinc-800 group hover:border-zinc-700 transition-all"
               >
                 <div className="flex-1">
                   <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-cyan transition-colors">

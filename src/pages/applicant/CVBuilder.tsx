@@ -64,7 +64,7 @@ export default function CVBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <main className="max-w-5xl mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
         <div className="mb-12 space-y-2">
@@ -91,7 +91,7 @@ export default function CVBuilder() {
 
             <div className="space-y-6">
               {experiences.map((exp, idx) => (
-                <div key={exp.id} className="p-6 bg-cyber-dark/50 border border-zinc-800 space-y-4">
+                <div key={exp.id} className="p-6 bg-white dark:bg-cyber-dark/50 border border-zinc-800 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -102,7 +102,7 @@ export default function CVBuilder() {
                         updated[idx].company = e.target.value;
                         setExperiences(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
                     />
                     <input
                       type="text"
@@ -113,7 +113,7 @@ export default function CVBuilder() {
                         updated[idx].role = e.target.value;
                         setExperiences(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -126,7 +126,7 @@ export default function CVBuilder() {
                         updated[idx].startDate = e.target.value;
                         setExperiences(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
                     />
                     <input
                       type="text"
@@ -137,7 +137,7 @@ export default function CVBuilder() {
                         updated[idx].endDate = e.target.value;
                         setExperiences(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                   <textarea
@@ -148,7 +148,7 @@ export default function CVBuilder() {
                       updated[idx].description = e.target.value;
                       setExperiences(updated);
                     }}
-                    className="w-full bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600 min-h-24"
+                    className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600 min-h-24"
                   />
                   {experiences.length > 1 && (
                     <button
@@ -182,7 +182,7 @@ export default function CVBuilder() {
 
             <div className="space-y-6">
               {education.map((edu, idx) => (
-                <div key={edu.id} className="p-6 bg-cyber-dark/50 border border-zinc-800 space-y-4">
+                <div key={edu.id} className="p-6 bg-white dark:bg-cyber-dark/50 border border-zinc-800 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -193,7 +193,7 @@ export default function CVBuilder() {
                         updated[idx].school = e.target.value;
                         setEducation(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
                     />
                     <input
                       type="text"
@@ -204,7 +204,7 @@ export default function CVBuilder() {
                         updated[idx].degree = e.target.value;
                         setEducation(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -217,7 +217,7 @@ export default function CVBuilder() {
                         updated[idx].field = e.target.value;
                         setEducation(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
                     />
                     <input
                       type="text"
@@ -228,7 +228,7 @@ export default function CVBuilder() {
                         updated[idx].year = e.target.value;
                         setEducation(updated);
                       }}
-                      className="bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors placeholder:text-zinc-600"
                     />
                   </div>
                   {education.length > 1 && (
@@ -273,7 +273,7 @@ export default function CVBuilder() {
                       updated[idx] = e.target.value;
                       setSkills(updated);
                     }}
-                    className="flex-1 bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-lime transition-colors placeholder:text-zinc-600"
+                    className="flex-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-lime transition-colors placeholder:text-zinc-600"
                   />
                   {skills.length > 1 && (
                     <button

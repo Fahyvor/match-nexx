@@ -60,7 +60,7 @@ export default function Login() {
   };
 
   return (
-    <div className="h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
       <div className="flex items-center justify-center h-screen px-6">
         <div className="w-full max-w-md">
@@ -96,14 +96,14 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@company.com"
-                className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+                className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
               />
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
-              <div className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
+              <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}

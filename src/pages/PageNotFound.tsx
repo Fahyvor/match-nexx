@@ -1,6 +1,6 @@
 export default function PageNotFound() {
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 flex flex-col items-center justify-center px-6 relative overflow-hidden">
 
       {/* Ambient Glow */}
       <div className="absolute w-96 h-96 bg-gradient-to-r from-[#00E5FF]/20 to-[#FF0055]/20 blur-[120px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />

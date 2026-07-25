@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import SleekToast, { toast } from 'sleek-toast';
+import { useSelector } from 'react-redux';
+import type { RootState } from "../../redux/store";
 
 interface Job {
   id: number;
@@ -7,9 +11,35 @@ interface Job {
   interviews: number;
   status: 'active' | 'paused' | 'closed';
   posted: string;
+  totalApplicants?: number;
 }
 
 export default function RecruiterDashboard() {
+  const token = useSelector((state: RootState) => state.user.token);
+  const [loading, setLoading] = useState(true);
+  const [recruiterJobs, setRecruiterJobs] = useState<Job[]>([]);
+
+  useEffect(() => {
+    const fetchRecruiterJobs = async () => {
+      try {
+        const response = await axios.get('/api/jobs/recruiter-jobs', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        setRecruiterJobs(response.data.data);
+        console.log('Recruiter Jobs:', response.data);
+      } catch (error) {
+        console.error('Error fetching recruiter jobs:', error);
+        toast.error('Failed to load jobs. Please try again later.', 4000);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecruiterJobs();
+  }, []);
   const [jobs] = useState<Job[]>([
     { id: 1, title: 'Senior Frontend Engineer', applicants: 42, interviews: 5, status: 'active', posted: '2 weeks ago' },
     { id: 2, title: 'Full Stack Developer', applicants: 28, interviews: 3, status: 'active', posted: '1 week ago' },
@@ -18,8 +48,8 @@ export default function RecruiterDashboard() {
   ]);
 
   const stats = [
-    { label: 'Active Jobs', value: '3', accent: 'cyan', icon: '📋' },
-    { label: 'Total Applicants', value: '450', accent: 'pink', icon: '👥' },
+    { label: 'Active Jobs', value: recruiterJobs.length || 0, accent: 'cyan', icon: '📋' },
+    { label: 'Total Applicants', value: recruiterJobs.totalApplicants, accent: 'pink', icon: '👥' },
     { label: 'In Interviews', value: '24', accent: 'lime', icon: '🎤' },
     { label: 'Offers Made', value: '8', accent: 'purple', icon: '🎯' },
   ];
@@ -34,7 +64,8 @@ export default function RecruiterDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white w-full">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white w-full">
+    <SleekToast />
 
       <main className="mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
@@ -134,7 +165,7 @@ export default function RecruiterDashboard() {
 
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-cyber-dark/50 border-b border-panel-border">
+              <thead className="bg-white dark:bg-cyber-dark/50 border-b border-panel-border">
                 <tr className="text-xs font-mono tracking-widest text-zinc-500 uppercase">
                   <th className="px-6 py-4 text-left">Job Title</th>
                   <th className="px-6 py-4 text-center">Applicants</th>
@@ -146,7 +177,7 @@ export default function RecruiterDashboard() {
               </thead>
               <tbody>
                 {jobs.map((job, idx) => (
-                  <tr key={job.id} className={`border-b border-panel-border hover:bg-cyber-dark/50 transition-colors ${idx % 2 === 0 ? 'bg-cyber-dark/30' : ''}`}>
+                  <tr key={job.id} className={`border-b border-panel-border hover:bg-white dark:bg-cyber-dark/50 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-cyber-dark/30' : ''}`}>
                     <td className="px-6 py-4">
                       <p className="font-bold text-sm">{job.title}</p>
                       <p className="text-xs text-zinc-500 mt-1">ID: #{job.id.toString().padStart(4, '0')}</p>
@@ -189,7 +220,7 @@ export default function RecruiterDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-cyber-dark/50 border border-zinc-800 p-4 text-center group hover:border-accent-lime transition-colors">
+              <div key={i} className="bg-white dark:bg-cyber-dark/50 border border-zinc-800 p-4 text-center group hover:border-accent-lime transition-colors">
                 <div className="w-12 h-12 bg-linear-to-br from-accent-cyan to-accent-pink rounded-full mx-auto mb-3 flex items-center justify-center text-xl">
                   👤
                 </div>

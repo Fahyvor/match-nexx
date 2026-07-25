@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../redux/store';
 import { useSelector } from 'react-redux';
@@ -19,7 +19,15 @@ export default function Settings() {
 
     localStorage.setItem('theme', theme);
   };
-  
+
+  const [theme, setTheme] = useState<'dark' | 'light'>(
+    (localStorage.getItem('theme') as 'dark' | 'light') || 'dark'
+  );
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
   const navigate = useNavigate();
   const [settings, setSettings] = useState({
     notifications: true,
@@ -83,7 +91,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
 
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
@@ -116,7 +124,7 @@ export default function Settings() {
                   type="email"
                   defaultValue={user?.email || ''}
                   onChange={handleInputChange}
-                  className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
+                  className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
 
@@ -128,7 +136,7 @@ export default function Settings() {
                   type="text"
                   defaultValue={user?.firstName || ''}
                   onChange={handleInputChange}
-                  className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
+                  className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
 
@@ -140,7 +148,7 @@ export default function Settings() {
                   type="text"
                   defaultValue={user?.lastName || ''}
                   onChange={handleInputChange}
-                  className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
+                  className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
 
@@ -151,7 +159,7 @@ export default function Settings() {
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="w-full bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600"
                 />
               </div>
 
@@ -174,7 +182,7 @@ export default function Settings() {
                 { key: 'notifications', label: 'Push Notifications', desc: 'Receive real-time alerts on your device' },
                 { key: 'emailUpdates', label: 'Email Updates', desc: 'Daily digest of application activity' },
               ].map((option) => (
-                <label key={option.key} className="flex items-center justify-between p-4 bg-cyber-dark/50 border border-zinc-800 cursor-pointer group hover:border-accent-pink transition-colors">
+                <label key={option.key} className="flex items-center justify-between p-4 bg-white dark:bg-cyber-dark/50 border border-zinc-800 cursor-pointer group hover:border-accent-pink transition-colors">
                   <div>
                     <p className="font-mono text-sm uppercase tracking-tight text-zinc-100">{option.label}</p>
                     <p className="text-xs text-zinc-500 mt-1">{option.desc}</p>
@@ -219,7 +227,7 @@ export default function Settings() {
                       <div className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
                         settings.privacy === val
                           ? 'bg-accent-lime/20 border-accent-lime'
-                          : 'bg-cyber-dark/50 border-zinc-800'
+                          : 'bg-white dark:bg-cyber-dark/50 border-zinc-800'
                       }`}>
                         {val === 'private' ? '🔒 Private' : '🌐 Public'}
                       </div>
@@ -264,7 +272,7 @@ export default function Settings() {
                       className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
                         settings.theme === val
                           ? 'bg-accent-purple/20 border-accent-purple text-white'
-                          : 'bg-cyber-dark/50 border-zinc-800 text-zinc-400 hover:border-zinc-600'
+                          : 'bg-white dark:bg-cyber-dark/50 border-zinc-800 text-zinc-400 hover:border-zinc-600'
                       }`}
                     >
                       {val === 'dark' ? '🌙 Dark' : '☀️ Light'}

@@ -110,7 +110,7 @@ export default function CreateJobPage() {
             value={form.title}
             name="title"
             onChange={handleChange}
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
             required
           />
         </div>
@@ -122,7 +122,7 @@ export default function CreateJobPage() {
             value={form.company}
             name="company"
             onChange={handleChange}
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
             required
           />
         </div>
@@ -134,7 +134,7 @@ export default function CreateJobPage() {
             title="type"
             onChange={handleChange}
             name="type"
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
           >
             <option value="" disabled>
               Select Job Type
@@ -155,7 +155,7 @@ export default function CreateJobPage() {
             value={form.experienceLevel}
             name="experienceLevel"
             onChange={handleChange}
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
           >
             <option value="" disabled>
               Experience Level
@@ -177,14 +177,14 @@ export default function CreateJobPage() {
             placeholder="Salary"
             value={form.salary}
             onChange={handleChange}
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan"
           />
         </div>
 
         <div className="space-y-2">
           <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
           <select
-            className='w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
+            className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
             required
             value={form.location}
             onChange={handleChange}
@@ -203,7 +203,7 @@ export default function CreateJobPage() {
           </label>
 
           {/* Input */}
-          <div className="mt-2 w-full bg-cyber-dark/50 border border-zinc-800 px-3 py-2">
+          <div className="mt-2 w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-3 py-2">
             <input
               type="text"
               placeholder="Add requirement and press Enter"
@@ -261,7 +261,7 @@ export default function CreateJobPage() {
             onChange={handleChange}
             rows={4}
             name="description"
-            className="w-full bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
             required
           />
         </div>
