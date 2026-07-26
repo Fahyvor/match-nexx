@@ -56,8 +56,8 @@ const Nav = () => {
           <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 group-hover:-translate-x-1 transition-transform duration-300 mix-blend-screen" />
         </div>
 
-        <span className="text-xl font-black text-accent-cyan tracking-tighter uppercase font-mono">
-          HIRE<span className="text-accent-cyan">.</span>FLOW
+        <span className="text-xl font-black text-accent-cyan-light dark:text-accent-cyan tracking-tighter uppercase font-mono">
+          HIRE<span className="text-accent-cyan-light dark:text-accent-cyan">.</span>FLOW
         </span>
       </div>
 
@@ -67,7 +67,7 @@ const Nav = () => {
         {/* Jobs */}
         <button
           onClick={handleJobs}
-          className="text-zinc-300 hover:text-white transition"
+          className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition"
         >
           <FaBriefcase className="w-5 h-5" />
         </button>

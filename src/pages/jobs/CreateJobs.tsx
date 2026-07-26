@@ -134,7 +134,7 @@ export default function CreateJobPage() {
             title="type"
             onChange={handleChange}
             name="type"
-            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-700 dark:text-zinc-300"
           >
             <option value="" disabled>
               Select Job Type
@@ -155,7 +155,7 @@ export default function CreateJobPage() {
             value={form.experienceLevel}
             name="experienceLevel"
             onChange={handleChange}
-            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-300"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors text-zinc-700 dark:text-zinc-300"
           >
             <option value="" disabled>
               Experience Level

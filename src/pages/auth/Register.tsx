@@ -67,7 +67,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
       <div className="flex items-center justify-center min-h-screen px-6 lg:py-12 py-4">
         <div className="w-full">
@@ -90,7 +90,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="w-5/6 mx-auto bg-panel-bg border border-panel-border p-8 relative">
           <div className=" space-y-6 grid grid-cols-2 gap-4 ">
             {/* Status Indicator */}
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/60 flex items-center gap-1">
+            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan-light dark:text-accent-cyan/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
               READY
             </div>

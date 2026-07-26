@@ -60,7 +60,7 @@ export default function Login() {
   };
 
   return (
-    <div className="h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
       <div className="flex items-center justify-center h-screen px-6">
         <div className="w-full max-w-md">
@@ -83,7 +83,7 @@ export default function Login() {
           {/* Form Container */}
           <form onSubmit={handleSubmit} className="relative bg-panel-bg border border-panel-border p-8 space-y-6">
             {/* Status Indicator */}
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/60 flex items-center gap-1">
+            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan-light dark:text-accent-cyan/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
               ACTIVE
             </div>
@@ -121,7 +121,7 @@ export default function Login() {
                 <input type="checkbox" className="w-4 h-4 accent-accent-cyan" />
                 Remember me
               </label>
-              <a href="#" className="text-accent-cyan hover:underline">Forgot Password?</a>
+              <a href="#" className="text-accent-cyan-light dark:text-accent-cyan hover:underline">Forgot Password?</a>
             </div>
 
             {/* Submit Button */}
@@ -138,7 +138,7 @@ export default function Login() {
             <div className="border-t border-zinc-800 pt-6">
               <p className="text-center text-zinc-500 text-xs">
                 New to HireFlow?{' '}
-                <a href="/register" className="text-accent-cyan hover:underline font-mono">Create Account →</a>
+                <a href="/register" className="text-accent-cyan-light dark:text-accent-cyan hover:underline font-mono">Create Account →</a>
               </p>
             </div>
           </form>

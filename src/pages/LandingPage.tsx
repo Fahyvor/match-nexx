@@ -1,7 +1,7 @@
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-[#FF0055] selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-[#FF0055] selection:text-white overflow-x-hidden">
 
       <main className="w-full mx-auto px-6 lg:px-16 pt-20 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         

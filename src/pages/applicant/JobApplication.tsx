@@ -186,7 +186,7 @@ const JobApplication = () => {
             <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider text-cyan-400 uppercase bg-cyan-950/40 rounded-full mb-3">
               {job.type}
             </span>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-100">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-700 dark:text-zinc-300">
               {job.experienceLevel.charAt(0).toUpperCase() + job.experienceLevel.slice(1)} {job.title}
             </h1>
             <p className="mt-2 text-lg text-zinc-400 font-medium">{job.company}</p>
@@ -220,7 +220,7 @@ const JobApplication = () => {
         {/* RIGHT COLUMN: Interactive Entry Action Forms */}
         <div className="lg:col-span-5 bg-[#101014] border border-zinc-900 p-6 md:p-8 rounded-xl shadow-xl space-y-5">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-zinc-100">Complete Profile</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-700 dark:text-zinc-300">Complete Profile</h2>
             <p className="text-sm text-zinc-500 mt-1">Review details before sending your application.</p>
           </div>
 

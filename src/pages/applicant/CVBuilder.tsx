@@ -64,11 +64,11 @@ export default function CVBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <main className="max-w-5xl mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
         <div className="mb-12 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
             <span className="w-1.5 h-1.5 bg-accent-cyan animate-ping" />
             CV_BUILDER_ACTIVE
           </div>
@@ -86,7 +86,7 @@ export default function CVBuilder() {
                 <span className="w-2 h-2 bg-accent-cyan" />
                 Work Experience
               </h2>
-              <span className="text-[10px] font-mono text-accent-cyan">[{experiences.length}] ENTRIES</span>
+              <span className="text-[10px] font-mono text-accent-cyan-light dark:text-accent-cyan">[{experiences.length}] ENTRIES</span>
             </div>
 
             <div className="space-y-6">
@@ -164,7 +164,7 @@ export default function CVBuilder() {
 
             <button
               onClick={addExperience}
-              className="mt-6 text-xs font-mono tracking-widest text-accent-cyan uppercase hover:text-accent-pink transition-colors flex items-center gap-2"
+              className="mt-6 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan uppercase hover:text-accent-pink transition-colors flex items-center gap-2"
             >
               + Add Experience
             </button>
@@ -234,7 +234,7 @@ export default function CVBuilder() {
                   {education.length > 1 && (
                     <button
                       onClick={() => removeEducation(edu.id)}
-                      className="text-xs font-mono text-accent-cyan hover:underline"
+                      className="text-xs font-mono text-accent-cyan-light dark:text-accent-cyan hover:underline"
                     >
                       // Remove Entry
                     </button>
@@ -245,7 +245,7 @@ export default function CVBuilder() {
 
             <button
               onClick={addEducation}
-              className="mt-6 text-xs font-mono tracking-widest text-accent-pink uppercase hover:text-accent-cyan transition-colors flex items-center gap-2"
+              className="mt-6 text-xs font-mono tracking-widest text-accent-pink uppercase hover:text-accent-cyan-light dark:text-accent-cyan transition-colors flex items-center gap-2"
             >
               + Add Education
             </button>

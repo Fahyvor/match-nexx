@@ -21,6 +21,8 @@ export default {
         "accent-lime": "#00FF41",
         "accent-purple": "#D946EF",
         "accent-orange": "#FF6B35",
+        "accent-cyan": "#00E5FF",
+        "accent-cyan-light": "#0284C7",
       },
 
       fontFamily: {
@@ -63,13 +65,13 @@ export default {
 //       },
 //       safelist: [
 //         // Accent colors - cyan
-//         'text-accent-cyan',
+//         'text-accent-cyan-light dark:text-accent-cyan',
 //         'border-accent-cyan',
 //         'bg-accent-cyan/5',
 //         'bg-accent-cyan/10',
 //         'bg-accent-cyan/20',
-//         'text-accent-cyan/60',
-//         'text-accent-cyan/40',
+//         'text-accent-cyan-light dark:text-accent-cyan/60',
+//         'text-accent-cyan-light dark:text-accent-cyan/40',
 //         'shadow-[0_0_20px_rgba(0,229,255,0.3)]',
 //         'shadow-[0_0_30px_rgba(0,229,255,0.3)]',
 //         // Accent colors - pink

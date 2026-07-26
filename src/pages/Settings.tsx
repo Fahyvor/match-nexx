@@ -18,6 +18,7 @@ export default function Settings() {
     }
 
     localStorage.setItem('theme', theme);
+    setTheme(theme as 'dark' | 'light');
   };
 
   const [theme, setTheme] = useState<'dark' | 'light'>(
@@ -91,13 +92,13 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
 
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Header */}
         <div className="mb-12 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
             <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
             CONFIG_PANEL_ACTIVE
           </div>
@@ -184,7 +185,7 @@ export default function Settings() {
               ].map((option) => (
                 <label key={option.key} className="flex items-center justify-between p-4 bg-white dark:bg-cyber-dark/50 border border-zinc-800 cursor-pointer group hover:border-accent-pink transition-colors">
                   <div>
-                    <p className="font-mono text-sm uppercase tracking-tight text-zinc-100">{option.label}</p>
+                    <p className="font-mono text-sm uppercase tracking-tight text-zinc-700 dark:text-zinc-300">{option.label}</p>
                     <p className="text-xs text-zinc-500 mt-1">{option.desc}</p>
                   </div>
                   <input

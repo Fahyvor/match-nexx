@@ -71,7 +71,7 @@ export default function ApplicantDashboard() {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'reviewing': return 'text-accent-cyan border-accent-cyan/30 bg-accent-cyan/5';
+      case 'reviewing': return 'text-accent-cyan-light dark:text-accent-cyan border-accent-cyan/30 bg-accent-cyan/5';
       case 'interview': return 'text-accent-pink border-accent-pink/30 bg-accent-pink/5';
       case 'pending': return 'text-accent-lime border-accent-lime/30 bg-accent-lime/5';
       default: return 'text-zinc-400 border-zinc-700';
@@ -79,12 +79,12 @@ export default function ApplicantDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
 
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
         <div className="mb-12 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
             <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
             DASHBOARD_ACTIVE
           </div>
@@ -138,17 +138,17 @@ export default function ApplicantDashboard() {
             onClick={() => navigate('/applicant/cv-builder')}
             className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer"
           >
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan/40 group-hover:text-accent-cyan transition-colors">
+            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan-light dark:text-accent-cyan/40 group-hover:text-accent-cyan-light dark:text-accent-cyan transition-colors">
               [ ACTION_01 ]
             </div>
             <div className="space-y-4">
               <h3 className="text-lg font-bold tracking-tight uppercase">
-                Build Your <br /><span className="text-accent-cyan">CV</span>
+                Build Your <br /><span className="text-accent-cyan-light dark:text-accent-cyan">CV</span>
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Create a parse-ready profile optimized for ATS systems and direct delivery to tech leads.
               </p>
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan">
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
                 Open Builder →
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function ApplicantDashboard() {
                 className="flex items-center justify-between p-4 bg-white dark:bg-cyber-dark/50 border border-zinc-800 group hover:border-zinc-700 transition-all"
               >
                 <div className="flex-1">
-                  <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-cyan transition-colors">
+                  <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-cyan-light dark:text-accent-cyan transition-colors">
                     {app?.job.experienceLevel} • {app?.job.title}
                   </h3>
                   <p className="text-xs text-zinc-500 font-mono mt-1">{app?.company} • {formatDate(app?.updatedAt)}</p>
@@ -204,7 +204,7 @@ export default function ApplicantDashboard() {
             ))}
           </div>
 
-          <button className="mt-6 text-xs font-mono tracking-widest text-accent-cyan uppercase hover:text-accent-pink transition-colors flex items-center gap-2">
+          <button className="mt-6 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan uppercase hover:text-accent-pink transition-colors flex items-center gap-2">
             View All Applications →
           </button>
         </section>

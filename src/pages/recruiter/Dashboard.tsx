@@ -3,21 +3,28 @@ import axios from 'axios';
 import SleekToast, { toast } from 'sleek-toast';
 import { useSelector } from 'react-redux';
 import type { RootState } from "../../redux/store";
+import { Skeleton } from '../../components/ReuseableSkeleton';
+import { formatDate } from '../../utils/formatDate';
 
 interface Job {
-  id: number;
+  id: string;
+  company: string;
   title: string;
-  applicants: number;
+  totalApplicants: number;
   interviews: number;
-  status: 'active' | 'paused' | 'closed';
-  posted: string;
-  totalApplicants?: number;
+  status: "active" | "paused" | "closed";
+  createdAt: string;
+}
+
+interface RecruiterJobsResponse {
+  data: Job[];
+  totalApplicants: number;
 }
 
 export default function RecruiterDashboard() {
   const token = useSelector((state: RootState) => state.user.token);
   const [loading, setLoading] = useState(true);
-  const [recruiterJobs, setRecruiterJobs] = useState<Job[]>([]);
+  const [recruiterJobs, setRecruiterJobs] = useState<RecruiterJobsResponse | null>(null);
 
   useEffect(() => {
     const fetchRecruiterJobs = async () => {
@@ -28,7 +35,7 @@ export default function RecruiterDashboard() {
             'Authorization': `Bearer ${token}`,
           },
         });
-        setRecruiterJobs(response.data.data);
+        setRecruiterJobs(response.data);
         console.log('Recruiter Jobs:', response.data);
       } catch (error) {
         console.error('Error fetching recruiter jobs:', error);
@@ -40,16 +47,10 @@ export default function RecruiterDashboard() {
 
     fetchRecruiterJobs();
   }, []);
-  const [jobs] = useState<Job[]>([
-    { id: 1, title: 'Senior Frontend Engineer', applicants: 42, interviews: 5, status: 'active', posted: '2 weeks ago' },
-    { id: 2, title: 'Full Stack Developer', applicants: 28, interviews: 3, status: 'active', posted: '1 week ago' },
-    { id: 3, title: 'DevOps Engineer', applicants: 15, interviews: 2, status: 'active', posted: '3 days ago' },
-    { id: 4, title: 'Product Manager', applicants: 0, interviews: 0, status: 'closed', posted: '1 month ago' },
-  ]);
 
   const stats = [
-    { label: 'Active Jobs', value: recruiterJobs.length || 0, accent: 'cyan', icon: '📋' },
-    { label: 'Total Applicants', value: recruiterJobs.totalApplicants, accent: 'pink', icon: '👥' },
+    { label: 'Active Jobs', value: recruiterJobs?.data.length ?? 0, accent: 'text-accent-cyan-light dark:text-accent-cyan', icon: '📋' },
+    { label: 'Total Applicants', value: recruiterJobs?.totalApplicants ?? 0, accent: 'pink', icon: '👥' },
     { label: 'In Interviews', value: '24', accent: 'lime', icon: '🎤' },
     { label: 'Offers Made', value: '8', accent: 'purple', icon: '🎯' },
   ];
@@ -64,42 +65,60 @@ export default function RecruiterDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-100 font-sans antialiased selection:bg-accent-pink selection:text-white w-full">
+    <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white w-full">
     <SleekToast />
 
       <main className="mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
         <div className="mb-12 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-pink">
-            <span className="w-1.5 h-1.5 bg-accent-pink animate-pulse rounded-full" />
-            RECRUITMENT_CONSOLE_ACTIVE
-          </div>
           <h1 className="text-5xl font-extrabold tracking-tighter uppercase leading-tight">
-            Recruitment <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-cyan to-accent-pink">Command Center</span>
+            Welcome, <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-cyan to-accent-pink">RECRUITER</span>
           </h1>
           <p className="text-zinc-400 text-sm">Manage job postings, track applicants, and streamline hiring workflows in real-time</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className={`bg-panel-bg border border-panel-border p-6 group hover:border-accent-${stat.accent} transition-all duration-300`}
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className={`text-xs font-mono tracking-widest uppercase text-zinc-500 group-hover:text-accent-${stat.accent}`}>
-                    {stat.label}
-                  </p>
-                  <p className={`text-4xl font-black mt-2 text-accent-${stat.accent}`}>
-                    {stat.value}
-                  </p>
+          {loading
+            ? [...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-panel-bg border border-panel-border p-6"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-3">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-10 w-16" />
+                    </div>
+
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                  </div>
                 </div>
-                <span className="text-2xl">{stat.icon}</span>
-              </div>
-            </div>
-          ))}
+              ))
+            : stats.map((stat, i) => (
+                <div
+                  key={i}
+                  className={`bg-panel-bg border border-panel-border p-6 group hover:border-accent-${stat.accent} transition-all duration-300`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p
+                        className={`text-xs font-mono tracking-widest uppercase text-zinc-500 group-hover:text-accent-${stat.accent}`}
+                      >
+                        {stat.label}
+                      </p>
+
+                      <p
+                        className={`text-4xl font-black mt-2 text-accent-${stat.accent}`}
+                      >
+                        {stat.value}
+                      </p>
+                    </div>
+
+                    <span className="text-2xl">{stat.icon}</span>
+                  </div>
+                </div>
+              ))}
         </div>
 
         {/* Action Buttons */}
@@ -107,21 +126,18 @@ export default function RecruiterDashboard() {
           <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden" onClick={() => window.location.href="/recruiter/create-job"}>
             <div className="space-y-4">
               <h3 className="text-lg font-bold tracking-tight uppercase">
-                Post New <br /><span className="text-accent-cyan">Job</span>
+                Post New <br /><span className="text-accent-cyan-light dark:text-accent-cyan">Job</span>
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Create and publish job listings to reach qualified candidates instantly.
               </p>
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan">
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
                 Create Posting →
               </div>
             </div>
           </button>
 
           <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-pink/40 group-hover:text-accent-pink transition-colors">
-              [ ACTION_02 ]
-            </div>
             <div className="space-y-4">
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Search <br /><span className="text-accent-pink">Talent Pool</span>
@@ -136,9 +152,6 @@ export default function RecruiterDashboard() {
           </button>
 
           <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-            <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-lime/40 group-hover:text-accent-lime transition-colors">
-              [ ACTION_03 ]
-            </div>
             <div className="space-y-4">
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Pipeline <br /><span className="text-accent-lime">Analytics</span>
@@ -160,7 +173,14 @@ export default function RecruiterDashboard() {
               <span className="w-2 h-2 bg-accent-pink animate-pulse" />
               Active Job Postings
             </h2>
-            <span className="text-[10px] font-mono text-zinc-500">[{jobs.filter(j => j.status === 'active').length}] LIVE</span>
+
+            {loading ? (
+              <Skeleton className="h-4 w-16" />
+            ) : (
+              <span className="text-[10px] font-mono text-zinc-500">
+                [{recruiterJobs?.data.filter((j) => j.status === "active").length}] LIVE
+              </span>
+            )}
           </div>
 
           <div className="overflow-x-auto">
@@ -169,40 +189,82 @@ export default function RecruiterDashboard() {
                 <tr className="text-xs font-mono tracking-widest text-zinc-500 uppercase">
                   <th className="px-6 py-4 text-left">Job Title</th>
                   <th className="px-6 py-4 text-center">Applicants</th>
-                  <th className="px-6 py-4 text-center">Interviews</th>
                   <th className="px-6 py-4 text-center">Status</th>
                   <th className="px-6 py-4 text-right">Posted</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
-                {jobs.map((job, idx) => (
-                  <tr key={job.id} className={`border-b border-panel-border hover:bg-white dark:bg-cyber-dark/50 transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-cyber-dark/30' : ''}`}>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-sm">{job.title}</p>
-                      <p className="text-xs text-zinc-500 mt-1">ID: #{job.id.toString().padStart(4, '0')}</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-lg font-bold text-accent-cyan">{job.applicants}</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-lg font-bold text-accent-pink">{job.interviews}</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 border rounded text-xs font-mono tracking-widest uppercase ${getStatusColor(job.status)}`}>
-                        {job.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <p className="text-xs text-zinc-500">{job.posted}</p>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-xs font-mono text-accent-cyan hover:text-accent-pink transition-colors">
-                        View →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {loading
+                  ? [...Array(6)].map((_, idx) => (
+                      <tr
+                        key={idx}
+                        className="border-b border-panel-border"
+                      >
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-52 mb-2" />
+                          <Skeleton className="h-3 w-20" />
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <Skeleton className="h-6 w-10 mx-auto" />
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <Skeleton className="h-8 w-20 mx-auto rounded-full" />
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <Skeleton className="h-4 w-24 ml-auto" />
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <Skeleton className="h-4 w-12 ml-auto" />
+                        </td>
+                      </tr>
+                    ))
+                  : recruiterJobs?.data.map((job, idx) => (
+                      <tr
+                        key={job.id}
+                        className={`border-b border-panel-border hover:bg-white dark:bg-cyber-dark/50 transition-colors ${
+                          idx % 2 === 0 ? "bg-white dark:bg-cyber-dark/30" : ""
+                        }`}
+                      >
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-sm">{job.title}</p>
+                          <p className="text-xs text-zinc-500 mt-1">
+                            {job.company}
+                          </p>
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <p className="text-lg font-bold text-accent-cyan-light dark:text-accent-cyan">
+                            {job.totalApplicants}
+                          </p>
+                        </td>
+
+                        <td className="px-6 py-4 text-center">
+                          <span
+                            className={`px-3 py-1 border rounded text-xs font-mono tracking-widest uppercase ${getStatusColor(
+                              job.status
+                            )}`}
+                          >
+                            {job.status}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <p className="text-xs text-zinc-500">{formatDate(job.createdAt)}</p>
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <button className="text-xs font-mono text-accent-cyan-light dark:text-accent-cyan hover:text-accent-pink transition-colors">
+                            View →
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
           </div>
@@ -226,7 +288,7 @@ export default function RecruiterDashboard() {
                 </div>
                 <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-lime transition-colors">Candidate {i}</h3>
                 <p className="text-xs text-zinc-500 mt-1">Senior Developer</p>
-                <button className="mt-3 text-xs font-mono text-accent-cyan hover:text-accent-pink transition-colors">
+                <button className="mt-3 text-xs font-mono text-accent-cyan-light dark:text-accent-cyan hover:text-accent-pink transition-colors">
                   Review Profile
                 </button>
               </div>
