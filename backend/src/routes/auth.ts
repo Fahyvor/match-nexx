@@ -1,10 +1,12 @@
 import { Elysia, t } from "elysia";
 import { authMiddleware } from "../middlewares/auth";
+import { requireActiveSubscription } from "../middlewares/requireActiveSubscription";
 import { authController } from "../controllers/authController";
 
 const app = new Elysia({ prefix: "/auth" })
 
   .get("/all-users", async () => authController.allUsers())
+  .get("/single-user/:id", async ({ params }) => authController.getSingleUser(params))
 
   .post(
     "/register",
@@ -31,8 +33,7 @@ const app = new Elysia({ prefix: "/auth" })
 
   .post(
     "/login",
-    ({ body }) =>
-      authController.login(body.email, body.password),
+    ({ body }) => authController.login(body.email, body.password),
     {
       body: t.Object({
         email: t.String({ format: "email" }),
@@ -48,9 +49,7 @@ const app = new Elysia({ prefix: "/auth" })
       message: "Password reset link sent to email",
     }),
     {
-      body: t.Object({
-        email: t.String({ format: "email" }),
-      }),
+      body: t.Object({ email: t.String({ format: "email" }) }),
     }
   )
 
@@ -85,6 +84,15 @@ const app = new Elysia({ prefix: "/auth" })
       .post("/logout", async () => authController.logout())
   )
 
+  // Scoped so this doesn't leak into routes below it
+  .use(
+    new Elysia()
+      .use(authMiddleware(["recruiter", "admin"]))
+      .use(requireActiveSubscription)
+      .get("/all-applicants", authController.getAllApplicants)
+  )
+
+
   .use(authMiddleware(["applicant", "recruiter", "admin"]))
   .delete("/delete-account", async ({ user }) => ({
     success: true,
@@ -96,10 +104,8 @@ const app = new Elysia({ prefix: "/auth" })
   // REFRESH TOKEN
   // =========================
 
-  .post(
-    "/refresh-token",
-    async ({ headers }) =>
-      authController.refreshToken(headers.authorization ?? ""),
+  .post("/refresh-token", async ({ headers }) =>
+    authController.refreshToken(headers.authorization ?? "")
   );
 
 export default app;

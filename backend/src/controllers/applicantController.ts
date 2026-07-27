@@ -401,6 +401,6 @@ export class ApplicantController {
         message: e instanceof Error ? e.message : "Internal server error",
       };
     }
-  };
+  }
 
 }

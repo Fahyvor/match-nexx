@@ -22,6 +22,13 @@
       "when": 1783032963649,
       "tag": "0002_yummy_pestilence",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785097432828,
+      "tag": "0003_new_la_nuit",
+      "breakpoints": true
     }
   ]
 }

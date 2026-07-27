@@ -189,9 +189,35 @@ export const educations = pgTable("educations", {
   endYear: text("end_year"),
 });
 
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  recruiterId: uuid("recruiter_id")
+    .notNull()
+    .references(() => recruiters.id, { onDelete: "cascade" }),
+
+  plan: text("plan").notNull(), // "monthly" | "yearly"
+  status: text("status").notNull().default("pending"), // "pending" | "active" | "past_due" | "cancelled"
+
+  paystackCustomerCode: text("paystack_customer_code"),
+  paystackSubscriptionCode: text("paystack_subscription_code"),
+
+  currentPeriodEnd: timestamp("current_period_end"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 /* ===========================
-   RELATIONS
+RELATIONS
 =========================== */
+
+export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
+  recruiter: one(recruiters, {
+    fields: [subscriptions.recruiterId],
+    references: [recruiters.id],
+  }),
+}));
 
 export const userRelations = relations(users, ({ one }) => ({
   applicant: one(applicants, {
@@ -225,6 +251,7 @@ export const recruiterRelations = relations(recruiters, ({ one, many }) => ({
   }),
 
   jobs: many(jobs),
+  subscriptions: many(subscriptions),
 }));
 
 export const jobRelations = relations(jobs, ({ one, many }) => ({

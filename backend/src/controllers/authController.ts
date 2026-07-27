@@ -327,4 +327,71 @@ deleteOwnAccount: async ({
       };
     }
   },
+
+
+  getAllApplicants: async () => {
+    try {
+      const allApplicants = await db.query.users.findMany({
+        where: (users, { eq }) => eq(users.role, "applicant"),
+        with: {
+          applicant: {
+            with: {
+              experiences: true,
+              educations: true,
+            },
+          },
+        },
+      });
+
+      return {
+        success: true,
+        data: allApplicants,
+      };
+
+    } catch (e) {
+      console.error("getAllApplicants error:", e);
+
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Internal server error",
+      };
+    }
+  },
+
+  getSingleUser: async ({ id }: { id: string }) => {
+    try {
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, id),
+        with: {
+          applicant: {
+            with: {
+              experiences: true,
+              educations: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+          status: 404,
+        };
+      }
+
+      return {
+        success: true,
+        data: user,
+      };
+
+    } catch (e) {
+      console.error("getSingleUser error:", e);
+
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Internal server error",
+      };
+    }
+  }
 };

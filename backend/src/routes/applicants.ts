@@ -61,4 +61,4 @@ export default new Elysia({ prefix: "/applicant" })
 .get(
   "/applications",
   applicantController.getApplications
-);
+)
