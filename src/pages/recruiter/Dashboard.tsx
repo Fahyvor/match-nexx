@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import SleekToast, { toast } from 'sleek-toast';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import type { RootState } from "../../redux/store";
 import { Skeleton } from '../../components/ReuseableSkeleton';
 import { formatDate } from '../../utils/formatDate';
@@ -21,10 +22,29 @@ interface RecruiterJobsResponse {
   totalApplicants: number;
 }
 
+interface Applicant {
+  id: string;
+  headline?: string;
+  profilePicture?: string;
+}
+
+interface Candidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  years_of_experience: number;
+  applicant: Applicant;
+}
+
 export default function RecruiterDashboard() {
   const token = useSelector((state: RootState) => state.user.token);
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [recruiterJobs, setRecruiterJobs] = useState<RecruiterJobsResponse | null>(null);
+
+  const [candidatesLoading, setCandidatesLoading] = useState(true);
+  const [topCandidates, setTopCandidates] = useState<Candidate[]>([]);
 
   useEffect(() => {
     const fetchRecruiterJobs = async () => {
@@ -36,7 +56,6 @@ export default function RecruiterDashboard() {
           },
         });
         setRecruiterJobs(response.data);
-        console.log('Recruiter Jobs:', response.data);
       } catch (error) {
         console.error('Error fetching recruiter jobs:', error);
         toast.error('Failed to load jobs. Please try again later.', 4000);
@@ -45,14 +64,39 @@ export default function RecruiterDashboard() {
       }
     };
 
+    const fetchTopCandidates = async () => {
+      setCandidatesLoading(true);
+      try {
+        const response = await axios.get('/api/auth/all-applicants', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const all: Candidate[] = response.data.data;
+
+        // "Top" = most experienced, top 5
+        const sorted = [...all]
+          .sort((a, b) => b.years_of_experience - a.years_of_experience)
+          .slice(0, 5);
+
+        setTopCandidates(sorted);
+      } catch (error) {
+        console.error('Error fetching top candidates:', error);
+        toast.error('Failed to load candidates. Please try again later.', 4000);
+      } finally {
+        setCandidatesLoading(false);
+      }
+    };
+
     fetchRecruiterJobs();
-  }, []);
+    fetchTopCandidates();
+  }, [token]);
 
   const stats = [
     { label: 'Active Jobs', value: recruiterJobs?.data.length ?? 0, accent: 'text-accent-cyan-light dark:text-accent-cyan', icon: '📋' },
     { label: 'Total Applicants', value: recruiterJobs?.totalApplicants ?? 0, accent: 'pink', icon: '👥' },
-    { label: 'In Interviews', value: '24', accent: 'lime', icon: '🎤' },
-    { label: 'Offers Made', value: '8', accent: 'purple', icon: '🎯' },
   ];
 
   const getStatusColor = (status: string) => {
@@ -78,7 +122,7 @@ export default function RecruiterDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-12">
           {loading
             ? [...Array(4)].map((_, i) => (
                 <div
@@ -124,28 +168,28 @@ export default function RecruiterDashboard() {
         {/* Action Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden" onClick={() => window.location.href="/recruiter/create-job"}>
-            <div className="space-y-4">
+            <div className="space-y-4 cursor-pointer">
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Post New <br /><span className="text-accent-cyan-light dark:text-accent-cyan">Job</span>
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Create and publish job listings to reach qualified candidates instantly.
               </p>
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan cursor-pointer">
                 Create Posting →
               </div>
             </div>
           </button>
 
-          <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-            <div className="space-y-4">
+          <button className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer" onClick={() => window.location.href="/candidates"}>
+            <div className="space-y-4 cursor-pointer">
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Search <br /><span className="text-accent-pink">Talent Pool</span>
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Query verified candidates using advanced filters and skill matching.
               </p>
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-pink">
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-pink cursor-pointer">
                 Browse Candidates →
               </div>
             </div>
@@ -270,29 +314,69 @@ export default function RecruiterDashboard() {
           </div>
         </section>
 
-        {/* Recently Viewed Candidates */}
+        {/* Top Candidates */}
         <section className="mt-12 bg-panel-bg border border-panel-border p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
               <span className="w-2 h-2 bg-accent-lime" />
-              Top Candidates This Week
+              Top Candidates
             </h2>
-            <span className="text-[10px] font-mono text-zinc-500">[5] REVIEWED</span>
+            <span className="text-[10px] font-mono text-zinc-500">
+              [{candidatesLoading ? "…" : topCandidates.length}] SHOWN
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-white dark:bg-cyber-dark/50 border border-zinc-800 p-4 text-center group hover:border-accent-lime transition-colors">
-                <div className="w-12 h-12 bg-linear-to-br from-accent-cyan to-accent-pink rounded-full mx-auto mb-3 flex items-center justify-center text-xl">
-                  👤
+            {candidatesLoading ? (
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-cyber-dark/50 border border-zinc-800 p-4 text-center">
+                  <Skeleton className="w-12 h-12 rounded-full mx-auto mb-3" />
+                  <Skeleton className="h-4 w-24 mx-auto mb-2" />
+                  <Skeleton className="h-3 w-20 mx-auto mb-3" />
+                  <Skeleton className="h-3 w-16 mx-auto" />
                 </div>
-                <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-lime transition-colors">Candidate {i}</h3>
-                <p className="text-xs text-zinc-500 mt-1">Senior Developer</p>
-                <button className="mt-3 text-xs font-mono text-accent-cyan-light dark:text-accent-cyan hover:text-accent-pink transition-colors">
-                  Review Profile
-                </button>
-              </div>
-            ))}
+              ))
+            ) : topCandidates.length === 0 ? (
+              <p className="col-span-full text-center text-sm text-zinc-500">
+                No candidates found yet.
+              </p>
+            ) : (
+              topCandidates.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className="bg-white dark:bg-cyber-dark/50 border border-zinc-800 p-4 text-center group hover:border-accent-lime transition-colors"
+                >
+                  {candidate.applicant?.profilePicture ? (
+                    <img
+                      src={candidate.applicant.profilePicture}
+                      alt={`${candidate.firstName} ${candidate.lastName}`}
+                      className="w-12 h-12 rounded-full mx-auto mb-3 object-cover border border-accent-lime/40"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-linear-to-br from-accent-cyan to-accent-pink rounded-full mx-auto mb-3 flex items-center justify-center text-xl">
+                      👤
+                    </div>
+                  )}
+
+                  <h3 className="font-bold text-sm uppercase tracking-tight group-hover:text-accent-lime transition-colors truncate">
+                    {candidate.firstName} {candidate.lastName}
+                  </h3>
+                  <p className="text-xs text-zinc-500 mt-1 truncate">
+                    {candidate.applicant?.headline || "No headline"}
+                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-1">
+                    {candidate.years_of_experience} yrs exp
+                  </p>
+
+                  <button
+                    onClick={() => navigate(`/candidates/${candidate.id}`)}
+                    className="mt-3 text-xs font-mono text-accent-cyan-light dark:text-accent-cyan hover:text-accent-pink transition-colors"
+                  >
+                    Review Profile
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </main>

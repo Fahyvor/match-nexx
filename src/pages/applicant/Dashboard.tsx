@@ -84,10 +84,10 @@ export default function ApplicantDashboard() {
       <main className="w-full mx-auto px-6 lg:px-16 py-12 pb-20">
         {/* Welcome Section */}
         <div className="mb-12 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
+          {/* <div className="inline-flex items-center gap-2 px-3 py-1 bg-panel-bg border border-zinc-800 text-[11px] font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
             <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
             DASHBOARD_ACTIVE
-          </div>
+          </div> */}
           <h1 className="text-5xl font-extrabold tracking-tighter uppercase leading-tight">
             Your Application <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-cyan to-accent-pink">Pipeline</span>
           </h1>

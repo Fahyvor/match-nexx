@@ -16,6 +16,8 @@ import PageNotFound from './pages/PageNotFound';
 import AllJobs from './pages/jobs/AllJobs';
 import CreateJobPage from './pages/jobs/CreateJobs';
 import JobApplication from './pages/applicant/JobApplication';
+import Candidates from './pages/recruiter/Candidates';
+import CandidatesProfile from './pages/recruiter/CandidatesProfile';
 export default function App() {
   const dispatch = useAppDispatch();
 
@@ -48,6 +50,8 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/settings" element={<Settings />} />
           <Route path="/jobs" element={<AllJobs />} />
+          <Route path="/candidates" element={<Candidates />} />
+          <Route path="/candidates/:id" element={<CandidatesProfile />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
