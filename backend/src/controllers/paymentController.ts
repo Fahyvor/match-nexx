@@ -13,12 +13,12 @@ const PLAN_CODES: Record<"monthly" | "yearly", string> = {
 
 export const paymentController = {
   initializeSubscription: async (
-    user: { id: string; email: string },
+    user: { sub: string; email: string },
     plan: "monthly" | "yearly"
   ) => {
     try {
       const recruiter = await db.query.recruiters.findFirst({
-        where: eq(recruiters.userId, user.id),
+        where: eq(recruiters.userId, user?.sub),
       });
 
       if (!recruiter) {

@@ -23,7 +23,7 @@ const app = new Elysia({ prefix: "/payments" })
         paymentController.verifyTransaction(params.reference)
       )
 
-      .get("/status", async ({ user }) => paymentController.getStatus(user.id))
+      .get("/status", async ({ user }) => paymentController.getStatus(user?.sub))
   )
   
   .post("/webhook", async ({ request, headers, set }) => {
