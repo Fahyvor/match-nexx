@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth";
 import jobRoutes from "./routes/jobs";
 import applicantRoutes from "./routes/applicants";
 import recruiterRoutes from "./routes/recruiters";
+import cvRoutes from "./routes/cv";
 
 const PORT = Number(process.env.PORT || 3000);
 const isProd = process.env.NODE_ENV === "production";
@@ -31,6 +32,7 @@ const app = new Elysia()
       .use(jobRoutes)
       .use(applicantRoutes)
       .use(recruiterRoutes)
+      .use(cvRoutes)
   );
 
 if (isProd) {

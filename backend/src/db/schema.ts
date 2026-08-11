@@ -57,6 +57,10 @@ export const applicants = pgTable("applicants", {
 
   linkedin: text("linkedin"),
 
+  twitter: text("twitter"),
+
+  facebook: text("facebook"),
+
   cvUrl: text("cv_url"),
 
   profilePicture: text("profile_picture"),
@@ -96,7 +100,7 @@ export const jobs = pgTable("jobs", {
 
   recruiterId: uuid("recruiter_id")
     .notNull()
-    .references(() => recruiters.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }),
 
   title: text("title").notNull(),
 
@@ -189,6 +193,61 @@ export const educations = pgTable("educations", {
   endYear: text("end_year"),
 });
 
+/* ===========================
+   SKILLS
+=========================== */
+
+export const skills = pgTable("skills", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  applicantId: uuid("applicant_id")
+    .notNull()
+    .references(() => applicants.id, { onDelete: "cascade" }),
+
+  name: text("name").notNull(),
+});
+
+/* ===========================
+   PROJECTS
+=========================== */
+
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  applicantId: uuid("applicant_id")
+    .notNull()
+    .references(() => applicants.id, { onDelete: "cascade" }),
+
+  name: text("name").notNull(),
+
+  description: text("description"),
+
+  technologies: text("technologies").array(),
+
+  link: text("link"),
+});
+
+/* ===========================
+   CVS
+=========================== */
+
+export const cvs = pgTable("cvs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  applicantId: uuid("applicant_id")
+    .notNull()
+    .unique()
+    .references(() => applicants.id, { onDelete: "cascade" }),
+
+  professionalSummary: text("professional_summary"),
+
+  template: text("template").default("minimal"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").primaryKey().defaultRandom(),
 
@@ -242,6 +301,36 @@ export const applicantRelations = relations(applicants, ({ one, many }) => ({
   experiences: many(experiences),
 
   educations: many(educations),
+
+  skills: many(skills),
+
+  projects: many(projects),
+
+  cv: one(cvs, {
+    fields: [applicants.id],
+    references: [cvs.applicantId],
+  }),
+}));
+
+export const cvRelations = relations(cvs, ({ one }) => ({
+  applicant: one(applicants, {
+    fields: [cvs.applicantId],
+    references: [applicants.id],
+  }),
+}));
+
+export const skillRelations = relations(skills, ({ one }) => ({
+  applicant: one(applicants, {
+    fields: [skills.applicantId],
+    references: [applicants.id],
+  }),
+}));
+
+export const projectRelations = relations(projects, ({ one }) => ({
+  applicant: one(applicants, {
+    fields: [projects.applicantId],
+    references: [applicants.id],
+  }),
 }));
 
 export const recruiterRelations = relations(recruiters, ({ one, many }) => ({

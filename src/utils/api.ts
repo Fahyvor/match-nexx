@@ -181,6 +181,18 @@ class ApiClient {
     sendOffer: (candidateId: string, data: OfferData) =>
       this.client.post(`/recruiters/candidates/${candidateId}/offer`, data),
   };
+
+  // CV Builder endpoints
+  cv = {
+    getMe: () =>
+      this.client.get('/cv/me'),
+
+    create: (data: any) =>
+      this.client.post('/cv/create', data),
+
+    generateSummary: (data: any) =>
+      this.client.post('/cv/generate-summary', data),
+  };
 }
 
 export default new ApiClient();

@@ -47,12 +47,13 @@ interface CreateCVBody {
   experiences?: ExperienceInput[];
   projects?: ProjectInput[];
   links?: LinksInput;
+  professionalSummary?: string;
 }
 
 export const cvController = {
   create: async (userId: string, body: CreateCVBody) => {
     try {
-      const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput, projects: projectInput, links } = body;
+      const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput, projects: projectInput, links, professionalSummary: customSummary } = body;
 
       if (!personalInfo || !personalInfo.phone) {
         return { success: false, message: "Phone number is required." };
@@ -73,10 +74,6 @@ export const cvController = {
       const existingCv = await db.query.cvs.findFirst({
         where: eq(cvs.applicantId, applicant.id),
       });
-
-      if (existingCv) {
-        return { success: false, message: "CV already exists for this user." };
-      }
 
       const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
       if (!user) {
@@ -134,9 +131,11 @@ export const cvController = {
 
       // Replace skills
       await db.delete(skills).where(eq(skills.applicantId, applicant.id));
-      await db.insert(skills).values(
-        skillNames.map((name) => ({ applicantId: applicant.id, name }))
-      );
+      if (skillNames.length > 0) {
+        await db.insert(skills).values(
+          skillNames.map((name) => ({ applicantId: applicant.id, name }))
+        );
+      }
 
       // Replace projects
       if (Array.isArray(projectInput)) {
@@ -154,24 +153,33 @@ export const cvController = {
         }
       }
 
-      // Generate AI professional summary
-      const fullName = `${user.firstName} ${user.lastName}`.trim();
+      // Generate or use custom professional summary
+      let professionalSummary = customSummary;
+      if (!professionalSummary) {
+        const fullName = `${user.firstName} ${user.lastName}`.trim();
+        professionalSummary = await AIService.generateProfessionalSummary({
+          fullName,
+          experience: experienceInput || [],
+          skills: skillNames,
+          education: educationInput || [],
+          role: personalInfo.position,
+        });
+      }
 
-      const professionalSummary = await AIService.generateProfessionalSummary({
-        fullName,
-        experience: experienceInput || [],
-        skills: skillNames,
-        education: educationInput || [],
-        role: personalInfo.position,
-      });
-
-      const [cv] = await db
-        .insert(cvs)
-        .values({
+      if (existingCv) {
+        await db
+          .update(cvs)
+          .set({
+            professionalSummary,
+            updatedAt: new Date(),
+          })
+          .where(eq(cvs.id, existingCv.id));
+      } else {
+        await db.insert(cvs).values({
           applicantId: applicant.id,
           professionalSummary,
-        })
-        .returning();
+        });
+      }
 
       // Return the full assembled CV
       const fullCv = await db.query.applicants.findFirst({
@@ -186,7 +194,7 @@ export const cvController = {
         },
       });
 
-      return { success: true, message: "CV created successfully", data: fullCv };
+      return { success: true, message: existingCv ? "CV updated successfully" : "CV created successfully", data: fullCv };
     } catch (e) {
       console.error("cvController.create error:", e);
       return {
@@ -220,6 +228,30 @@ export const cvController = {
       return {
         success: false,
         message: e instanceof Error ? e.message : "Internal server error",
+      };
+    }
+  },
+
+  generateSummary: async (userId: string, body: CreateCVBody) => {
+    try {
+      const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput } = body;
+      const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+      const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Candidate";
+
+      const summary = await AIService.generateProfessionalSummary({
+        fullName,
+        experience: experienceInput || [],
+        skills: skillNames || [],
+        education: educationInput || [],
+        role: personalInfo?.position,
+      });
+
+      return { success: true, summary };
+    } catch (e) {
+      console.error("cvController.generateSummary error:", e);
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Failed to generate summary",
       };
     }
   },

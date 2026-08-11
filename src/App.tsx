@@ -4,6 +4,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ApplicantDashboard from './pages/applicant/Dashboard';
 import CVBuilder from './pages/applicant/CVBuilder';
+import CVPreview from './pages/applicant/CVPreview';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
 import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -37,6 +38,7 @@ export default function App() {
         <Route element={<ProtectedRoute role="applicant" />}>
           <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
           <Route path="/applicant/cv-builder" element={<CVBuilder />} />
+          <Route path="/applicant/cv-preview" element={<CVPreview />} />
           <Route path="/applicant/apply-job/:jobId" element={<JobApplication />} />
         </Route>
 

@@ -4,6 +4,8 @@ import applicantReducer from './slices/applicantSlice';
 import recruiterReducer from './slices/recruiterSlice';
 import jobsReducer from './slices/jobsSlice';
 import stateSlice from './slices/stateSlice';
+import resumeReducer from './slices/resumeSlice';
+import templateReducer from './slices/templateSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ export const store = configureStore({
     recruiter: recruiterReducer,
     jobs: jobsReducer,
     states: stateSlice,
+    resume: resumeReducer,
+    template: templateReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

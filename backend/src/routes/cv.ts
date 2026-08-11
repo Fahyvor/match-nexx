@@ -57,6 +57,46 @@ const app = new Elysia({ prefix: "/cv" })
             facebook: t.Optional(t.String()),
           })
         ),
+        professionalSummary: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  .post(
+    "/generate-summary",
+    async ({ user, body }) => cvController.generateSummary(user?.sub, body as any),
+    {
+      body: t.Object({
+        personalInfo: t.Optional(
+          t.Object({
+            phone: t.Optional(t.String()),
+            position: t.Optional(t.String()),
+          })
+        ),
+        skills: t.Optional(t.Array(t.String())),
+        experiences: t.Optional(
+          t.Array(
+            t.Object({
+              company: t.String(),
+              role: t.String(),
+              startDate: t.Optional(t.String()),
+              endDate: t.Optional(t.String()),
+              isCurrent: t.Optional(t.Boolean()),
+              description: t.Optional(t.String()),
+            })
+          )
+        ),
+        educations: t.Optional(
+          t.Array(
+            t.Object({
+              institution: t.String(),
+              degree: t.Optional(t.String()),
+              department: t.Optional(t.String()),
+              startDate: t.Optional(t.String()),
+              endDate: t.Optional(t.String()),
+            })
+          )
+        ),
       }),
     }
   )
