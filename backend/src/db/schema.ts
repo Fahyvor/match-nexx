@@ -255,15 +255,20 @@ export const subscriptions = pgTable("subscriptions", {
     .notNull()
     .references(() => recruiters.id, { onDelete: "cascade" }),
 
-  plan: text("plan").notNull(), // "monthly" | "yearly"
-  status: text("status").notNull().default("pending"), // "pending" | "active" | "past_due" | "cancelled"
+  plan: text("plan").notNull(),
 
-  paystackCustomerCode: text("paystack_customer_code"),
-  paystackSubscriptionCode: text("paystack_subscription_code"),
+  status: text("status")
+    .notNull()
+    .default("pending"),
+
+  bachsCheckoutId: text("bachs_checkout_id").unique(),
+
+  bachsChargeId: text("bachs_charge_id").unique(),
 
   currentPeriodEnd: timestamp("current_period_end"),
 
   createdAt: timestamp("created_at").defaultNow(),
+
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 

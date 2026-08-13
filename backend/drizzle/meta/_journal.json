@@ -29,6 +29,13 @@
       "when": 1785097432828,
       "tag": "0003_new_la_nuit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786604426006,
+      "tag": "0004_small_gauntlet",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,3 @@
-
 {
   "name": "recruiter-api",
   "version": "1.0.0",
@@ -11,6 +10,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@bachs/sdk": "^0.0.1",
     "@elysiajs/bearer": "^0.8.0",
     "@elysiajs/jwt": "^0.8.0",
     "@elysiajs/static": "^0.8.0",

@@ -288,46 +288,172 @@ deleteOwnAccount: async ({
 
   allUsers: async () => {
     try {
-      const allUsers = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          role: users.role,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          state: users.state,
-          country: users.country,
-          years_of_experience: users.years_of_experience,
-          createdAt: users.createdAt,
-        })
-        .from(users);
+      // 1. Fetch users only
+      const allUsers = await db.query.users.findMany();
 
-      if (allUsers.length === 0) {
-        return {
-          success: true,
-          message: "No users found",
-          data: { users: [] },
-          status: 200,
-        };
+      // 2. Only recruiters need payment information
+      const recruiterUsers = allUsers.filter(
+        (user) => user.role === "recruiter"
+      );
+
+      // 3. Get recruiter profiles for recruiter users
+      const recruiterProfiles = await db.query.recruiters.findMany({
+        where: (recruiters, { inArray }) =>
+          inArray(
+            recruiters.userId,
+            recruiterUsers.map((user) => user.id)
+          ),
+      });
+
+      // 4. Get subscriptions for those recruiters
+      const recruiterIds = recruiterProfiles.map(
+        (recruiter) => recruiter.id
+      );
+
+      const subscriptions =
+        recruiterIds.length > 0
+          ? await db.query.subscriptions.findMany({
+              where: (subscriptions, { inArray }) =>
+                inArray(
+                  subscriptions.recruiterId,
+                  recruiterIds
+                ),
+            })
+          : [];
+
+      // 5. Build a recruiterId -> subscription mapping
+      const subscriptionsByRecruiter = new Map<
+        string,
+        typeof subscriptions
+      >();
+
+      for (const subscription of subscriptions) {
+        const existing =
+          subscriptionsByRecruiter.get(
+            subscription.recruiterId
+          ) ?? [];
+
+        existing.push(subscription);
+
+        subscriptionsByRecruiter.set(
+          subscription.recruiterId,
+          existing
+        );
       }
+
+      // 6. Build user -> recruiter mapping
+      const recruiterByUser = new Map(
+        recruiterProfiles.map((recruiter) => [
+          recruiter.userId,
+          recruiter,
+        ])
+      );
+
+      // 7. Add payment information
+      const usersWithPayment = allUsers.map((user) => {
+        // Applicants/admins don't have subscription payments
+        if (user.role !== "recruiter") {
+          return {
+            ...user,
+
+            payment: {
+              applicable: false,
+              hasPaid: false,
+              status: null,
+              plan: null,
+              currentPeriodEnd: null,
+            },
+          };
+        }
+
+        const recruiter =
+          recruiterByUser.get(user.id);
+
+        const userSubscriptions = recruiter
+          ? subscriptionsByRecruiter.get(
+              recruiter.id
+            ) ?? []
+          : [];
+
+        // Most recent subscription
+        const latestSubscription = [
+          ...userSubscriptions,
+        ].sort((a, b) => {
+          const dateA = a.createdAt
+            ? new Date(a.createdAt).getTime()
+            : 0;
+
+          const dateB = b.createdAt
+            ? new Date(b.createdAt).getTime()
+            : 0;
+
+          return dateB - dateA;
+        })[0];
+
+        const hasPaid = Boolean(
+          latestSubscription &&
+            latestSubscription.status === "active" &&
+            latestSubscription.currentPeriodEnd &&
+            new Date(
+              latestSubscription.currentPeriodEnd
+            ) > new Date()
+        );
+
+        return {
+          ...user,
+
+          payment: {
+            applicable: true,
+            hasPaid,
+
+            status:
+              latestSubscription?.status ??
+              "inactive",
+
+            plan:
+              latestSubscription?.plan ??
+              null,
+
+            currentPeriodEnd:
+              latestSubscription?.currentPeriodEnd ??
+              null,
+          },
+        };
+      });
 
       return {
         success: true,
-        message: "Fetched all users",
-        data: { users: allUsers },
+
+        message:
+          usersWithPayment.length > 0
+            ? "Fetched all users"
+            : "No users found",
+
+        data: {
+          users: usersWithPayment,
+        },
+
         status: 200,
       };
     } catch (error) {
-      console.error("FETCH USERS ERROR:", error);
+      console.error(
+        "FETCH USERS ERROR:",
+        error
+      );
+
       return {
         success: false,
         message: "Failed to fetch users",
-        error: "Internal Server Error",
+
+        error:
+          error instanceof Error
+            ? error.message
+            : "Internal Server Error",
+
         status: 500,
       };
     }
   },
-
 
   getAllApplicants: async () => {
     try {
@@ -362,11 +488,18 @@ deleteOwnAccount: async ({
     try {
       const user = await db.query.users.findFirst({
         where: (users, { eq }) => eq(users.id, id),
+
         with: {
           applicant: {
             with: {
               experiences: true,
               educations: true,
+            },
+          },
+
+          recruiter: {
+            with: {
+              subscriptions: true,
             },
           },
         },
@@ -380,18 +513,77 @@ deleteOwnAccount: async ({
         };
       }
 
+      /**
+       * Find the most recent subscription
+       */
+      const subscriptions =
+        user.recruiter?.subscriptions ?? [];
+
+      const latestSubscription = subscriptions
+        .sort((a, b) => {
+          const dateA = a.createdAt
+            ? new Date(a.createdAt).getTime()
+            : 0;
+
+          const dateB = b.createdAt
+            ? new Date(b.createdAt).getTime()
+            : 0;
+
+          return dateB - dateA;
+        })[0];
+
+      /**
+       * Determine whether the subscription
+       * is currently active.
+       */
+      const hasPaid = Boolean(
+        latestSubscription &&
+          latestSubscription.status === "active" &&
+          latestSubscription.currentPeriodEnd &&
+          new Date(latestSubscription.currentPeriodEnd) > new Date()
+      );
+
       return {
         success: true,
-        data: user,
-      };
 
+        data: {
+          ...user,
+
+          payment: {
+            hasPaid,
+
+            status:
+              latestSubscription?.status ??
+              "inactive",
+
+            plan:
+              latestSubscription?.plan ??
+              null,
+
+            currentPeriodEnd:
+              latestSubscription?.currentPeriodEnd ??
+              null,
+
+            checkoutId:
+              latestSubscription?.bachsCheckoutId ??
+              null,
+
+            chargeId:
+              latestSubscription?.bachsChargeId ??
+              null,
+          },
+        },
+      };
     } catch (e) {
       console.error("getSingleUser error:", e);
 
       return {
         success: false,
-        message: e instanceof Error ? e.message : "Internal server error",
+        message:
+          e instanceof Error
+            ? e.message
+            : "Internal server error",
       };
     }
-  }
+  },
 };
