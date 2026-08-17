@@ -92,8 +92,7 @@ class ApiClient {
       (response) => response.data,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userRole');
+          sessionStorage.removeItem('auth');
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -110,7 +109,7 @@ class ApiClient {
       this.client.post('/auth/login', data),
 
     logout: () =>
-      this.client.post('/auth/logout'),
+      this.client.post('/auth/user/logout'),
 
     refreshToken: () =>
       this.client.post('/auth/refresh-token'),
@@ -119,19 +118,22 @@ class ApiClient {
   // Job endpoints
   jobs = {
     list: () =>
-      this.client.get('/jobs'),
+      this.client.get('/jobs/all-jobs'),
 
     get: (id: string) =>
-      this.client.get(`/jobs/${id}`),
+      this.client.get(`/jobs/get-single-job/${id}`),
 
     create: (data: JobData) =>
-      this.client.post('/jobs', data),
+      this.client.post('/jobs/create-job', data),
 
     update: (id: string, data: Partial<JobData>) =>
-      this.client.put(`/jobs/${id}`, data),
+      this.client.put(`/jobs/update-job/${id}`, data),
 
     delete: (id: string) =>
-      this.client.delete(`/jobs/${id}`),
+      this.client.delete(`/jobs/delete-job/${id}`),
+
+    getRecruiterJobs: () =>
+      this.client.get('/jobs/recruiter-jobs'),
   };
 
   // Applicant endpoints
@@ -145,17 +147,27 @@ class ApiClient {
     getApplications: () =>
       this.client.get('/applicant/applications'),
 
-    parseCV: (data: Cv) => 
-      this.client.post('/applicant/parse-cv', data),
+    uploadCV: (file: File) => {
+      const formData = new FormData();
+      formData.append('cv', file);
+      return this.client.put('/applicant/upload-cv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+
+    parseCV: (data: Cv) => {
+      const formData = new FormData();
+      formData.append('cv', data.cv);
+      return this.client.post('/applicant/parse-cv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
 
     completeProfile: (data: ApplicantProfileData) =>
       this.client.put('/applicant/complete-profile', data),
 
     submitApplication: (jobId: string) =>
-      this.client.post(`/applicant/apply/${jobId}`)
-
-    // submitApplication: (jobId: string) =>
-    //   this.client.post('/applicant/apply', { jobId }),
+      this.client.post(`/applicant/apply/${jobId}`),
   };
 
   // Recruiter endpoints
@@ -192,6 +204,27 @@ class ApiClient {
 
     generateSummary: (data: any) =>
       this.client.post('/cv/generate-summary', data),
+  };
+
+  // Payment endpoints
+  payments = {
+    initializeSubscription: (plan: 'monthly' | 'yearly') =>
+      this.client.post('/payments/initialize', { plan }),
+
+    activateSubscription: (plan: 'monthly' | 'yearly' = 'monthly') =>
+      this.client.post('/payments/recruiter/activate', { plan }),
+
+    getSubscriptionStatus: () =>
+      this.client.get('/payments/status'),
+
+    initializeCvPayment: () =>
+      this.client.post('/payments/cv/initialize'),
+
+    verifyCvPayment: () =>
+      this.client.post('/payments/cv/verify'),
+
+    getCvStatus: () =>
+      this.client.get('/payments/cv/status'),
   };
 }
 

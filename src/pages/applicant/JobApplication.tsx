@@ -136,7 +136,7 @@ const JobApplication = () => {
         //     "Content-Type": "multipart/form-data",
         //   },
         // });
-        await api.applicants.parseCV({ cv });
+        await api.applicants.uploadCV(cv);
       }
 
       // 3. Complete Job Application

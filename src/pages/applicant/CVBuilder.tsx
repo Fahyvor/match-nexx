@@ -13,6 +13,7 @@ import type {
 } from '../../types/resume';
 import api from '../../utils/api';
 import SleekToast, { toast } from 'sleek-toast';
+import CvPaywallModal from '../../components/CvPaywallModal';
 
 export default function CVBuilder() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function CVBuilder() {
   const [loading, setLoading] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [hasPaidCv, setHasPaidCv] = useState<boolean | null>(null);
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: '',
@@ -46,11 +48,18 @@ export default function CVBuilder() {
   const [experiences, setExperiences] = useState<ExperienceEntry[]>([]);
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
 
-  // Fetch existing CV on mount
+  // Check CV payment status and fetch existing CV on mount
   useEffect(() => {
     const fetchCVDetails = async () => {
       try {
         setLoading(true);
+        const statusRes: any = await api.payments.getCvStatus();
+        if (statusRes.success && statusRes.data) {
+          setHasPaidCv(statusRes.data.hasPaidCv);
+        } else {
+          setHasPaidCv(false);
+        }
+
         const res: any = await api.cv.getMe();
 
         if (res.success && res.data) {
@@ -319,6 +328,10 @@ export default function CVBuilder() {
     );
   }
 
+  if (hasPaidCv === false) {
+    return <CvPaywallModal onSuccess={() => setHasPaidCv(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
@@ -387,7 +400,7 @@ export default function CVBuilder() {
                 <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Phone Number *</label>
                 <input
                   type="text"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+234 8123456789"
                   value={personalInfo.phone}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, phone: e.target.value })}
                   className="w-full mt-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
@@ -407,7 +420,7 @@ export default function CVBuilder() {
                 <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Address / Location</label>
                 <input
                   type="text"
-                  placeholder="San Francisco, CA"
+                  placeholder="Abuja, Nigeria"
                   value={personalInfo.address}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, address: e.target.value })}
                   className="w-full mt-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
@@ -757,7 +770,7 @@ export default function CVBuilder() {
               type="button"
               onClick={() => handleSave(false)}
               disabled={saving}
-              className="flex-1 relative px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:bg-accent-cyan/10 transition-all duration-300 rounded"
+              className="flex-1 relative cursor-pointer px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-cyan hover:bg-accent-cyan/10 transition-all duration-300 rounded"
             >
               {saving ? 'Saving...' : 'Save Draft'}
             </button>
@@ -765,7 +778,7 @@ export default function CVBuilder() {
               type="button"
               onClick={() => handleSave(true)}
               disabled={saving}
-              className="flex-1 relative px-6 py-3 text-xs font-bold uppercase tracking-widest bg-gradient-to-r from-accent-pink to-purple-600 text-white shadow-lg hover:shadow-accent-pink/30 transition-all duration-300 rounded"
+              className="flex-1 relative px-6 py-3 text-xs font-bold uppercase tracking-widest bg-accent-cyan text-black shadow-lg hover:shadow-cyan-500 cursor-pointer transition-all duration-300 rounded"
             >
               {saving ? 'Saving...' : 'Save & Preview CV ↗'}
             </button>

@@ -8,6 +8,8 @@ import type { ResumeData, EducationEntry, ExperienceEntry, ProjectEntry } from '
 import api from '../../utils/api';
 import SleekToast from 'sleek-toast';
 
+import CvPaywallModal from '../../components/CvPaywallModal';
+
 const CVPreview: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -15,79 +17,88 @@ const CVPreview: React.FC = () => {
 
   const [backendResume, setBackendResume] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasPaidCv, setHasPaidCv] = useState<boolean | null>(null);
 
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUserCV = async () => {
-      if (resumeFromStore) return;
       try {
         setLoading(true);
-        const res: any = await api.cv.getMe();
-        if (res.success && res.data) {
-          const applicantData = res.data;
-          const user = applicantData.user || {};
-          const cvData = applicantData.cv || {};
+        const statusRes: any = await api.payments.getCvStatus();
+        if (statusRes.success && statusRes.data) {
+          setHasPaidCv(statusRes.data.hasPaidCv);
+        } else {
+          setHasPaidCv(false);
+        }
 
-          const educations: EducationEntry[] = Array.isArray(applicantData.educations)
-            ? applicantData.educations.map((edu: any) => ({
-                institution: edu.school || '',
-                department: edu.field || '',
-                degree: edu.degree || '',
-                startDate: edu.startYear || '',
-                endDate: edu.endYear || '',
-              }))
-            : [];
+        if (!resumeFromStore) {
+          const res: any = await api.cv.getMe();
+          if (res.success && res.data) {
+            const applicantData = res.data;
+            const user = applicantData.user || {};
+            const cvData = applicantData.cv || {};
 
-          const experiences: ExperienceEntry[] = Array.isArray(applicantData.experiences)
-            ? applicantData.experiences.map((exp: any) => ({
-                company: exp.company || '',
-                role: exp.role || '',
-                startDate: exp.startDate || '',
-                endDate: exp.endDate || '',
-                isCurrent: !exp.endDate,
-                description: exp.description || '',
-              }))
-            : [];
+            const educations: EducationEntry[] = Array.isArray(applicantData.educations)
+              ? applicantData.educations.map((edu: any) => ({
+                  institution: edu.school || '',
+                  department: edu.field || '',
+                  degree: edu.degree || '',
+                  startDate: edu.startYear || '',
+                  endDate: edu.endYear || '',
+                }))
+              : [];
 
-          const projects: ProjectEntry[] = Array.isArray(applicantData.projects)
-            ? applicantData.projects.map((proj: any) => ({
-                name: proj.name || '',
-                description: proj.description || '',
-                technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
-                link: proj.link || '',
-              }))
-            : [];
+            const experiences: ExperienceEntry[] = Array.isArray(applicantData.experiences)
+              ? applicantData.experiences.map((exp: any) => ({
+                  company: exp.company || '',
+                  role: exp.role || '',
+                  startDate: exp.startDate || '',
+                  endDate: exp.endDate || '',
+                  isCurrent: !exp.endDate,
+                  description: exp.description || '',
+                }))
+              : [];
 
-          const skillsList: string[] = Array.isArray(applicantData.skills)
-            ? applicantData.skills.map((s: any) => (typeof s === 'string' ? s : s.name))
-            : [];
+            const projects: ProjectEntry[] = Array.isArray(applicantData.projects)
+              ? applicantData.projects.map((proj: any) => ({
+                  name: proj.name || '',
+                  description: proj.description || '',
+                  technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+                  link: proj.link || '',
+                }))
+              : [];
 
-          const assembledResume: ResumeData = {
-            personalInfo: {
-              firstName: user.firstName || '',
-              lastName: user.lastName || '',
-              position: applicantData.headline || (experiences.length > 0 ? experiences[0].role : ''),
-              email: user.email || '',
-              phone: applicantData.phone || '',
-              address: `${user.state || ''}, ${user.country || ''}`.replace(/^,\s*/, ''),
-            },
-            links: {
-              linkedIn: applicantData.linkedin || '',
-              portfolio: applicantData.portfolio || '',
-              github: applicantData.github || '',
-              twitter: applicantData.twitter || '',
-              facebook: applicantData.facebook || '',
-            },
-            skills: skillsList,
-            educations,
-            experiences,
-            projects,
-            professionalSummary: cvData.professionalSummary || applicantData.summary || '',
-          };
+            const skillsList: string[] = Array.isArray(applicantData.skills)
+              ? applicantData.skills.map((s: any) => (typeof s === 'string' ? s : s.name))
+              : [];
 
-          setBackendResume(assembledResume);
-          dispatch(setResume(assembledResume));
+            const assembledResume: ResumeData = {
+              personalInfo: {
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                position: applicantData.headline || (experiences.length > 0 ? experiences[0].role : ''),
+                email: user.email || '',
+                phone: applicantData.phone || '',
+                address: `${user.state || ''}, ${user.country || ''}`.replace(/^,\s*/, ''),
+              },
+              links: {
+                linkedIn: applicantData.linkedin || '',
+                portfolio: applicantData.portfolio || '',
+                github: applicantData.github || '',
+                twitter: applicantData.twitter || '',
+                facebook: applicantData.facebook || '',
+              },
+              skills: skillsList,
+              educations,
+              experiences,
+              projects,
+              professionalSummary: cvData.professionalSummary || applicantData.summary || '',
+            };
+
+            setBackendResume(assembledResume);
+            dispatch(setResume(assembledResume));
+          }
         }
       } catch (err: any) {
         console.error('Failed to fetch user CV:', err);
@@ -111,6 +122,10 @@ const CVPreview: React.FC = () => {
         <p className="text-zinc-500 font-medium animate-pulse">Loading CV Preview...</p>
       </div>
     );
+  }
+
+  if (hasPaidCv === false) {
+    return <CvPaywallModal onSuccess={() => setHasPaidCv(true)} />;
   }
 
   if (!effectiveResume) {

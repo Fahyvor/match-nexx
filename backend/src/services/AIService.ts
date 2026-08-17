@@ -97,19 +97,22 @@ export const AIService = {
         : "No education listed.";
 
       const prompt = `
-You are a professional CV writer. Write a concise, compelling professional summary (3-4 sentences, no more than 80 words) for a CV based on the details below. Write in third person is not needed — write it as if it will appear directly on the candidate's CV (first-person implied, no "I" statements, resume style). Do not use markdown formatting, headers, or bullet points. Return only the summary text, nothing else.
+          You are a professional CV writer. Write a concise, compelling professional summary (3-4 sentences, no more than 80 words)
+          for a CV based on the details below. Write in third person is not needed — write it as if it will appear directly on the
+          candidate's CV (first-person implied, no "I" statements, resume style). Do not use markdown formatting, headers, or bullet
+          points. Return only the summary text, nothing else.
 
-Name: ${fullName}
-Target Role: ${role || "Not specified"}
+          Name: ${fullName}
+          Target Role: ${role || "Not specified"}
 
-Skills: ${skills.join(", ")}
+          Skills: ${skills.join(", ")}
 
-Experience:
-${experienceText}
+          Experience:
+          ${experienceText}
 
-Education:
-${educationText}
-      `.trim();
+          Education:
+          ${educationText}
+                `.trim();
 
       const result = await model.generateContent(prompt);
       const summary = result.response.text().trim();

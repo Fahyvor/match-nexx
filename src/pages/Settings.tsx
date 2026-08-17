@@ -50,7 +50,7 @@ export default function Settings() {
     }));
   }
   const handleLogout = () => {
-    localStorage.removeItem('auth');
+    sessionStorage.removeItem('auth');
     navigate('/login');
   };
 
@@ -72,9 +72,10 @@ export default function Settings() {
     }
   }
 
-  const handleUpdateAccount = async () => {
+  const handleUpdateAccount = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     try {
-      const response = await axios.put('/api/user/update', updatedUser,
+      const response = await axios.put('/api/auth/user/profile', updatedUser,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -83,7 +84,7 @@ export default function Settings() {
       );
 
       if(response.status == 200) {
-        toast.success(response.data.message, 4000);
+        toast.success(response.data.message || 'Account updated successfully', 4000);
         console.log('Account updated successfully:', response.data);
       }
     } catch (error) {

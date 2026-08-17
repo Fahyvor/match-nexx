@@ -63,12 +63,20 @@ export const cvController = {
         return { success: false, message: "At least one skill is required." };
       }
 
-      const applicant = await db.query.applicants.findFirst({
+      let applicant = await db.query.applicants.findFirst({
         where: eq(applicants.userId, userId),
       });
 
       if (!applicant) {
         return { success: false, message: "Applicant profile not found." };
+      }
+
+      if (applicant.hasPaidCv !== "true") {
+        return {
+          success: false,
+          code: "CV_PAYMENT_REQUIRED",
+          message: "Payment of ₦1,000 is required before creating your CV.",
+        };
       }
 
       const existingCv = await db.query.cvs.findFirst({
@@ -234,6 +242,18 @@ export const cvController = {
 
   generateSummary: async (userId: string, body: CreateCVBody) => {
     try {
+      const applicant = await db.query.applicants.findFirst({
+        where: eq(applicants.userId, userId),
+      });
+
+      if (!applicant || applicant.hasPaidCv !== "true") {
+        return {
+          success: false,
+          code: "CV_PAYMENT_REQUIRED",
+          message: "Payment of ₦1,000 is required before generating your CV summary.",
+        };
+      }
+
       const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput } = body;
       const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
       const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "Candidate";

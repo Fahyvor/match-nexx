@@ -5,12 +5,14 @@ import dotenv from "dotenv";
 import path from "path";
 
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 import authRoutes from "./routes/auth";
 import jobRoutes from "./routes/jobs";
 import applicantRoutes from "./routes/applicants";
 import recruiterRoutes from "./routes/recruiters";
 import cvRoutes from "./routes/cv";
+import paymentRoutes from "./routes/payment";
 
 const PORT = Number(process.env.PORT || 3000);
 const isProd = process.env.NODE_ENV === "production";
@@ -33,6 +35,7 @@ const app = new Elysia()
       .use(applicantRoutes)
       .use(recruiterRoutes)
       .use(cvRoutes)
+      .use(paymentRoutes)
   );
 
 if (isProd) {

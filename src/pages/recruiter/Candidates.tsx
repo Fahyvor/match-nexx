@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import { useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import type { RootState } from "../../redux/store";
+
+import RecruiterPaywallModal from "../../components/RecruiterPaywallModal";
+import api from "../../utils/api";
 
 interface Experience {
   id: string;
@@ -88,6 +90,7 @@ const Candidates = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [requiresSubscription, setRequiresSubscription] = useState(false);
 
   const [search, setSearch] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
@@ -96,26 +99,31 @@ const Candidates = () => {
   const token = useSelector((state: RootState) => state.user.token);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCandidates = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get("/api/auth/all-applicants", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setCandidates(response.data.data);
-      } catch (err) {
-        console.error("Error fetching candidates:", err);
-        setError("Failed to load candidates. Please try again.");
-      } finally {
-        setLoading(false);
+  const fetchCandidates = async () => {
+    setLoading(true);
+    setError(null);
+    setRequiresSubscription(false);
+    try {
+      const response: any = await api.recruiters.getCandidates();
+      const list = response.data || response;
+      if (Array.isArray(list)) {
+        setCandidates(list);
+      } else if (Array.isArray(list.data)) {
+        setCandidates(list.data);
       }
-    };
+    } catch (err: any) {
+      console.error("Error fetching candidates:", err);
+      if (err.response?.status === 402 || err.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
+        setRequiresSubscription(true);
+      } else {
+        setError("Failed to load candidates. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCandidates();
   }, [token]);
 
@@ -181,7 +189,9 @@ const Candidates = () => {
       </div>
 
       {/* Results */}
-      {loading ? (
+      {requiresSubscription ? (
+        <RecruiterPaywallModal onSuccess={() => fetchCandidates()} />
+      ) : loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <CandidateCardSkeleton key={i} />

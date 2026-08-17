@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { paymentController } from "../controllers/paymentController";
 
 export const requireActiveSubscription = new Elysia().onBeforeHandle(
-  async ({ user, set }) => {
+  async ({ user, set }: { user?: { sub: string; id?: string; role: string }; set: any }) => {
     if (!user) {
       set.status = 401;
       return { success: false, message: "Unauthorized" };
@@ -10,7 +10,8 @@ export const requireActiveSubscription = new Elysia().onBeforeHandle(
 
     if (user.role !== "recruiter") return;
 
-    const status = await paymentController.getStatus(user.id);
+    const userId = user.sub || user.id || "";
+    const status = await paymentController.getStatus(userId);
 
     if (!status.success || !status.data?.isActive) {
       set.status = 402;

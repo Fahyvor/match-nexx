@@ -4,7 +4,7 @@ import {
   applications,
   jobs,
 } from "../db/schema";
-import type { UploadedFile, Context } from "elysia";
+import type { Context } from "elysia";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { supabase } from "../config/supabase";
@@ -43,7 +43,7 @@ export class ApplicantController {
     body,
     set,
   }: {
-    body: { cv: UploadedFile };
+    body: { cv: File };
     user: AuthUser;
     set: ElysiaSet;
   }) => {

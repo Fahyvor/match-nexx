@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import SleekToast, { toast } from 'sleek-toast';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from "../../redux/store";
 import { Skeleton } from '../../components/ReuseableSkeleton';
 import { formatDate } from '../../utils/formatDate';
+import api from '../../utils/api';
+import RecruiterPaywallModal from '../../components/RecruiterPaywallModal';
 
 interface Job {
   id: string;
@@ -45,51 +46,46 @@ export default function RecruiterDashboard() {
 
   const [candidatesLoading, setCandidatesLoading] = useState(true);
   const [topCandidates, setTopCandidates] = useState<Candidate[]>([]);
+  const [requiresSubscription, setRequiresSubscription] = useState(false);
+
+  const fetchRecruiterJobs = async () => {
+    try {
+      const response: any = await api.jobs.getRecruiterJobs();
+      setRecruiterJobs(response.data || response);
+    } catch (error) {
+      console.error('Error fetching recruiter jobs:', error);
+      toast.error('Failed to load jobs. Please try again later.', 4000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTopCandidates = async () => {
+    setCandidatesLoading(true);
+    setRequiresSubscription(false);
+    try {
+      const response: any = await api.recruiters.getCandidates();
+      const all: Candidate[] = response.data || response;
+
+      if (Array.isArray(all)) {
+        const sorted = [...all]
+          .sort((a, b) => (b.years_of_experience || 0) - (a.years_of_experience || 0))
+          .slice(0, 5);
+        setTopCandidates(sorted);
+      }
+    } catch (error: any) {
+      console.error('Error fetching top candidates:', error);
+      if (error.response?.status === 402 || error.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
+        setRequiresSubscription(true);
+      } else {
+        toast.error('Failed to load candidates. Please try again later.', 4000);
+      }
+    } finally {
+      setCandidatesLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecruiterJobs = async () => {
-      try {
-        const response = await axios.get('/api/jobs/recruiter-jobs', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        setRecruiterJobs(response.data);
-      } catch (error) {
-        console.error('Error fetching recruiter jobs:', error);
-        toast.error('Failed to load jobs. Please try again later.', 4000);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchTopCandidates = async () => {
-      setCandidatesLoading(true);
-      try {
-        const response = await axios.get('/api/auth/all-applicants', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        const all: Candidate[] = response.data.data;
-
-        // "Top" = most experienced, top 5
-        const sorted = [...all]
-          .sort((a, b) => b.years_of_experience - a.years_of_experience)
-          .slice(0, 5);
-
-        setTopCandidates(sorted);
-      } catch (error) {
-        console.error('Error fetching top candidates:', error);
-        toast.error('Failed to load candidates. Please try again later.', 4000);
-      } finally {
-        setCandidatesLoading(false);
-      }
-    };
-
     fetchRecruiterJobs();
     fetchTopCandidates();
   }, [token]);
@@ -326,8 +322,11 @@ export default function RecruiterDashboard() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {candidatesLoading ? (
+          {requiresSubscription ? (
+            <RecruiterPaywallModal onSuccess={() => fetchTopCandidates()} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {candidatesLoading ? (
               [...Array(5)].map((_, i) => (
                 <div key={i} className="bg-white dark:bg-cyber-dark/50 border border-zinc-800 p-4 text-center">
                   <Skeleton className="w-12 h-12 rounded-full mx-auto mb-3" />
@@ -378,6 +377,7 @@ export default function RecruiterDashboard() {
               ))
             )}
           </div>
+          )}
         </section>
       </main>
     </div>

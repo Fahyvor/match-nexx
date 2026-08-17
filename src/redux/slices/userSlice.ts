@@ -79,12 +79,18 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.auth.register(data);
-      sessionStorage.setItem('token', response.data.token);
-      return { user: response.data.user, token: response.data.token };
+      const response: any = await api.auth.register(data);
+      const payload = response.data?.data ?? response.data ?? response;
+      const user = payload.user || { id: payload.id, email: payload.email, role: payload.role || data.userType, firstName: data.firstName, lastName: data.lastName };
+      const token = payload.token || '';
+      if (token) {
+        const expiry = Date.now() + 24 * 60 * 60 * 1000;
+        sessionStorage.setItem('auth', JSON.stringify({ token, user, expiry }));
+      }
+      return { user, token };
     } catch (error: unknown) {
-      const apiError = error as { response?: { data?: { error?: string } } };
-      return rejectWithValue(apiError.response?.data?.error || 'Registration failed');
+      const apiError = error as { response?: { data?: { error?: string; message?: string } } };
+      return rejectWithValue(apiError.response?.data?.message || apiError.response?.data?.error || 'Registration failed');
     }
   }
 );
