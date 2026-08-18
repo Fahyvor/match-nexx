@@ -7,7 +7,7 @@ interface CvPaywallModalProps {
 }
 
 export default function CvPaywallModal({
-  onSuccess,
+  // onSuccess,
 }: CvPaywallModalProps) {
   const [loading, setLoading] = useState(false);
 

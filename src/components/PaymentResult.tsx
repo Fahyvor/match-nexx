@@ -26,7 +26,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
   const checkoutId = searchParams.get("checkout_id");
   const chargeId = searchParams.get("charge_id");
   const statusParam = searchParams.get("status");
-  const plan = searchParams.get("plan");
+  // const plan = searchParams.get("plan");
 
   useEffect(() => {
     const verifyPayment = async () => {
