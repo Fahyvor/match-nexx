@@ -56,7 +56,7 @@ export default function CVBuilder() {
         // Get the user data normally first.
         const response: any = await api.auth.getCurrentUser();
         if (response) {
-          console.log("User Data", response.data || response);
+          // console.log("User Data", response.data || response);
           setPersonalInfo((prev) => ({
             ...prev,
             firstName: response.data.firstName || '',

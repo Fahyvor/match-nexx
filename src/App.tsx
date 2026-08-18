@@ -19,6 +19,8 @@ import CreateJobPage from './pages/jobs/CreateJobs';
 import JobApplication from './pages/applicant/JobApplication';
 import Candidates from './pages/recruiter/Candidates';
 import CandidatesProfile from './pages/recruiter/CandidatesProfile';
+import PaymentResult from "./components/PaymentResult";
+
 export default function App() {
   const dispatch = useAppDispatch();
 
@@ -55,6 +57,9 @@ export default function App() {
           <Route path="/candidates" element={<Candidates />} />
           <Route path="/candidates/:id" element={<CandidatesProfile />} />
         </Route>
+        <Route path="/applicant/cv/payment/callback" element={<PaymentResult />} />
+        <Route path="/applicant/cv/payment/success" element={<PaymentResult />} />
+        <Route path="/applicant/cv/payment/failed" element={<PaymentResult />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       <Footer />

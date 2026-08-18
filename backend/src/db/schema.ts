@@ -4,514 +4,365 @@ import {
   uuid,
   timestamp,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
+
 import { relations } from "drizzle-orm";
 
-/* ===========================
+/* =========================================================
    USERS
-=========================== */
+========================================================= */
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-
   firstName: text("firstName").notNull(),
   lastName: text("lastName").notNull(),
-
   state: text("state").notNull(),
   country: text("country").notNull(),
-
   years_of_experience: integer("years_of_experience").notNull(),
-
   role: text("role").notNull(),
-
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
+/* =========================================================
    APPLICANTS
-=========================== */
+========================================================= */
 
 export const applicants = pgTable("applicants", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   userId: uuid("user_id")
     .notNull()
     .unique()
-    .references(() => users.id, { onDelete: "cascade" }),
-
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
   headline: text("headline"),
-
   summary: text("summary"),
-
   phone: text("phone"),
-
   location: text("location"),
-
   portfolio: text("portfolio"),
-
   github: text("github"),
-
   linkedin: text("linkedin"),
-
   twitter: text("twitter"),
-
   facebook: text("facebook"),
-
   cvUrl: text("cv_url"),
-
   profilePicture: text("profile_picture"),
-
-  hasPaidCv: text("has_paid_cv").default("false"),
-
+  
+  // 🔥 NEW FIELDS FOR CV PAYMENT TRACKING
+  hasPaidCv: boolean("has_paid_cv").default(false),
+  bachsCheckoutId: text("bachs_checkout_id").unique(),
+  bachsChargeId: text("bachs_charge_id").unique(),
+  paidAt: timestamp("paid_at"),
+  
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
+/* =========================================================
    RECRUITERS
-=========================== */
+========================================================= */
 
 export const recruiters = pgTable("recruiters", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   userId: uuid("user_id")
     .notNull()
     .unique()
-    .references(() => users.id, { onDelete: "cascade" }),
-
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
   companyName: text("company_name"),
-
   website: text("website"),
-
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
+/* =========================================================
    JOBS
-=========================== */
+========================================================= */
 
 export const jobs = pgTable("jobs", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   recruiterId: uuid("recruiter_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-
+    .references(() => recruiters.id, {
+      onDelete: "cascade",
+    }),
   title: text("title").notNull(),
-
   description: text("description"),
-
   location: text("location"),
-
   type: text("type"),
-
   experienceLevel: text("experience_level"),
-
   salary: integer("salary"),
-
   requirements: text("requirements").array(),
-
   company: text("company"),
-
   status: text("status").default("active"),
-
   totalApplicants: integer("total_applicants").default(0),
-
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
+/* =========================================================
    APPLICATIONS
-=========================== */
+========================================================= */
 
 export const applications = pgTable("applications", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   jobId: uuid("job_id")
     .notNull()
-    .references(() => jobs.id, { onDelete: "cascade" }),
-
+    .references(() => jobs.id, {
+      onDelete: "cascade",
+    }),
   status: text("status").default("pending"),
-
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
+/* =========================================================
    EXPERIENCES
-=========================== */
+========================================================= */
 
 export const experiences = pgTable("experiences", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   company: text("company").notNull(),
-
   role: text("role").notNull(),
-
   startDate: text("start_date"),
-
   endDate: text("end_date"),
-
   description: text("description"),
 });
 
-/* ===========================
+/* =========================================================
    EDUCATIONS
-=========================== */
+========================================================= */
 
 export const educations = pgTable("educations", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   school: text("school").notNull(),
-
   degree: text("degree"),
-
   field: text("field"),
-
   startYear: text("start_year"),
-
   endYear: text("end_year"),
 });
 
-/* ===========================
+/* =========================================================
    SKILLS
-=========================== */
+========================================================= */
 
 export const skills = pgTable("skills", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   name: text("name").notNull(),
 });
 
-/* ===========================
+/* =========================================================
    PROJECTS
-=========================== */
+========================================================= */
 
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   name: text("name").notNull(),
-
   description: text("description"),
-
   technologies: text("technologies").array(),
-
   link: text("link"),
 });
 
-/* ===========================
+/* =========================================================
    CVS
-=========================== */
+========================================================= */
 
 export const cvs = pgTable("cvs", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   applicantId: uuid("applicant_id")
     .notNull()
     .unique()
-    .references(() => applicants.id, { onDelete: "cascade" }),
-
+    .references(() => applicants.id, {
+      onDelete: "cascade",
+    }),
   professionalSummary: text("professional_summary"),
-
   template: text("template").default("minimal"),
-
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+/* =========================================================
+   RECRUITER SUBSCRIPTIONS
+   This is ONLY for recruiter subscriptions.
+========================================================= */
 
 export const subscriptions = pgTable("subscriptions", {
   id: uuid("id").primaryKey().defaultRandom(),
-
   recruiterId: uuid("recruiter_id")
     .notNull()
-    .references(() => recruiters.id, { onDelete: "cascade" }),
-
+    .references(() => recruiters.id, {
+      onDelete: "cascade",
+    }),
   plan: text("plan").notNull(),
-
   status: text("status")
     .notNull()
     .default("pending"),
-
   bachsCheckoutId: text("bachs_checkout_id").unique(),
-
   bachsChargeId: text("bachs_charge_id").unique(),
-
   currentPeriodEnd: timestamp("current_period_end"),
-
   createdAt: timestamp("created_at").defaultNow(),
-
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-/* ===========================
-RELATIONS
-=========================== */
+/* =========================================================
+   RELATIONS
+========================================================= */
 
-export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
-  recruiter: one(recruiters, {
-    fields: [subscriptions.recruiterId],
-    references: [recruiters.id],
-  }),
-}));
+export const userRelations = relations(
+  users,
+  ({ one, many }) => ({
+    applicant: one(applicants, {
+      fields: [users.id],
+      references: [applicants.userId],
+    }),
+    recruiter: one(recruiters, {
+      fields: [users.id],
+      references: [recruiters.userId],
+    }),
+  })
+);
 
-export const userRelations = relations(users, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [users.id],
-    references: [applicants.userId],
-  }),
+export const applicantRelations = relations(
+  applicants,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [applicants.userId],
+      references: [users.id],
+    }),
+    applications: many(applications),
+    experiences: many(experiences),
+    educations: many(educations),
+    skills: many(skills),
+    projects: many(projects),
+    cv: one(cvs, {
+      fields: [applicants.id],
+      references: [cvs.applicantId],
+    }),
+  })
+);
 
-  recruiter: one(recruiters, {
-    fields: [users.id],
-    references: [recruiters.userId],
-  }),
-}));
+export const recruiterRelations = relations(
+  recruiters,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [recruiters.userId],
+      references: [users.id],
+    }),
+    jobs: many(jobs),
+    subscriptions: many(subscriptions),
+  })
+);
 
-export const applicantRelations = relations(applicants, ({ one, many }) => ({
-  user: one(users, {
-    fields: [applicants.userId],
-    references: [users.id],
-  }),
+export const subscriptionRelations = relations(
+  subscriptions,
+  ({ one }) => ({
+    recruiter: one(recruiters, {
+      fields: [subscriptions.recruiterId],
+      references: [recruiters.id],
+    }),
+  })
+);
 
-  applications: many(applications),
+export const jobRelations = relations(
+  jobs,
+  ({ one, many }) => ({
+    recruiter: one(recruiters, {
+      fields: [jobs.recruiterId],
+      references: [recruiters.id],
+    }),
+    applications: many(applications),
+  })
+);
 
-  experiences: many(experiences),
+export const applicationRelations = relations(
+  applications,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [applications.applicantId],
+      references: [applicants.id],
+    }),
+    job: one(jobs, {
+      fields: [applications.jobId],
+      references: [jobs.id],
+    }),
+  })
+);
 
-  educations: many(educations),
+export const experienceRelations = relations(
+  experiences,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [experiences.applicantId],
+      references: [applicants.id],
+    }),
+  })
+);
 
-  skills: many(skills),
+export const educationRelations = relations(
+  educations,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [educations.applicantId],
+      references: [applicants.id],
+    }),
+  })
+);
 
-  projects: many(projects),
+export const skillRelations = relations(
+  skills,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [skills.applicantId],
+      references: [applicants.id],
+    }),
+  })
+);
 
-  cv: one(cvs, {
-    fields: [applicants.id],
-    references: [cvs.applicantId],
-  }),
-}));
+export const projectRelations = relations(
+  projects,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [projects.applicantId],
+      references: [applicants.id],
+    }),
+  })
+);
 
-export const cvRelations = relations(cvs, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [cvs.applicantId],
-    references: [applicants.id],
-  }),
-}));
-
-export const skillRelations = relations(skills, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [skills.applicantId],
-    references: [applicants.id],
-  }),
-}));
-
-export const projectRelations = relations(projects, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [projects.applicantId],
-    references: [applicants.id],
-  }),
-}));
-
-export const recruiterRelations = relations(recruiters, ({ one, many }) => ({
-  user: one(users, {
-    fields: [recruiters.userId],
-    references: [users.id],
-  }),
-
-  jobs: many(jobs),
-  subscriptions: many(subscriptions),
-}));
-
-export const jobRelations = relations(jobs, ({ one, many }) => ({
-  recruiter: one(recruiters, {
-    fields: [jobs.recruiterId],
-    references: [recruiters.id],
-  }),
-
-  applications: many(applications),
-}));
-
-export const applicationRelations = relations(applications, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [applications.applicantId],
-    references: [applicants.id],
-  }),
-
-  job: one(jobs, {
-    fields: [applications.jobId],
-    references: [jobs.id],
-  }),
-}));
-
-export const experienceRelations = relations(experiences, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [experiences.applicantId],
-    references: [applicants.id],
-  }),
-}));
-
-export const educationRelations = relations(educations, ({ one }) => ({
-  applicant: one(applicants, {
-    fields: [educations.applicantId],
-    references: [applicants.id],
-  }),
-}));
-
-//   pgTable,
-//   text,
-//   uuid,
-//   timestamp,
-//   integer,
-// } from "drizzle-orm/pg-core";
-
-// /* USERS */
-// export const users = pgTable("users", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   email: text("email").notNull().unique(),
-//   password: text("password").notNull(),
-//   firstName: text("firstName").notNull(),
-//   lastName: text("lastName").notNull(),
-//   state: text("state").notNull(),
-//   country: text("country").notNull(),
-//   years_of_experience: integer("years_of_experience").notNull(),
-//   role: text("role").notNull(),
-
-//   createdAt: timestamp("created_at").defaultNow(),
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
-// /* APPLICANTS */
-// export const applicants = pgTable("applicants", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-
-//   userId: uuid("user_id").notNull().unique(),
-
-//   headline: text("headline"),
-
-//   summary: text("summary"),
-
-//   phone: text("phone"),
-
-//   location: text("location"),
-
-//   portfolio: text("portfolio"),
-
-//   github: text("github"),
-
-//   linkedin: text("linkedin"),
-
-//   cvUrl: text("cv_url"),
-
-//   profilePicture: text("profile_picture"),
-
-//   createdAt: timestamp("created_at").defaultNow(),
-
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
-// /* RECRUITERS */
-// export const recruiters = pgTable("recruiters", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   userId: uuid("user_id").notNull().unique(),
-
-//   companyName: text("company_name"),
-//   website: text("website"),
-
-//   createdAt: timestamp("created_at").defaultNow(),
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
-// /* JOBS */
-// export const jobs = pgTable("jobs", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   recruiterId: uuid("recruiter_id")
-//     .notNull()
-//     .references(() => users.id, { onDelete: "cascade" }),
-
-//   title: text("title").notNull(),
-//   description: text("description"),
-
-//   location: text("location"),
-//   type: text("type"),
-
-//   experienceLevel: text("experience_level"),
-//   salary: integer("salary"),
-//   requirements: text("requirements").array(),
-//   company: text("company"),
-
-//   status: text("status").default("active"),
-//   totalApplicants: integer("total_applicants").default(0),
-
-//   createdAt: timestamp("created_at").defaultNow(),
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
-// /* APPLICATIONS */
-// export const applications = pgTable("applications", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-
-//   applicantId: uuid("applicant_id")
-//     .notNull()
-//     .references(() => applicants.id, { onDelete: "cascade" }),
-
-//   jobId: uuid("job_id")
-//     .notNull()
-//     .references(() => jobs.id, { onDelete: "cascade" }),
-
-//   status: text("status").default("pending"),
-
-//   createdAt: timestamp("created_at").defaultNow(),
-//   updatedAt: timestamp("updated_at").defaultNow(),
-// });
-
-// /* EXPERIENCES */
-// export const experiences = pgTable("experiences", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   applicantId: uuid("applicant_id").notNull(),
-
-//   company: text("company").notNull(),
-//   role: text("role").notNull(),
-//   startDate: text("start_date"),
-//   endDate: text("end_date"),
-//   description: text("description"),
-// });
-
-// /* EDUCATION */
-// export const educations = pgTable("educations", {
-//   id: uuid("id").primaryKey().defaultRandom(),
-//   applicantId: uuid("applicant_id").notNull(),
-
-//   school: text("school").notNull(),
-//   degree: text("degree"),
-//   field: text("field"),
-//   startYear: text("start_year"),
-//   endYear: text("end_year"),
-// });
+export const cvRelations = relations(
+  cvs,
+  ({ one }) => ({
+    applicant: one(applicants, {
+      fields: [cvs.applicantId],
+      references: [cvs.applicantId],
+    }),
+  })
+);

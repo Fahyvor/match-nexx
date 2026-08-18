@@ -4,75 +4,152 @@ import { paymentController } from "../controllers/paymentController";
 
 const app = new Elysia({ prefix: "/payments" })
 
-  // Recruiter Subscription Endpoints
+  // =========================================================
+  // RECRUITER PAYMENTS
+  // =========================================================
   .group("/recruiter", (group) =>
     group
       .use(authMiddleware(["recruiter", "admin"]))
 
+      // POST /payments/recruiter/initialize
       .post(
         "/initialize",
-        async ({ user, body }) =>
-          paymentController.initializeSubscription(user, body.plan),
+        async ({ user, body }) => {
+          return paymentController.initializeSubscription(
+            user,
+            body.plan
+          );
+        },
         {
           body: t.Object({
-            plan: t.Union([t.Literal("monthly"), t.Literal("yearly")]),
+            plan: t.Union([
+              t.Literal("monthly"),
+              t.Literal("yearly"),
+            ]),
           }),
         }
       )
 
+      // POST /payments/recruiter/activate
       .post(
         "/activate",
-        async ({ user, body }) =>
-          paymentController.activateSubscriptionDirect(user?.sub, body?.plan || "monthly"),
+        async ({ user, body }) => {
+          return paymentController.activateSubscriptionDirect(
+            user.sub,
+            body?.plan || "monthly"
+          );
+        },
         {
           body: t.Optional(
             t.Object({
-              plan: t.Optional(t.Union([t.Literal("monthly"), t.Literal("yearly")])),
+              plan: t.Optional(
+                t.Union([
+                  t.Literal("monthly"),
+                  t.Literal("yearly"),
+                ])
+              ),
             })
           ),
         }
       )
 
-      .get("/status", async ({ user }) => paymentController.getStatus(user?.sub))
+      // GET /payments/recruiter/status
+      .get("/status", async ({ user }) => {
+        return paymentController.getStatus(user.sub);
+      })
   )
 
-  // Legacy recruiter initialize endpoint alias
-  .use(authMiddleware(["recruiter", "admin"]))
-  .post(
-    "/initialize",
-    async ({ user, body }) =>
-      paymentController.initializeSubscription(user, body.plan),
-    {
-      body: t.Object({
-        plan: t.Union([t.Literal("monthly"), t.Literal("yearly")]),
-      }),
-    }
-  )
-  .get("/status", async ({ user }) => paymentController.getStatus(user?.sub))
+  // =========================================================
+  // LEGACY RECRUITER ENDPOINTS
+  // =========================================================
+  .group("", (group) =>
+    group
+      .use(authMiddleware(["recruiter", "admin"]))
 
-  // Applicant CV Payment Endpoints
+      // POST /payments/initialize
+      .post(
+        "/initialize",
+        async ({ user, body }) => {
+          return paymentController.initializeSubscription(
+            user,
+            body.plan
+          );
+        },
+        {
+          body: t.Object({
+            plan: t.Union([
+              t.Literal("monthly"),
+              t.Literal("yearly"),
+            ]),
+          }),
+        }
+      )
+
+      // GET /payments/status
+      .get("/status", async ({ user }) => {
+        return paymentController.getStatus(user.sub);
+      })
+  )
+
+  // =========================================================
+  // CV PAYMENTS
+  // =========================================================
   .group("/cv", (group) =>
     group
       .use(authMiddleware(["applicant", "admin", "recruiter"]))
 
-      .post("/initialize", async ({ user }) =>
-        paymentController.initializeCvPayment(user?.sub)
+      // POST /payments/cv/initialize
+      .post(
+        "/initialize",
+        async ({ user }) => {
+          console.log("========== CV PAYMENT INITIALIZE ==========");
+          console.log("USER ID:", user.sub);
+          console.log("EMAIL:", user.email);
+          console.log("ROLE:", user.role);
+          console.log("===========================================");
+
+          return paymentController.initializeCvPayment(
+            user.sub,
+            user.email
+          );
+        }
       )
 
-      .post("/verify", async ({ user }) =>
-        paymentController.verifyCvPayment(user?.sub)
+      // POST /payments/cv/verify
+      .post(
+        "/verify",
+        async ({ user }) => {
+          return paymentController.verifyCvPayment(
+            user.sub
+          );
+        }
       )
 
-      .get("/status", async ({ user }) =>
-        paymentController.getCvStatus(user?.sub)
+      // GET /payments/cv/status
+      .get(
+        "/status",
+        async ({ user }) => {
+          return paymentController.getCvStatus(
+            user.sub
+          );
+        }
       )
   )
 
-  .post("/webhook", async ({ request, headers, set }) => {
-    const rawBody = await request.text();
-    const event = JSON.parse(rawBody);
-    await paymentController.handleWebhookEvent(event);
-    return "OK";
-  });
+  // =========================================================
+  // PAYMENT WEBHOOK
+  // =========================================================
+  .post(
+    "/webhook",
+    async ({ request }) => {
+      const rawBody = await request.text();
+
+      const event = JSON.parse(rawBody);
+
+      await paymentController.handleWebhookEvent(event);
+
+      return "OK";
+    }
+  );
 
 export default app;
