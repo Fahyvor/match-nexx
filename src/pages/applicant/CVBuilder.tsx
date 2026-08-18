@@ -49,6 +49,32 @@ export default function CVBuilder() {
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
 
   // Check CV payment status and fetch existing CV on mount
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // Get the user data normally first.
+        const response: any = await api.auth.getCurrentUser();
+        if (response) {
+          console.log("User Data", response.data || response);
+          setPersonalInfo((prev) => ({
+            ...prev,
+            firstName: response.data.firstName || '',
+            lastName: response.data.lastName || '',
+            email: response.data.email || '',
+            phone: response.data.phone || '',
+            address: response.data.address || '',
+            country: response.data.country || '',
+            state: response.data.state || '',
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   useEffect(() => {
     const fetchCVDetails = async () => {
       try {
@@ -240,7 +266,10 @@ export default function CVBuilder() {
         setProfessionalSummary(res.summary);
         toast.success('AI Professional Summary generated!');
       } else {
-        toast.error(res.message || 'Could not generate summary.');
+        toast.error(res.message || 'Could not generate summary.', 5000);
+        if (res.message === "Payment of ₦1,000 is required before generating your CV summary.") {
+         setHasPaidCv(false)
+        }
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || 'Failed to generate summary.');
@@ -493,13 +522,13 @@ export default function CVBuilder() {
                 disabled={generatingSummary}
                 className="px-4 py-1.5 bg-accent-lime/20 border border-accent-lime text-accent-lime hover:bg-accent-lime hover:text-black transition-all font-mono text-xs font-bold uppercase tracking-wider rounded flex items-center gap-2 self-start"
               >
-                {generatingSummary ? '✨ Generating...' : '✨ Generate with Gemini AI'}
+                {generatingSummary ? 'Generating...' : 'Generate with AI'}
               </button>
             </div>
 
             <textarea
               rows={4}
-              placeholder="Write a brief professional summary or click 'Generate with Gemini AI'..."
+              placeholder="Write a brief professional summary or click 'Generate with AI'..."
               value={professionalSummary}
               onChange={(e) => setProfessionalSummary(e.target.value)}
               className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-lime transition-colors leading-relaxed"

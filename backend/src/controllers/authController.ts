@@ -2,6 +2,7 @@ import { registerUser, loginUser, updateUser } from "../modules/auth";
 import { createToken, verifyToken } from "../utils/jwt";
 import type { Context } from "elysia";
 import type { User } from "../models/User";
+import type { AuthUser } from "../middlewares/auth";
 import { users } from "../db/schema";
 import { db } from "../db/db";
 import { eq } from "drizzle-orm";
@@ -583,6 +584,34 @@ deleteOwnAccount: async ({
           e instanceof Error
             ? e.message
             : "Internal server error",
+      };
+    }
+  },
+
+  getUserProfile: async (user: AuthUser) => {
+    try {
+      const userProfile = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, user.sub),
+      });
+
+      if (!userProfile) {
+        return {
+          success: false,
+          message: "User not found",
+          status: 404,
+        };
+      }
+
+      return {
+        success: true,
+        data: userProfile,
+      };
+    } catch (e) {
+      console.error("getUserProfile error:", e);
+
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Internal server error",
       };
     }
   },

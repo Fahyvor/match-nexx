@@ -12,7 +12,7 @@ export default function CvPaywallModal({ onSuccess }: CvPaywallModalProps) {
   const handlePayCv = async () => {
     try {
       setLoading(true);
-      const res: any = await api.payments.verifyCvPayment();
+      const res: any = await api.payments.initializeCvPayment();
 
       if (res.success) {
         toast.success(res.message || '₦1,000 Payment verified! Your CV Builder is unlocked.');
@@ -30,7 +30,7 @@ export default function CvPaywallModal({ onSuccess }: CvPaywallModalProps) {
   };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center p-6 bg-panel-bg/80 backdrop-blur-md">
+    <div className="min-h-[70vh] bg-black flex items-center justify-center p-6 bg-panel-bg/80 backdrop-blur-md">
       <SleekToast />
       <div className="w-full max-w-lg bg-panel-bg border border-accent-cyan/40 p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center space-y-6">
         {/* Glow */}

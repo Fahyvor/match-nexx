@@ -66,11 +66,6 @@ const app = new Elysia({ prefix: "/auth" })
       }),
     }
   )
-
-  // =========================
-  // PROTECTED ROUTES
-  // =========================
-
   .group("/user", (group) =>
     group
       .use(authMiddleware(["applicant", "recruiter", "admin"]))
@@ -99,13 +94,13 @@ const app = new Elysia({ prefix: "/auth" })
     message: "Account deleted successfully",
     data: { user },
   }))
-
-  // =========================
-  // REFRESH TOKEN
-  // =========================
-
   .post("/refresh-token", async ({ headers }) =>
     authController.refreshToken(headers.authorization ?? "")
+  )
+
+  .get(
+    "/get-single-user",
+    async ({ user }) => authController.getUserProfile(user)
   );
 
 export default app;

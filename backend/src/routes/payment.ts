@@ -53,7 +53,7 @@ const app = new Elysia({ prefix: "/payments" })
   // Applicant CV Payment Endpoints
   .group("/cv", (group) =>
     group
-      .use(authMiddleware(["applicant", "admin"]))
+      .use(authMiddleware(["applicant", "admin", "recruiter"]))
 
       .post("/initialize", async ({ user }) =>
         paymentController.initializeCvPayment(user?.sub)

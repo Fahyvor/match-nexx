@@ -113,6 +113,9 @@ class ApiClient {
 
     refreshToken: () =>
       this.client.post('/auth/refresh-token'),
+
+    getCurrentUser: () => 
+      this.client.get('/auth/get-single-user')
   };
 
   // Job endpoints
@@ -209,7 +212,7 @@ class ApiClient {
   // Payment endpoints
   payments = {
     initializeSubscription: (plan: 'monthly' | 'yearly') =>
-      this.client.post('/payments/initialize', { plan }),
+      this.client.post('/payments/cv/initialize', { plan }),
 
     activateSubscription: (plan: 'monthly' | 'yearly' = 'monthly') =>
       this.client.post('/payments/recruiter/activate', { plan }),

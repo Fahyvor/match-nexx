@@ -21,6 +21,8 @@ export const paymentController = {
     plan: "monthly" | "yearly"
   ) => {
     try {
+      console.log("Payment detaiils", plan);
+      console.log("User data", user)
       let recruiter = await db.query.recruiters.findFirst({
         where: eq(recruiters.userId, user.sub),
       });
