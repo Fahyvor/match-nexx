@@ -71,7 +71,7 @@ export const cvController = {
         return { success: false, message: "Applicant profile not found." };
       }
 
-      if (applicant.hasPaidCv !== "true") {
+      if (applicant.hasPaidCv !== true) {
         return {
           success: false,
           code: "CV_PAYMENT_REQUIRED",
@@ -246,7 +246,7 @@ export const cvController = {
         where: eq(applicants.userId, userId),
       });
 
-      if (!applicant || applicant.hasPaidCv !== "true") {
+      if (!applicant || applicant.hasPaidCv !== true) {
         return {
           success: false,
           code: "CV_PAYMENT_REQUIRED",

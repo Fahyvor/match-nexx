@@ -51,7 +51,6 @@ export const applicants = pgTable("applicants", {
   cvUrl: text("cv_url"),
   profilePicture: text("profile_picture"),
   
-  // 🔥 NEW FIELDS FOR CV PAYMENT TRACKING
   hasPaidCv: boolean("has_paid_cv").default(false),
   bachsCheckoutId: text("bachs_checkout_id").unique(),
   bachsChargeId: text("bachs_charge_id").unique(),

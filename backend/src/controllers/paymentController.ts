@@ -1,5 +1,5 @@
 import { db } from "../db/db";
-import { recruiters, subscriptions, applicants } from "../db/schema";
+import { users, recruiters, subscriptions, applicants  } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import axios from "axios";
 
@@ -279,15 +279,13 @@ export const paymentController = {
    * Initialize CV Builder Payment
    * One-time payment of ₦1,000
    */
-  initializeCvPayment: async (userId: string, email: string) => {
+initializeCvPayment: async (userId: string, email: string) => {
   try {
-    console.log('Starting initializeCvPayment for userId:', userId);
+    console.log(
+      "Starting initializeCvPayment for userId:",
+      userId
+    );
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-    
-    // Validate inputs
     if (!userId || !email) {
       return {
         success: false,
@@ -295,7 +293,32 @@ export const paymentController = {
       };
     }
 
-    // Find or create applicant
+    const singleUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    console.log(singleUser, 'is user here?')
+
+    if (!singleUser) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    console.log("User found:", {
+      id: singleUser.id,
+      email: singleUser.email,
+      role: singleUser.role,
+    });
+
+    if (singleUser.role !== "applicant") {
+      return {
+        success: false,
+        message: "Only applicants can purchase the CV Builder",
+      };
+    }
+
     let applicant = await db.query.applicants.findFirst({
       where: eq(applicants.userId, userId),
     });
@@ -304,15 +327,16 @@ export const paymentController = {
       const created = await db
         .insert(applicants)
         .values({
-          userId,
+          userId: userId,
           hasPaidCv: false,
         })
         .returning();
+
       applicant = created[0];
-      console.log('Applicant created');
+
+      console.log("Applicant profile created");
     }
 
-    // Check if already paid
     if (applicant.hasPaidCv === true) {
       return {
         success: true,
@@ -325,32 +349,34 @@ export const paymentController = {
       };
     }
 
-    // Prepare the request data for Bachs
-    // Try different formats based on what works
     const requestData = {
-      product_cart: [
-        {
-          // product_id: process.env.BACHS_CV_PRODUCT_ID || "prod_f710459e53f147c993a0",
-          product_id: process.env.BACHS_CV_PRODUCT_ID || "prod_dcbea9b206c34b1c863f",
-          quantity: 1,
-          // amount: "1000.00",
-          // currency: "NGN",
-        }
-      ],
-      billingCurrency: "NGN",
-      customer: {
-        email: email,
-        name: `${user?.firstName} ${user?.lastName}`,
+      pricing: {
+        currency: "USD",
+        amount: "3.00",
+
+        currency_options: {
+          NGN: "1000.00",
+        },
       },
+
+      customer: {
+        email,
+        name: `${singleUser.firstName} ${singleUser.lastName}`,
+      },
+
       success_url: `${process.env.FRONTEND_URL}/applicant/cv/payment/callback`,
       cancel_url: `${process.env.FRONTEND_URL}/applicant/cv/payment/callback`,
+
       metadata: {
         user_id: userId,
         type: "cv_builder",
       },
     };
 
-    console.log('Bachs request:', JSON.stringify(requestData, null, 2));
+    console.log(
+      "Bachs request:",
+      JSON.stringify(requestData, null, 2)
+    );
 
     const response = await axios.post(
       `${BACHS_API_URL}/v1/checkout-sessions`,
@@ -360,27 +386,43 @@ export const paymentController = {
           Authorization: `Bearer ${BACHS_API_KEY}`,
           "Content-Type": "application/json",
         },
+
         timeout: 30000,
       }
     );
 
     const data = response.data;
-    console.log('Bachs response:', JSON.stringify(data, null, 2));
 
-    // Extract checkout info from response
-    const checkoutId = data?.data?.checkout_id || data?.checkout_id || data?.id;
-    const checkoutUrl = data?.data?.checkout_url || data?.data?.url || data?.checkout_url || data?.url;
+    console.log(
+      "Bachs response:",
+      JSON.stringify(data, null, 2)
+    );
+
+    const checkoutId =
+      data?.data?.checkout_id ||
+      data?.checkout_id ||
+      data?.id;
+
+    const checkoutUrl =
+      data?.data?.checkout_url ||
+      data?.data?.url ||
+      data?.checkout_url ||
+      data?.url;
 
     if (!checkoutId || !checkoutUrl) {
-      console.error('Missing checkout data:', data);
+      console.error(
+        "Missing checkout data:",
+        data
+      );
+
       return {
         success: false,
-        message: "Payment service did not return checkout details",
-        data: data,
+        message:
+          "Payment service did not return checkout details",
+        data,
       };
     }
 
-    // Update applicant
     await db
       .update(applicants)
       .set({
@@ -389,8 +431,15 @@ export const paymentController = {
       })
       .where(eq(applicants.id, applicant.id));
 
+    console.log(
+      "Bachs checkout saved:",
+      checkoutId
+    );
+
     return {
       success: true,
+      message: "CV payment initialized successfully",
+
       data: {
         authorizationUrl: checkoutUrl,
         checkoutId,
@@ -399,23 +448,45 @@ export const paymentController = {
       },
     };
   } catch (e) {
-    console.error('initializeCvPayment error:', e);
-    
-    // Handle Axios errors specifically
+    console.error(
+      "initializeCvPayment error:",
+      e
+    );
+
     if (axios.isAxiosError(e)) {
-      console.error('Status:', e.response?.status);
-      console.error('Response data:', JSON.stringify(e.response?.data, null, 2));
-      
+      console.error(
+        "Bachs Status:",
+        e.response?.status
+      );
+
+      console.error(
+        "Bachs Response:",
+        JSON.stringify(
+          e.response?.data,
+          null,
+          2
+        )
+      );
+
       return {
         success: false,
-        message: e.response?.data?.message || e.response?.data?.error || "Payment service error",
+
+        message:
+          e.response?.data?.message ||
+          e.response?.data?.error ||
+          "Payment service error",
+
         details: e.response?.data,
       };
     }
-    
+
     return {
       success: false,
-      message: e instanceof Error ? e.message : "Internal server error",
+
+      message:
+        e instanceof Error
+          ? e.message
+          : "Internal server error",
     };
   }
 },
@@ -526,59 +597,251 @@ export const paymentController = {
    * Handle CV payment webhook specifically
    * This can be called from a dedicated webhook endpoint
    */
-  handleCvPaymentWebhook: async (checkoutId: string, chargeId: string) => {
+  handleCvPaymentWebhook: async (
+    checkoutId: string,
+    chargeId: string,
+    event?: any
+  ) => {
     try {
-      // Find the applicant with this checkout ID
-      const applicant = await db.query.applicants.findFirst({
-        where: eq(applicants.bachsCheckoutId, checkoutId),
-      });
+      console.log("========== CV PAYMENT WEBHOOK ==========");
+      console.log("Checkout ID:", checkoutId);
+      console.log("Charge ID:", chargeId);
+      console.log("Event:", JSON.stringify(event, null, 2));
+      console.log("========================================");
 
-      if (!applicant) {
+      // -----------------------------------------
+      // Validate required identifiers
+      // -----------------------------------------
+
+      if (!checkoutId) {
         return {
           success: false,
-          message: "Applicant not found for this checkout ID",
+          message: "Checkout ID is required",
         };
       }
 
-      // Check if already paid
+      if (!chargeId) {
+        return {
+          success: false,
+          message: "Charge ID is required",
+        };
+      }
+
+      // -----------------------------------------
+      // Make sure this is actually a successful
+      // collection event
+      // -----------------------------------------
+
+      if (
+        event &&
+        event.type !== "collection.succeeded"
+      ) {
+        return {
+          success: false,
+          message: "Webhook is not a successful collection event",
+        };
+      }
+
+      // -----------------------------------------
+      // If Bachs provides status, verify it
+      // -----------------------------------------
+
+      if (
+        event?.data?.status &&
+        event.data.status !== "succeeded"
+      ) {
+        return {
+          success: false,
+          message: "Payment has not succeeded",
+        };
+      }
+
+      // -----------------------------------------
+      // Find applicant by checkout ID
+      // -----------------------------------------
+
+      const applicant =
+        await db.query.applicants.findFirst({
+          where: eq(
+            applicants.bachsCheckoutId,
+            checkoutId
+          ),
+        });
+
+      if (!applicant) {
+        console.error(
+          "No applicant found for checkout:",
+          checkoutId
+        );
+
+        return {
+          success: false,
+          message:
+            "Applicant not found for this checkout ID",
+        };
+      }
+
+      // -----------------------------------------
+      // Idempotency
+      // -----------------------------------------
+      // Webhooks can be delivered more than once.
+      // Never process the same successful payment twice.
+
       if (applicant.hasPaidCv === true) {
+        console.log(
+          "CV payment already processed:",
+          applicant.userId
+        );
+
         return {
           success: true,
-          message: "Applicant already has paid for CV Builder",
+          alreadyProcessed: true,
+
+          message:
+            "CV payment has already been processed",
+
           data: {
             userId: applicant.userId,
             hasPaidCv: true,
             paidAt: applicant.paidAt,
+            chargeId:
+              applicant.bachsChargeId,
           },
         };
       }
 
-      // Mark applicant as paid
+      // -----------------------------------------
+      // Mark CV as paid
+      // -----------------------------------------
+
+      const paidAt = new Date();
+
       await db
         .update(applicants)
         .set({
           hasPaidCv: true,
           bachsChargeId: chargeId,
-          paidAt: new Date(),
-          updatedAt: new Date(),
+          paidAt,
+          updatedAt: paidAt,
         })
-        .where(eq(applicants.id, applicant.id));
+        .where(
+          eq(
+            applicants.id,
+            applicant.id
+          )
+        );
+
+      console.log(
+        "CV PAYMENT SUCCESSFULLY CONFIRMED"
+      );
+
+      console.log({
+        userId: applicant.userId,
+        applicantId: applicant.id,
+        checkoutId,
+        chargeId,
+        paidAt,
+      });
 
       return {
         success: true,
-        message: "CV payment confirmed successfully",
+
+        message:
+          "CV payment confirmed successfully",
+
         data: {
           userId: applicant.userId,
+          applicantId: applicant.id,
           hasPaidCv: true,
-          paidAt: new Date(),
+          checkoutId,
+          chargeId,
+          paidAt,
         },
       };
+
     } catch (e) {
-      console.error("handleCvPaymentWebhook error:", e);
+
+      console.error(
+        "handleCvPaymentWebhook error:",
+        e
+      );
+
       return {
         success: false,
-        message: e instanceof Error ? e.message : "Internal server error",
+
+        message:
+          e instanceof Error
+            ? e.message
+            : "Internal server error",
       };
     }
   },
+
+  getUserTransactions: async (
+      userId: string
+    ) => {
+      try {
+
+        if (!userId) {
+          return {
+            success: false,
+            message: "User ID is required",
+            status: 400,
+          };
+        }
+
+        const userTransactions =
+          await db
+            .select()
+            .from(applicants)
+            .where(
+              eq(
+                applicants.userId,
+                userId
+              )
+            )
+            .orderBy(
+              desc(
+                applicants.createdAt
+              )
+            );
+
+        return {
+          success: true,
+
+          message:
+            "Transactions fetched successfully",
+
+          data: {
+            transactions:
+              userTransactions,
+
+            total:
+              userTransactions.length,
+          },
+
+          status: 200,
+        };
+
+      } catch (error) {
+
+        console.error(
+          "GET USER TRANSACTIONS ERROR:",
+          error
+        );
+
+        return {
+          success: false,
+          message:
+            "Failed to fetch transactions",
+
+          error:
+            error instanceof Error
+              ? error.message
+              : "Internal Server Error",
+
+          status: 500,
+        };
+      }
+    },
 };
