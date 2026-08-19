@@ -326,7 +326,7 @@ export const paymentController = {
     const requestData = {
       product_cart: [
         {
-          product_id: process.env.BACHS_CV_PRODUCT_ID || "cv_builder",
+          product_id: process.env.BACHS_CV_PRODUCT_ID || "prod_f710459e53f147c993a0",
           quantity: 1,
           amount: "1000.00",
           currency: "NGN",
