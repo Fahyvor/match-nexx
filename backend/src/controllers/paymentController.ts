@@ -330,7 +330,7 @@ export const paymentController = {
           product_id: process.env.BACHS_CV_PRODUCT_ID || "prod_dcbea9b206c34b1c863f",
           quantity: 1,
           // amount: "1000.00",
-          // currency: "NGN",
+          currency: "NGN",
         }
       ],
       customer: {
