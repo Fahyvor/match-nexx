@@ -61,7 +61,9 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
 
           const response = await api.payments.verifyPayment(verifyPayload);
 
-          if (response?.data?.success) {
+          console.log("Response after payment", response)
+
+          if (response?.data?.success === true) {
             setStatus("success");
             setPaymentData(response.data);
             if (onSuccess) onSuccess();
