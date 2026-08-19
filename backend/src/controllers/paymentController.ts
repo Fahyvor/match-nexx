@@ -282,6 +282,10 @@ export const paymentController = {
   initializeCvPayment: async (userId: string, email: string) => {
   try {
     console.log('Starting initializeCvPayment for userId:', userId);
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
     
     // Validate inputs
     if (!userId || !email) {
@@ -330,12 +334,13 @@ export const paymentController = {
           product_id: process.env.BACHS_CV_PRODUCT_ID || "prod_dcbea9b206c34b1c863f",
           quantity: 1,
           // amount: "1000.00",
-          currency: "NGN",
+          // currency: "NGN",
         }
       ],
+      billingCurrency: "NGN",
       customer: {
         email: email,
-        name: "Applicant",
+        name: `${user?.firstName} ${user?.lastName}`,
       },
       success_url: `${process.env.FRONTEND_URL}/applicant/cv/payment/callback`,
       cancel_url: `${process.env.FRONTEND_URL}/applicant/cv/payment/callback`,
