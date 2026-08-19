@@ -61,13 +61,13 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
 
           const response = await api.payments.verifyPayment(verifyPayload);
 
-          if (response?.success) {
+          if (response?.data?.success) {
             setStatus("success");
             setPaymentData(response.data);
             if (onSuccess) onSuccess();
           } else {
             setStatus("failure");
-            setErrorMessage(response?.message || "Payment verification failed.");
+            setErrorMessage(response?.data?.message || "Payment verification failed.");
           }
         } else {
           // No parameters - check if user has already paid

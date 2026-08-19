@@ -214,10 +214,12 @@ class ApiClient {
     initializeSubscription: (plan: 'monthly' | 'yearly') =>
       this.client.post('/payments/cv/initialize', { plan }),
 
-    verifyPayment: (data: {
-      checkoutId: string;
-      chargeId?: string;
-    }) =>
+    // verifyPayment: async (data: { checkoutId: string; chargeId?: string }) => {
+    //   const response = await axios.post("/api/payments/cv/verify", data);
+    //   return response.data;
+    // },
+
+    verifyPayment: (data: {checkoutId: string; chargeId?: string;}) =>
       this.client.post('/payments/cv/verify', data),
 
     activateSubscription: (plan: 'monthly' | 'yearly' = 'monthly') =>
