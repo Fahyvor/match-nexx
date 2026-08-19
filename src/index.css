@@ -20,3 +20,56 @@ select:-webkit-autofill:active {
   -webkit-text-fill-color: white !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+@media print {
+  /* Hide everything except the resume */
+  body * {
+    visibility: hidden;
+  }
+
+  .resume-print-area,
+  .resume-print-area * {
+    visibility: visible;
+  }
+
+  .resume-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    width: 100% !important;
+    min-height: 297mm !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 15mm !important;
+
+    box-sizing: border-box;
+
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .resume-print-area * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* A4 page */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: white !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

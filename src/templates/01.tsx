@@ -18,10 +18,10 @@ const Template01: FC<Template01Props> = ({ resume }) => {
   ].filter((item) => item.value);
 
   return (
-    <div className="bg-white text-slate-900 p-8 max-w-4xl w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
+    <div className="bg-white text-slate-900 p-8 w-full w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
       {/* Header */}
-      <div className="border-b-2 border-slate-800 pb-4 text-center">
-        <h1 className="text-3xl font-extrabold uppercase tracking-tight text-slate-900">
+      <div className="text-center">
+        <h1 className="text-3xl font-extrabold uppercase tracking-loose text-slate-900">
           {personalInfo.firstName || personalInfo.lastName
             ? `${personalInfo.firstName} ${personalInfo.lastName}`.trim()
             : 'FULL NAME'}
@@ -64,7 +64,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
               Professional Summary
             </h2>
-            <div className="h-px bg-slate-300 w-full" />
+            <div className="h-0.5 bg-black w-full" />
           </div>
           <p className="text-xs leading-relaxed text-slate-700 text-justify">
             {professionalSummary}
@@ -79,7 +79,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
               Skills
             </h2>
-            <div className="h-px bg-slate-300 w-full" />
+            <div className="h-0.5 bg-black w-full" />
           </div>
           <div className="flex flex-wrap gap-1.5 text-xs">
             {skills.map((skill, idx) => (
@@ -101,7 +101,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
               Work Experience
             </h2>
-            <div className="h-px bg-slate-300 w-full" />
+            <div className="h-0.5 bg-black w-full" />
           </div>
           <div className="space-y-4">
             {experiences.map((exp, idx) => {
@@ -144,7 +144,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
               Education
             </h2>
-            <div className="h-px bg-slate-300 w-full" />
+            <div className="h-0.5 bg-black w-full" />
           </div>
           <div className="space-y-3">
             {educations.map((edu, idx) => (
@@ -171,7 +171,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
               Projects
             </h2>
-            <div className="h-px bg-slate-300 w-full" />
+            <div className="h-0.5 bg-black w-full" />
           </div>
           <div className="space-y-4">
             {projects.map((proj, idx) => {

@@ -54,10 +54,10 @@ export const paymentController = {
             {
               product_cart: [{ product_id: PLAN_CODES[plan], quantity: 1 }],
               customer: { email: user.email, name: recruiter.companyName || "Recruiter" },
-              success_url: `https://clean-story.outray.app/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
-              // success_url: `${process.env.FRONTEND_URL || "https://untrustworthy-duke.outray.app"}/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
-              cancel_url: `https://clean-story.outray.app/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
-              // cancel_url: `${process.env.FRONTEND_URL || "https://untrustworthy-duke.outray.app"}/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
+              // success_url: `https://clean-story.outray.app/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
+              success_url: `${process.env.FRONTEND_URL}/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
+              // cancel_url: `https://clean-story.outray.app/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
+              cancel_url: `${process.env.FRONTEND_URL}/recruiter/payment/callback?checkout_id=${checkoutId}&plan=${plan}`,
             },
             {
               headers: {

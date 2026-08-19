@@ -169,7 +169,7 @@ const CVPreview: React.FC = () => {
       </div>
 
       {/* Printable Area */}
-      <div className="max-w-4xl mx-auto" ref={printRef}>
+      <div className="resume-print-area w-full mx-auto" ref={printRef}>
         <Template01 resume={effectiveResume} />
       </div>
     </div>
