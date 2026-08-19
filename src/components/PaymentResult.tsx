@@ -63,7 +63,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
 
           console.log("Response after payment", response)
 
-          if (response?.data?.success === true) {
+          if (response?.data?.success === true || response?.status === 200) {
             setStatus("success");
             setPaymentData(response.data);
             if (onSuccess) onSuccess();
