@@ -372,7 +372,7 @@ export default function CVBuilder() {
               Construct Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-accent-pink">Professional CV</span>
             </h1>
             <p className="text-zinc-400 text-sm max-w-2xl mt-1">
-              Build an automated, parse-ready CV optimized for recruiters, ATS systems, and tech leads.
+              Build an automated, parse-ready CV optimized for recruiters, ATS systems and tech leads.
             </p>
           </div>
           <div className="flex gap-3">

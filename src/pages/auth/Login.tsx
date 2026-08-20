@@ -71,7 +71,7 @@ export default function Login() {
                 <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12" />
                 <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 mix-blend-screen" />
               </div>
-              <span className="text-lg font-black tracking-tighter uppercase font-mono">HIRE.FLOW</span>
+              <span className="text-lg font-black tracking-tighter uppercase font-mono">MATCH.NEXX</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tighter uppercase mb-2">Welcome Back</h1>
             <p className="text-xs font-mono tracking-widest text-zinc-500">AUTHENTICATION_PROTOCOL</p>

@@ -84,12 +84,12 @@ const Nav = () => {
         </div>
 
         {/* Logo Text */}
-        <span className="text-xl font-black text-accent-cyan-light dark:text-accent-cyan tracking-tighter uppercase font-mono">
-          HIRE
+        <span className="text-xl font-black tracking-wider text-accent-cyan-light dark:text-accent-cyan tracking-tighter uppercase font-mono">
+          MATCH
           <span className="text-accent-cyan-light dark:text-accent-cyan">
             .
           </span>
-          FLOW
+          NEXX
         </span>
       </div>
 
