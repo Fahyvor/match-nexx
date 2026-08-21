@@ -1025,12 +1025,15 @@ initializeCvPayment: async (
       console.log("========== CV PAYMENT WEBHOOK ==========");
       console.log("Checkout ID:", checkoutId);
       console.log("Charge ID:", chargeId);
-      console.log("Event:", JSON.stringify(event, null, 2));
+      console.log(
+        "Event:",
+        JSON.stringify(event, null, 2)
+      );
       console.log("========================================");
 
-      // -----------------------------------------
-      // Validate required identifiers
-      // -----------------------------------------
+      /* =====================================================
+        1. VALIDATE REQUIRED IDENTIFIERS
+      ===================================================== */
 
       if (!checkoutId) {
         return {
@@ -1046,24 +1049,30 @@ initializeCvPayment: async (
         };
       }
 
-      // -----------------------------------------
-      // Make sure this is actually a successful
-      // collection event
-      // -----------------------------------------
+      /* =====================================================
+        2. VERIFY WEBHOOK EVENT
+      ===================================================== */
 
       if (
         event &&
+        event.type &&
         event.type !== "collection.succeeded"
       ) {
+        console.log(
+          "Ignoring webhook event:",
+          event.type
+        );
+
         return {
           success: false,
-          message: "Webhook is not a successful collection event",
+          message:
+            "Webhook is not a successful collection event",
         };
       }
 
-      // -----------------------------------------
-      // If Bachs provides status, verify it
-      // -----------------------------------------
+      /* =====================================================
+        3. VERIFY PAYMENT STATUS
+      ===================================================== */
 
       if (
         event?.data?.status &&
@@ -1075,92 +1084,500 @@ initializeCvPayment: async (
         };
       }
 
-      // -----------------------------------------
-      // Find applicant by checkout ID
-      // -----------------------------------------
+      /* =====================================================
+        4. FIND TRANSACTION
+        
+        IMPORTANT:
+        We now use the transaction as the source of truth
+        instead of relying only on applicants.bachsCheckoutId.
+      ===================================================== */
 
-      const applicant =
-        await db.query.applicants.findFirst({
+      const transaction =
+        await db.query.transactions.findFirst({
           where: eq(
-            applicants.bachsCheckoutId,
+            transactions.providerCheckoutId,
             checkoutId
           ),
         });
 
-      if (!applicant) {
+      if (!transaction) {
         console.error(
-          "No applicant found for checkout:",
+          "Transaction not found for checkout:",
           checkoutId
         );
 
         return {
           success: false,
           message:
-            "Applicant not found for this checkout ID",
+            "Transaction not found for this checkout ID",
         };
       }
 
-      // -----------------------------------------
-      // Idempotency
-      // -----------------------------------------
-      // Webhooks can be delivered more than once.
-      // Never process the same successful payment twice.
+      console.log(
+        "Transaction found:",
+        transaction.id
+      );
 
-      if (applicant.hasPaidCv === true) {
+      /* =====================================================
+        5. VERIFY THIS IS A CV PAYMENT
+      ===================================================== */
+
+      if (transaction.type !== "cv_builder") {
+        console.error(
+          "Invalid transaction type:",
+          transaction.type
+        );
+
+        return {
+          success: false,
+          message:
+            "This transaction is not a CV Builder payment",
+        };
+      }
+
+      /* =====================================================
+        6. IDEMPOTENCY CHECK
+        
+        Webhooks can arrive multiple times.
+
+        If the transaction is already successful,
+        DO NOT process the payment again.
+      ===================================================== */
+
+      if (transaction.status === "successful") {
         console.log(
-          "CV payment already processed:",
-          applicant.userId
+          "Transaction already processed:",
+          transaction.id
         );
 
         return {
           success: true,
+
           alreadyProcessed: true,
 
           message:
             "CV payment has already been processed",
 
           data: {
-            userId: applicant.userId,
-            hasPaidCv: true,
-            paidAt: applicant.paidAt,
+            transactionId:
+              transaction.id,
+
+            userId:
+              transaction.userId,
+
+            applicantId:
+              transaction.applicantId,
+
+            checkoutId,
+
             chargeId:
-              applicant.bachsChargeId,
+              transaction.providerChargeId ||
+              chargeId,
+
+            status:
+              transaction.status,
+
+            paidAt:
+              transaction.paidAt,
           },
         };
       }
 
-      // -----------------------------------------
-      // Mark CV as paid
-      // -----------------------------------------
+      /* =====================================================
+        7. MAKE SURE TRANSACTION IS EXPECTED
+      ===================================================== */
+
+      if (transaction.status !== "pending") {
+        console.warn(
+          "Transaction is not pending:",
+          {
+            transactionId:
+              transaction.id,
+
+            status:
+              transaction.status,
+          }
+        );
+
+        return {
+          success: false,
+
+          message:
+            `Transaction cannot be completed because its current status is "${transaction.status}"`,
+        };
+      }
+
+      /* =====================================================
+        8. FIND APPLICANT
+      ===================================================== */
+
+      if (!transaction.applicantId) {
+        console.error(
+          "Transaction has no applicant ID:",
+          transaction.id
+        );
+
+        return {
+          success: false,
+
+          message:
+            "Transaction is missing applicant information",
+        };
+      }
+
+      const applicant =
+        await db.query.applicants.findFirst({
+          where: eq(
+            applicants.id,
+            transaction.applicantId
+          ),
+        });
+
+      if (!applicant) {
+        console.error(
+          "Applicant not found:",
+          transaction.applicantId
+        );
+
+        return {
+          success: false,
+
+          message:
+            "Applicant not found for this transaction",
+        };
+      }
+
+      /* =====================================================
+        9. SECOND IDEMPOTENCY CHECK
+        
+        The applicant may already have been marked as paid
+        by another successful webhook.
+
+        We don't blindly reject it because the transaction
+        itself is our primary payment record.
+      ===================================================== */
+
+      if (applicant.hasPaidCv === true) {
+        console.log(
+          "Applicant already has CV access:",
+          applicant.id
+        );
+
+        /*
+        * Synchronize the transaction if necessary.
+        *
+        * This protects against a situation where the
+        * applicant was marked as paid but the transaction
+        * update failed during an earlier request.
+        */
+
+        const paidAt =
+          applicant.paidAt || new Date();
+
+        await db
+          .update(transactions)
+          .set({
+            status: "successful",
+
+            providerChargeId:
+              transaction.providerChargeId ||
+              chargeId,
+
+            paidAt,
+
+            updatedAt:
+              new Date(),
+          })
+          .where(
+            eq(
+              transactions.id,
+              transaction.id
+            )
+          );
+
+        return {
+          success: true,
+
+          alreadyProcessed: true,
+
+          message:
+            "CV payment was already confirmed",
+
+          data: {
+            transactionId:
+              transaction.id,
+
+            userId:
+              applicant.userId,
+
+            applicantId:
+              applicant.id,
+
+            hasPaidCv: true,
+
+            checkoutId,
+
+            chargeId,
+
+            paidAt,
+          },
+        };
+      }
+
+      /* =====================================================
+        10. CONFIRM PAYMENT ATOMICALLY
+        
+        Both the transaction and applicant are updated
+        inside ONE database transaction.
+
+        Either BOTH succeed or BOTH roll back.
+      ===================================================== */
 
       const paidAt = new Date();
 
-      await db
-        .update(applicants)
-        .set({
-          hasPaidCv: true,
-          bachsChargeId: chargeId,
-          paidAt,
-          updatedAt: paidAt,
-        })
-        .where(
-          eq(
-            applicants.id,
-            applicant.id
-          )
+      const result =
+        await db.transaction(
+          async (tx) => {
+
+            /* -----------------------------------------------
+              Update payment transaction
+            ------------------------------------------------ */
+
+            const updatedTransactions =
+              await tx
+                .update(transactions)
+                .set({
+                  status: "successful",
+
+                  providerChargeId:
+                    chargeId,
+
+                  paidAt,
+
+                  updatedAt:
+                    paidAt,
+
+                  /*
+                  * Preserve useful webhook information.
+                  */
+                  metadata:
+                    event
+                      ? JSON.stringify(event)
+                      : transaction.metadata,
+                })
+                .where(
+                  and(
+                    eq(
+                      transactions.id,
+                      transaction.id
+                    ),
+
+                    /*
+                    * IMPORTANT:
+                    *
+                    * Only transition pending -> successful.
+                    *
+                    * This provides another layer of
+                    * protection against duplicate webhook
+                    * processing.
+                    */
+                    eq(
+                      transactions.status,
+                      "pending"
+                    )
+                  )
+                )
+                .returning();
+
+            /*
+            * If nothing was updated, another request may
+            * have processed the transaction concurrently.
+            */
+            if (
+              updatedTransactions.length === 0
+            ) {
+              const currentTransaction =
+                await tx.query.transactions.findFirst(
+                  {
+                    where: eq(
+                      transactions.id,
+                      transaction.id
+                    ),
+                  }
+                );
+
+              if (
+                currentTransaction?.status ===
+                "successful"
+              ) {
+                return {
+                  alreadyProcessed: true,
+
+                  transaction:
+                    currentTransaction,
+                };
+              }
+
+              throw new Error(
+                "Transaction could not be confirmed"
+              );
+            }
+
+            /* -----------------------------------------------
+              Update applicant
+            ------------------------------------------------ */
+
+            const updatedApplicants =
+              await tx
+                .update(applicants)
+                .set({
+                  hasPaidCv: true,
+
+                  bachsChargeId:
+                    chargeId,
+
+                  paidAt,
+
+                  updatedAt:
+                    paidAt,
+                })
+                .where(
+                  and(
+                    eq(
+                      applicants.id,
+                      applicant.id
+                    ),
+
+                    /*
+                    * Only update an unpaid applicant.
+                    */
+                    eq(
+                      applicants.hasPaidCv,
+                      false
+                    )
+                  )
+                )
+                .returning();
+
+            /*
+            * Normally this should always update one row.
+            */
+            if (
+              updatedApplicants.length === 0
+            ) {
+              const currentApplicant =
+                await tx.query.applicants.findFirst(
+                  {
+                    where: eq(
+                      applicants.id,
+                      applicant.id
+                    ),
+                  }
+                );
+
+              if (
+                currentApplicant?.hasPaidCv ===
+                true
+              ) {
+                return {
+                  alreadyProcessed: true,
+
+                  transaction:
+                    updatedTransactions[0],
+
+                  applicant:
+                    currentApplicant,
+                };
+              }
+
+              throw new Error(
+                "Applicant CV payment status could not be updated"
+              );
+            }
+
+            return {
+              alreadyProcessed: false,
+
+              transaction:
+                updatedTransactions[0],
+
+              applicant:
+                updatedApplicants[0],
+            };
+          }
         );
+
+      /* =====================================================
+        11. HANDLE CONCURRENT / DUPLICATE WEBHOOK
+      ===================================================== */
+
+      if (result.alreadyProcessed) {
+        console.log(
+          "CV payment was already processed concurrently"
+        );
+
+        return {
+          success: true,
+
+          alreadyProcessed: true,
+
+          message:
+            "CV payment has already been processed",
+
+          data: {
+            transactionId:
+              result.transaction.id,
+
+            userId:
+              applicant.userId,
+
+            applicantId:
+              applicant.id,
+
+            hasPaidCv: true,
+
+            checkoutId,
+
+            chargeId,
+
+            paidAt:
+              result.transaction.paidAt,
+          },
+        };
+      }
+
+      /* =====================================================
+        12. SUCCESS
+      ===================================================== */
+
+      console.log(
+        "========================================"
+      );
 
       console.log(
         "CV PAYMENT SUCCESSFULLY CONFIRMED"
       );
 
       console.log({
-        userId: applicant.userId,
-        applicantId: applicant.id,
+        transactionId:
+          result.transaction.id,
+
+        userId:
+          applicant.userId,
+
+        applicantId:
+          applicant.id,
+
         checkoutId,
+
         chargeId,
+
         paidAt,
       });
+
+      console.log(
+        "========================================"
+      );
 
       return {
         success: true,
@@ -1169,16 +1586,29 @@ initializeCvPayment: async (
           "CV payment confirmed successfully",
 
         data: {
-          userId: applicant.userId,
-          applicantId: applicant.id,
+          transactionId:
+            result.transaction.id,
+
+          userId:
+            applicant.userId,
+
+          applicantId:
+            applicant.id,
+
           hasPaidCv: true,
+
           checkoutId,
+
           chargeId,
+
           paidAt,
         },
       };
 
     } catch (e) {
+      /* =====================================================
+        ERROR HANDLING
+      ===================================================== */
 
       console.error(
         "handleCvPaymentWebhook error:",

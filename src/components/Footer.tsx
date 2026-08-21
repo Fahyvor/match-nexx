@@ -6,7 +6,7 @@ const Footer = () => {
           <span>STATUS: <span className="text-[#00E5FF]">ONLINE</span></span>
           <span>NET_TRAFFIC: <span className="text-[#FF0055]">STABLE</span></span>
         </div>
-        <div>HIREFLOW © {new Date().getFullYear()}</div>
+        <div>MATCHNEXX © {new Date().getFullYear()}</div>
     </div>
   )
 }
