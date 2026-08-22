@@ -20,6 +20,15 @@ import JobApplication from './pages/applicant/JobApplication';
 import Candidates from './pages/recruiter/Candidates';
 import CandidatesProfile from './pages/recruiter/CandidatesProfile';
 import PaymentResult from "./components/PaymentResult";
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/Terms';
+import Pricing from './pages/Pricing';
+import Documentation from './pages/Docs';
+import SystemStatus from './pages/Status';
+import NDPACompliance from './pages/NDPA-Compliance';
+import SecurityOverview from './pages/Security';
+import ContactUs from './pages/Contact';
+import AboutUs from './pages/About';
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -35,7 +44,16 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+        <Route path="/privacy" element={<PrivacyPolicy/>}/>
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/docs" element={<Documentation />} />
+        <Route path="/status" element={<SystemStatus />} />
+        <Route path="/ndpa-compliance" element={<NDPACompliance />} />
+        <Route path="/security" element={<SecurityOverview />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
+
         {/* Applicant Routes */}
         <Route element={<ProtectedRoute role="applicant" />}>
           <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />

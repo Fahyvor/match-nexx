@@ -3,18 +3,16 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import { useNavigate } from "react-router-dom";
 
-import { FaBriefcase } from "react-icons/fa";
+import { FaBriefcase, FaInfoCircle, FaEnvelope } from "react-icons/fa";
 import { RiUserSettingsFill } from "react-icons/ri";
 import { FiMenu, FiX } from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
 
 const Nav = () => {
   const navigate = useNavigate();
-
   const [open, setOpen] = useState(false);
 
   const user = useSelector((state: RootState) => state.user.user);
-
   const isAuthenticated = useSelector(
     (state: RootState) => state.user.isAuthenticated
   );
@@ -22,17 +20,12 @@ const Nav = () => {
   const firstName = user?.firstName;
   const role = user?.role;
 
-  /**
-   * Navigate to dashboard
-   */
   const handleDashboard = () => {
     setOpen(false);
-
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-
     if (role === "recruiter") {
       navigate("/recruiter/dashboard");
     } else {
@@ -40,40 +33,35 @@ const Nav = () => {
     }
   };
 
-  /**
-   * Navigate to jobs
-   */
   const handleJobs = () => {
     setOpen(false);
     navigate("/jobs");
   };
 
-  /**
-   * Navigate to settings
-   */
+  const handleAbout = () => {
+    setOpen(false);
+    navigate("/about");
+  };
+
+  const handleContact = () => {
+    setOpen(false);
+    navigate("/contact");
+  };
+
   const handleSettings = () => {
     setOpen(false);
     navigate("/settings");
   };
 
-  /**
-   * Navigate home
-   */
   const handleLogoClick = () => {
     setOpen(false);
     navigate("/");
   };
 
-  /**
-   * Toggle mobile navigation
-   */
   const toggleMobileMenu = () => {
     setOpen((prev) => !prev);
   };
 
-  /**
-   * Close mobile navigation
-   */
   const handleCancel = () => {
     setOpen(false);
   };
@@ -81,222 +69,168 @@ const Nav = () => {
   return (
     <>
       {/* =====================================================
-          NAVBAR
+          FLOATING CENTERED NAVBAR CONTAINER
       ====================================================== */}
-      <nav className="sticky top-0 z-50 w-full max-w-full overflow-x-clip bg-white dark:bg-cyber-dark font-sans backdrop-blur-xl border-b border-zinc-800/60 px-4 sm:px-6 lg:px-16 py-5 flex justify-between items-center">
-        {/* =====================================================
-            LOGO
-        ====================================================== */}
-        <div
-          className="flex items-center gap-2 min-w-0 cursor-pointer group"
-          onClick={handleLogoClick}
-        >
-          {/* Logo Icon */}
-          <div className="relative w-6 h-6 shrink-0">
-            <div className="absolute inset-0 bg-accent-cyan transform -skew-x-12 group-hover:translate-x-1 transition-transform duration-300" />
-
-            <div className="absolute inset-0 bg-accent-pink transform skew-x-12 translate-x-1 group-hover:-translate-x-1 transition-transform duration-300 mix-blend-screen" />
+      <header className="sticky bg-black top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <nav className="w-fit mx-auto bg-white/80 dark:bg-[#070708]/90 backdrop-blur-xl border-2 border-zinc-800/80 rounded-2xl px-6 py-4 flex gap-8 justify-between items-center shadow-2xl">
+          
+          {/* LOGO */}
+          <div
+            className="flex items-center gap-2 min-w-0 cursor-pointer group"
+            onClick={handleLogoClick}
+          >
+            <div className="relative w-6 h-6 shrink-0">
+              <div className="absolute inset-0 bg-[#00E5FF] transform -skew-x-12 group-hover:translate-x-1 transition-transform duration-300" />
+              <div className="absolute inset-0 bg-[#FF0055] transform skew-x-12 translate-x-1 group-hover:-translate-x-1 transition-transform duration-300 mix-blend-screen" />
+            </div>
+            <span className="text-lg sm:text-xl font-black tracking-tight text-white uppercase font-mono truncate">
+              MATCH<span className="text-[#00E5FF]">.</span>NEXX
+            </span>
           </div>
 
-          {/* Logo Text */}
-          <span className="text-lg sm:text-xl font-black tracking-tight text-accent-cyan-light dark:text-accent-cyan uppercase font-mono truncate">
-            MATCH
-            <span className="text-accent-cyan-light dark:text-accent-cyan">
-              .
-            </span>
-            NEXX
-          </span>
-        </div>
+          {/* DESKTOP NAVIGATION */}
+          <div className="hidden md:flex items-center gap-8 shrink-0">
+            <button
+              type="button"
+              onClick={handleJobs}
+              className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer flex items-center gap-2"
+            >
+              {/* <FaBriefcase className="w-4 h-4 text-[#00E5FF]" /> */}
+              <span>Jobs</span>
+            </button>
 
-        {/* =====================================================
-            DESKTOP NAVIGATION
-        ====================================================== */}
-        <div className="hidden md:flex items-center gap-6 shrink-0">
-          {/* Jobs */}
+            <button
+              type="button"
+              onClick={handleAbout}
+              className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer"
+            >
+              About
+            </button>
+
+            <button
+              type="button"
+              onClick={handleContact}
+              className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer"
+            >
+              Contact
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDashboard}
+              className="relative px-5 py-2 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-[#FF0055] cursor-pointer hover:shadow-[0_0_20px_rgba(255,0,85,0.4)] transition-all duration-300 overflow-hidden group whitespace-nowrap"
+            >
+              <span className="relative z-10">
+                {isAuthenticated ? `Hi, ${firstName || "User"}` : "Get Started"}
+              </span>
+              <div className="absolute inset-0 bg-[#FF0055] transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSettings}
+              aria-label="Settings"
+              className="text-white cursor-pointer hover:text-[#00E5FF] transition-colors duration-200"
+            >
+              <RiUserSettingsFill className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* MOBILE MENU BUTTON */}
           <button
             type="button"
-            onClick={handleJobs}
-            aria-label="Jobs"
-            className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors duration-200 cursor-pointer"
+            onClick={toggleMobileMenu}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="md:hidden text-white cursor-pointer relative z-[70] shrink-0 p-1"
           >
-            <FaBriefcase className="w-5 h-5" />
+            {open ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
+        </nav>
+      </header>
 
-          {/* Dashboard / Get Started */}
-          <button
-            type="button"
-            onClick={handleDashboard}
-            className="relative px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-pink cursor-pointer hover:shadow-[0_0_20px_rgba(255,0,85,0.4)] transition-all duration-300 overflow-hidden group whitespace-nowrap"
-          >
-            <span className="relative z-10">
-              {isAuthenticated
-                ? `Hi, ${firstName || "User"}`
-                : "Get Started"}
-            </span>
-
-            {/* Hover animation */}
-            <div className="absolute inset-0 bg-accent-pink transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
-          </button>
-
-          {/* Settings */}
-          <button
-            type="button"
-            onClick={handleSettings}
-            aria-label="Settings"
-            className="text-white cursor-pointer hover:text-accent-cyan transition-colors duration-200"
-          >
-            <RiUserSettingsFill className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* =====================================================
-            MOBILE MENU BUTTON
-        ====================================================== */}
-        <button
-          type="button"
-          onClick={toggleMobileMenu}
-          aria-label={
-            open ? "Close navigation menu" : "Open navigation menu"
-          }
-          aria-expanded={open}
-          className="md:hidden text-white cursor-pointer relative z-[70] shrink-0"
-        >
-          {open ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
-      </nav>
-
-      {/* =====================================================
-          MOBILE MENU OVERLAY
-      ====================================================== */}
+      {/* MOBILE MENU OVERLAY */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
           onClick={handleCancel}
           aria-hidden="true"
         />
       )}
 
-      {/* =====================================================
-          MOBILE DRAWER
-      ====================================================== */}
+      {/* MOBILE DRAWER */}
       <div
         className={`
-          fixed
-          inset-y-0
-          right-0
-          z-50
-          w-[80vw]
-          max-w-sm
-          bg-cyber-panel
-          border-l
-          border-zinc-800
-          shadow-2xl
-          md:hidden
-          overflow-y-auto
-          overflow-x-hidden
-          pt-6
-          transition-transform
-          duration-300
-          ease-in-out
+          fixed inset-y-0 right-0 z-50 w-[85vw] max-w-sm bg-[#070708] border-l border-zinc-800 shadow-2xl md:hidden overflow-y-auto pt-6 transition-transform duration-300 ease-in-out
           ${open ? "translate-x-0" : "translate-x-full"}
         `}
       >
-        {/* =================================================
-            DRAWER HEADER
-        ================================================== */}
         <div className="flex items-center justify-between px-6 pb-6 border-b border-zinc-800">
-          <span className="text-sm font-bold uppercase tracking-widest text-zinc-300">
-            Menu
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#00E5FF]">
+            // Navigation
           </span>
-
-          {/* CANCEL / CLOSE BUTTON */}
           <button
             type="button"
             onClick={handleCancel}
             aria-label="Close menu"
-            className="flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-accent-pink hover:bg-accent-pink/10 transition-all duration-200 cursor-pointer"
+            className="flex items-center justify-center w-8 h-8 rounded border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
           >
-            <FiX size={20} />
+            <FiX size={18} />
           </button>
         </div>
 
-        {/* =================================================
-            MOBILE NAVIGATION ITEMS
-        ================================================== */}
-        <div className="flex flex-col gap-5 px-6 py-6">
-          {/* =================================================
-              MOBILE JOBS
-          ================================================== */}
+        <div className="flex flex-col gap-4 px-6 py-6 font-mono text-xs uppercase">
           <button
             type="button"
             onClick={handleJobs}
-            className="flex items-center gap-3 text-zinc-200 hover:text-white transition-colors duration-200 text-left cursor-pointer w-full"
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
-            <FaBriefcase className="w-5 h-5 shrink-0" />
-
-            <span className="truncate">
-              Jobs
-            </span>
+            <FaBriefcase className="w-4 h-4 text-[#00E5FF]" />
+            <span>Jobs</span>
           </button>
 
-          {/* =================================================
-              MOBILE SETTINGS
-          ================================================== */}
+          <button
+            type="button"
+            onClick={handleAbout}
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
+          >
+            <FaInfoCircle className="w-4 h-4 text-[#00E5FF]" />
+            <span>About Us</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleContact}
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
+          >
+            <FaEnvelope className="w-4 h-4 text-[#FF0055]" />
+            <span>Contact Us</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDashboard}
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
+          >
+            <MdDashboard className="w-4 h-4 text-[#00E5FF]" />
+            <span>Dashboard</span>
+          </button>
+
           <button
             type="button"
             onClick={handleSettings}
-            className="flex items-center gap-3 text-zinc-200 hover:text-white transition-colors duration-200 text-left cursor-pointer w-full"
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
-            <RiUserSettingsFill className="w-5 h-5 shrink-0" />
-
-            <span className="truncate">
-              Profile Settings
-            </span>
+            <RiUserSettingsFill className="w-4 h-4 text-[#FF0055]" />
+            <span>Profile Settings</span>
           </button>
 
-          {/* =================================================
-              MOBILE DASHBOARD
-          ================================================== */}
           <button
             type="button"
             onClick={handleDashboard}
-            className="flex items-center gap-3 text-zinc-200 hover:text-white transition-colors duration-200 text-left cursor-pointer w-full"
+            className="mt-4 w-full bg-[#FF0055] hover:bg-[#ff1a66] text-white font-bold py-3 uppercase tracking-widest transition-colors text-center"
           >
-            <MdDashboard className="w-5 h-5 shrink-0" />
-
-            <span className="truncate">
-              Dashboard
-            </span>
-          </button>
-
-          {/* =================================================
-              MOBILE USER / GET STARTED
-          ================================================== */}
-          <button
-            type="button"
-            onClick={handleDashboard}
-            className="flex items-center gap-3 text-zinc-200 hover:text-white transition-colors duration-200 text-left cursor-pointer w-full"
-          >
-            <span className="truncate">
-              {isAuthenticated
-                ? `Welcome, ${firstName || "User"}`
-                : "Get Started"}
-            </span>
-          </button>
-
-          {/* =================================================
-              CANCEL BUTTON
-          ================================================== */}
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-accent-pink hover:bg-accent-pink/10 transition-all duration-200 cursor-pointer"
-          >
-            <FiX className="w-5 h-5" />
-
-            <span className="font-semibold text-sm uppercase tracking-wider">
-              Cancel
-            </span>
+            {isAuthenticated ? `Welcome, ${firstName || "User"}` : "Get Started"}
           </button>
         </div>
       </div>
