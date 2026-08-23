@@ -6,7 +6,7 @@ interface Template01Props {
 }
 
 const Template01: FC<Template01Props> = ({ resume }) => {
-  const { personalInfo, links, skills, educations, experiences, projects, professionalSummary } = resume;
+  const { personalInfo, links, skills, educations, experiences, projects, references, professionalSummary } = resume;
 
   const linkItems = [
     { label: 'Email', value: personalInfo.email ? `mailto:${personalInfo.email}` : '' },
@@ -18,7 +18,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
   ].filter((item) => item.value);
 
   return (
-    <div className="bg-white text-slate-900 p-8 w-full w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
+    <div className="bg-white text-slate-900 lg:p-8 p-2 w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-extrabold uppercase tracking-loose text-slate-900">
@@ -217,6 +217,44 @@ const Template01: FC<Template01Props> = ({ resume }) => {
           </div>
         </section>
       )}
+
+      {/* References */}
+        <section className="mt-6">
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 whitespace-nowrap">
+              Referees
+            </h2>
+            <div className="h-0.5 bg-black w-full" />
+          </div>
+
+          {references && references.length > 0 ? (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3">
+              {references.map((ref, idx) => (
+                <div key={idx} className="text-xs">
+                  <p className="font-bold text-slate-900 uppercase">
+                    {ref.name}
+                  </p>
+
+                  <p className="text-slate-600 ">
+                    <span className='font-semibold'>{ref.position},</span> {ref?.company}
+                  </p>
+
+                  {(ref.email || ref.phone) && (
+                    <p className="text-slate-500 mt-0.5 ">
+                      {ref.email}
+                      {ref.email && ref.phone && ' | '}
+                      {ref.phone}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-600">
+              Available upon request.
+            </p>
+          )}
+        </section>
     </div>
   );
 };

@@ -13,6 +13,9 @@ const app = new Elysia({ prefix: "/cv" })
         personalInfo: t.Object({
           phone: t.String(),
           position: t.Optional(t.String()),
+          firstName: t.Optional(t.String()),
+          lastName: t.Optional(t.String()),
+          address: t.Optional(t.String()),
         }),
         skills: t.Array(t.String()),
         experiences: t.Optional(
@@ -45,6 +48,18 @@ const app = new Elysia({ prefix: "/cv" })
               description: t.Optional(t.String()),
               technologies: t.Optional(t.Array(t.String())),
               link: t.Optional(t.String()),
+            })
+          )
+        ),
+        references: t.Optional(
+          t.Array(
+            t.Object({
+              name: t.String(),
+              position: t.Optional(t.String()),
+              company: t.Optional(t.String()),
+              email: t.Optional(t.String()),
+              phone: t.Optional(t.String()),
+              relationship: t.Optional(t.String()),
             })
           )
         ),

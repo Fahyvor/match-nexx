@@ -1,0 +1,1 @@
+ALTER TABLE "cvs" ADD COLUMN "references" jsonb;

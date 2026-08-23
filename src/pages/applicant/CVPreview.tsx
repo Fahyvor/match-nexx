@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../../redux/store';
 import { setResume } from '../../redux/slices/resumeSlice';
 import Template01 from '../../templates/01';
-import type { ResumeData, EducationEntry, ExperienceEntry, ProjectEntry } from '../../types/resume';
+import type { ResumeData, EducationEntry, ExperienceEntry, ProjectEntry, ReferenceEntry } from '../../types/resume';
 import api from '../../utils/api';
 import SleekToast from 'sleek-toast';
 
@@ -73,6 +73,12 @@ const CVPreview: React.FC = () => {
               ? applicantData.skills.map((s: any) => (typeof s === 'string' ? s : s.name))
               : [];
 
+            const references: ReferenceEntry[] = Array.isArray(applicantData.references)
+              ? applicantData.references
+              : cvData && Array.isArray(cvData.references)
+              ? cvData.references
+              : [];
+
             const assembledResume: ResumeData = {
               personalInfo: {
                 firstName: user.firstName || '',
@@ -93,6 +99,7 @@ const CVPreview: React.FC = () => {
               educations,
               experiences,
               projects,
+              references,
               professionalSummary: cvData.professionalSummary || applicantData.summary || '',
             };
 
@@ -132,7 +139,7 @@ const CVPreview: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-panel-bg dark:bg-cyber-dark px-4">
         <SleekToast />
-        <div className="bg-white dark:bg-cyber-dark/80 p-8 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-center max-w-md">
+        <div className="bg-white dark:bg-cyber-dark/80 lg:p-8 p-3 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-center max-w-md">
           <p className="font-bold text-zinc-800 dark:text-zinc-200 text-lg mb-2">No CV Data Found</p>
           <p className="text-sm text-zinc-500 mb-6">Please create your CV first in the CV Builder.</p>
           <button
@@ -150,7 +157,7 @@ const CVPreview: React.FC = () => {
     <div className="min-h-screen bg-zinc-100 dark:bg-cyber-dark text-zinc-800 dark:text-zinc-200 py-8 px-4 print:bg-white print:p-0">
       <SleekToast />
       {/* Top Action Bar */}
-      <div className="max-w-4xl mx-auto flex items-center justify-between mb-6 print:hidden">
+      <div className="w-full mx-auto flex items-center justify-between mb-6 print:hidden">
         <button
           onClick={() => navigate('/applicant/cv-builder')}
           className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:text-accent-pink transition-colors"

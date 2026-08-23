@@ -57,6 +57,13 @@
       "when": 1787292989190,
       "tag": "0007_giant_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787444076656,
+      "tag": "0008_nasty_medusa",
+      "breakpoints": true
     }
   ]
 }

@@ -39,6 +39,13 @@ export interface ProjectEntry {
   technologies: string[];
   link: string;
 }
+export interface ReferenceEntry {
+  name: string;
+  position: string;
+  company: string;
+  email: string;
+  phone: string;
+}
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
@@ -47,5 +54,6 @@ export interface ResumeData {
   educations: EducationEntry[];
   experiences: ExperienceEntry[];
   projects: ProjectEntry[];
+  references?: ReferenceEntry[];
   professionalSummary?: string;
 }

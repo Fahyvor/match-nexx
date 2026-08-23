@@ -37,7 +37,19 @@ interface LinksInput {
 
 interface PersonalInfoInput {
   phone: string;
-  position?: string; // maps to applicants.headline
+  position?: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+}
+
+export interface ReferenceEntry {
+  name: string;
+  position?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  relationship?: string;
 }
 
 interface CreateCVBody {
@@ -46,6 +58,7 @@ interface CreateCVBody {
   educations?: EducationInput[];
   experiences?: ExperienceInput[];
   projects?: ProjectInput[];
+  references?: ReferenceEntry[];
   links?: LinksInput;
   professionalSummary?: string;
 }
@@ -53,7 +66,16 @@ interface CreateCVBody {
 export const cvController = {
   create: async (userId: string, body: CreateCVBody) => {
     try {
-      const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput, projects: projectInput, links, professionalSummary: customSummary } = body;
+      const {
+        personalInfo,
+        skills: skillNames,
+        educations: educationInput,
+        experiences: experienceInput,
+        projects: projectInput,
+        references: referenceInput,
+        links,
+        professionalSummary: customSummary,
+      } = body;
 
       if (!personalInfo || !personalInfo.phone) {
         return { success: false, message: "Phone number is required." };
@@ -68,7 +90,13 @@ export const cvController = {
       });
 
       if (!applicant) {
-        return { success: false, message: "Applicant profile not found." };
+        const created = await db
+          .insert(applicants)
+          .values({
+            userId: userId,
+          })
+          .returning();
+        applicant = created[0];
       }
 
       if (applicant.hasPaidCv !== true) {
@@ -88,12 +116,30 @@ export const cvController = {
         return { success: false, message: "User not found." };
       }
 
+      // Update user details if personalInfo contains updated firstName, lastName, or address
+      if (personalInfo.firstName || personalInfo.lastName || personalInfo.address) {
+        const userUpdates: Record<string, unknown> = {};
+        if (personalInfo.firstName) userUpdates.firstName = personalInfo.firstName;
+        if (personalInfo.lastName) userUpdates.lastName = personalInfo.lastName;
+        if (personalInfo.address) {
+          const parts = personalInfo.address.split(",").map((s) => s.trim());
+          if (parts.length >= 2) {
+            userUpdates.state = parts[0];
+            userUpdates.country = parts[1];
+          } else if (parts.length === 1 && parts[0]) {
+            userUpdates.state = parts[0];
+          }
+        }
+        await db.update(users).set(userUpdates).where(eq(users.id, userId));
+      }
+
       // Update applicant profile fields with any new info from the form
       await db
         .update(applicants)
         .set({
           phone: personalInfo.phone,
           headline: personalInfo.position || applicant.headline,
+          location: personalInfo.address || applicant.location,
           portfolio: links?.portfolio || applicant.portfolio,
           github: links?.github || applicant.github,
           linkedin: links?.linkedIn || applicant.linkedin,
@@ -164,7 +210,8 @@ export const cvController = {
       // Generate or use custom professional summary
       let professionalSummary = customSummary;
       if (!professionalSummary) {
-        const fullName = `${user.firstName} ${user.lastName}`.trim();
+        const updatedUser = await db.query.users.findFirst({ where: eq(users.id, userId) });
+        const fullName = updatedUser ? `${updatedUser.firstName} ${updatedUser.lastName}`.trim() : `${user.firstName} ${user.lastName}`.trim();
         professionalSummary = await AIService.generateProfessionalSummary({
           fullName,
           experience: experienceInput || [],
@@ -174,11 +221,14 @@ export const cvController = {
         });
       }
 
+      const referencesData = Array.isArray(referenceInput) ? referenceInput : [];
+
       if (existingCv) {
         await db
           .update(cvs)
           .set({
             professionalSummary,
+            references: referencesData,
             updatedAt: new Date(),
           })
           .where(eq(cvs.id, existingCv.id));
@@ -186,6 +236,7 @@ export const cvController = {
         await db.insert(cvs).values({
           applicantId: applicant.id,
           professionalSummary,
+          references: referencesData,
         });
       }
 
@@ -202,7 +253,11 @@ export const cvController = {
         },
       });
 
-      return { success: true, message: existingCv ? "CV updated successfully" : "CV created successfully", data: fullCv };
+      return {
+        success: true,
+        message: existingCv ? "CV updated successfully" : "CV created successfully",
+        data: fullCv,
+      };
     } catch (e) {
       console.error("cvController.create error:", e);
       return {
@@ -214,7 +269,7 @@ export const cvController = {
 
   getByUserId: async (userId: string) => {
     try {
-      const applicant = await db.query.applicants.findFirst({
+      let applicant = await db.query.applicants.findFirst({
         where: eq(applicants.userId, userId),
         with: {
           user: true,
@@ -227,7 +282,20 @@ export const cvController = {
       });
 
       if (!applicant) {
-        return { success: false, message: "Applicant profile not found." };
+        const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+        if (!user) {
+          return { success: false, message: "Applicant profile not found." };
+        }
+        const created = await db.insert(applicants).values({ userId }).returning();
+        applicant = {
+          ...created[0],
+          user,
+          experiences: [],
+          educations: [],
+          skills: [],
+          projects: [],
+          cv: null,
+        } as unknown as typeof applicant;
       }
 
       return { success: true, data: applicant };

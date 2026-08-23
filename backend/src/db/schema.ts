@@ -283,6 +283,8 @@ export const cvs = pgTable("cvs", {
 
   professionalSummary: text("professional_summary"),
 
+  references: jsonb("references"),
+
   template: text("template").default("minimal"),
 
   createdAt: timestamp("created_at").defaultNow(),

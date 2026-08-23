@@ -9,6 +9,7 @@ import type {
   EducationEntry,
   ExperienceEntry,
   ProjectEntry,
+  ReferenceEntry,
   ResumeData,
 } from '../../types/resume';
 import api from '../../utils/api';
@@ -47,6 +48,7 @@ export default function CVBuilder() {
   const [educations, setEducations] = useState<EducationEntry[]>([]);
   const [experiences, setExperiences] = useState<ExperienceEntry[]>([]);
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
+  const [references, setReferences] = useState<ReferenceEntry[]>([]);
 
   // Check CV payment status and fetch existing CV on mount
 
@@ -153,6 +155,24 @@ export default function CVBuilder() {
               }))
             );
           }
+
+          const refs = Array.isArray(applicant.references)
+            ? applicant.references
+            : cv.references && Array.isArray(cv.references)
+            ? cv.references
+            : [];
+          if (refs.length > 0) {
+            setReferences(
+              refs.map((ref: any) => ({
+                name: ref.name || '',
+                position: ref.position || '',
+                company: ref.company || '',
+                email: ref.email || '',
+                phone: ref.phone || '',
+                relationship: ref.relationship || '',
+              }))
+            );
+          }
         } else if (userFromStore) {
           setPersonalInfo((prev) => ({
             ...prev,
@@ -239,6 +259,23 @@ export default function CVBuilder() {
     setProjects((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const addReference = () => {
+    setReferences((prev) => [
+      ...prev,
+      { name: '', position: '', company: '', email: '', phone: '', relationship: '' },
+    ]);
+  };
+
+  const updateReference = (index: number, field: keyof ReferenceEntry, value: string) => {
+    setReferences((prev) =>
+      prev.map((ref, i) => (i === index ? { ...ref, [field]: value } : ref))
+    );
+  };
+
+  const removeReference = (index: number) => {
+    setReferences((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleGenerateSummary = async () => {
     try {
       setGeneratingSummary(true);
@@ -294,6 +331,9 @@ export default function CVBuilder() {
         personalInfo: {
           phone: personalInfo.phone,
           position: personalInfo.position,
+          firstName: personalInfo.firstName,
+          lastName: personalInfo.lastName,
+          address: personalInfo.address,
         },
         links,
         skills,
@@ -318,6 +358,14 @@ export default function CVBuilder() {
           technologies: proj.technologies,
           link: proj.link,
         })),
+        references: references.map((ref) => ({
+          name: ref.name,
+          position: ref.position,
+          company: ref.company,
+          email: ref.email,
+          phone: ref.phone,
+          relationship: ref.relationship,
+        })),
         professionalSummary,
       };
 
@@ -332,6 +380,7 @@ export default function CVBuilder() {
           educations,
           experiences,
           projects,
+          references,
           professionalSummary: professionalSummary || res.data?.cv?.professionalSummary,
         };
         dispatch(setResume(fullResume));
@@ -537,7 +586,7 @@ export default function CVBuilder() {
 
           {/* Work Experience Section */}
           <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex lg:flex-row flex-col lg:items-center items-start justify-between mb-6">
               <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
                 <span className="w-2.5 h-2.5 bg-accent-cyan" />
                 Work Experience
@@ -623,7 +672,7 @@ export default function CVBuilder() {
 
           {/* Education Section */}
           <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex lg:flex-row flex-col lg:items-center items-start justify-between mb-6">
               <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
                 <span className="w-2.5 h-2.5 bg-accent-pink" />
                 Education
@@ -730,7 +779,7 @@ export default function CVBuilder() {
 
           {/* Projects Section */}
           <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex lg:flex-row flex-col lg:items-center items-start gap-2 justify-between mb-6">
               <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
                 <span className="w-2.5 h-2.5 bg-accent-cyan" />
                 Key Projects
@@ -790,6 +839,82 @@ export default function CVBuilder() {
               className="mt-6 text-xs font-mono tracking-widest text-accent-cyan uppercase hover:text-accent-pink transition-colors flex items-center gap-2"
             >
               + Add Project
+            </button>
+          </section>
+
+          {/* References Section */}
+          <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
+            <div className="flex lg:flex-row flex-col lg:items-center items-start gap-2 justify-between mb-6">
+              <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
+                <span className="w-2.5 h-2.5 bg-accent-pink" />
+                References
+              </h2>
+              <span className="text-xs font-mono text-accent-pink">[{references.length}] REFEREES</span>
+            </div>
+
+            <div className="space-y-6">
+              {references.map((ref, idx) => (
+                <div key={idx} className="p-6 bg-white dark:bg-cyber-dark/50 border border-zinc-800 space-y-4 rounded">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={ref.name}
+                      onChange={(e) => updateReference(idx, 'name', e.target.value)}
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors"
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Position / Title"
+                      value={ref.position}
+                      onChange={(e) => updateReference(idx, 'position', e.target.value)}
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Company"
+                      value={ref.company}
+                      onChange={(e) => updateReference(idx, 'company', e.target.value)}
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors"
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      value={ref.email}
+                      onChange={(e) => updateReference(idx, 'email', e.target.value)}
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Phone Number"
+                      value={ref.phone}
+                      onChange={(e) => updateReference(idx, 'phone', e.target.value)}
+                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-pink transition-colors"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => removeReference(idx)}
+                      className="text-xs font-mono text-accent-pink hover:underline"
+                    >
+                      Remove Reference
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={addReference}
+              className="mt-6 text-xs font-mono tracking-widest text-accent-pink uppercase hover:text-accent-cyan transition-colors flex items-center gap-2"
+            >
+              + Add Reference
             </button>
           </section>
 
