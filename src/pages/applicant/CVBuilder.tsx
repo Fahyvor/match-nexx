@@ -363,8 +363,7 @@ export default function CVBuilder() {
           position: ref.position,
           company: ref.company,
           email: ref.email,
-          phone: ref.phone,
-          relationship: ref.relationship,
+          phone: ref.phone
         })),
         professionalSummary,
       };
