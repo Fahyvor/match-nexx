@@ -277,7 +277,7 @@ export const paymentController = {
 
   /**
    * Initialize CV Builder Payment
-   * One-time payment of ₦1,000
+   * One-time payment of ₦2,000
    */
 initializeCvPayment: async (
   userId: string,
@@ -529,10 +529,10 @@ initializeCvPayment: async (
       pricing: {
         currency: "USD",
 
-        amount: "3.00",
+        amount: "2.00",
 
         currency_options: {
-          NGN: "1000.00",
+          NGN: "2000.00",
         },
       },
 
@@ -970,7 +970,7 @@ initializeCvPayment: async (
 
       return {
         success: true,
-        message: "₦1,000 payment verified successfully! Your CV Builder is unlocked.",
+        message: "₦2,000 payment verified successfully! Your CV Builder is unlocked.",
         data: {
           hasPaidCv: true,
           paidAt: new Date(),

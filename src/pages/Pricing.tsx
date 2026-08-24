@@ -16,7 +16,7 @@ export default function Pricing() {
           <div>
             <span className="font-mono text-xs text-zinc-500 uppercase block mb-2">Applicants</span>
             <h3 className="text-2xl font-extrabold text-white uppercase mb-2">Candidate Node</h3>
-            <p className="text-3xl font-extrabold text-[#00E5FF] font-mono mb-6">₦1,000 <span className="text-xs font-normal text-zinc-500">/ forever</span></p>
+            <p className="text-3xl font-extrabold text-[#00E5FF] font-mono mb-6">₦2,000 <span className="text-xs font-normal text-zinc-500">/ forever</span></p>
             <ul className="space-y-3 font-mono text-xs text-zinc-400 mb-8">
               <li>✓ Structured CV Generation</li>
               <li>✓ Public Talent Link</li>
