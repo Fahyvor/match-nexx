@@ -116,7 +116,6 @@ export const cvController = {
         return { success: false, message: "User not found." };
       }
 
-      // Update user details if personalInfo contains updated firstName, lastName, or address
       if (personalInfo.firstName || personalInfo.lastName || personalInfo.address) {
         const userUpdates: Record<string, unknown> = {};
         if (personalInfo.firstName) userUpdates.firstName = personalInfo.firstName;
@@ -133,7 +132,6 @@ export const cvController = {
         await db.update(users).set(userUpdates).where(eq(users.id, userId));
       }
 
-      // Update applicant profile fields with any new info from the form
       await db
         .update(applicants)
         .set({
@@ -166,7 +164,6 @@ export const cvController = {
         }
       }
 
-      // Replace educations
       if (Array.isArray(educationInput)) {
         await db.delete(educations).where(eq(educations.applicantId, applicant.id));
         if (educationInput.length > 0) {
@@ -183,7 +180,6 @@ export const cvController = {
         }
       }
 
-      // Replace skills
       await db.delete(skills).where(eq(skills.applicantId, applicant.id));
       if (skillNames.length > 0) {
         await db.insert(skills).values(
@@ -191,7 +187,6 @@ export const cvController = {
         );
       }
 
-      // Replace projects
       if (Array.isArray(projectInput)) {
         await db.delete(projects).where(eq(projects.applicantId, applicant.id));
         if (projectInput.length > 0) {
@@ -207,7 +202,6 @@ export const cvController = {
         }
       }
 
-      // Generate or use custom professional summary
       let professionalSummary = customSummary;
       if (!professionalSummary) {
         const updatedUser = await db.query.users.findFirst({ where: eq(users.id, userId) });
@@ -240,7 +234,6 @@ export const cvController = {
         });
       }
 
-      // Return the full assembled CV
       const fullCv = await db.query.applicants.findFirst({
         where: eq(applicants.id, applicant.id),
         with: {

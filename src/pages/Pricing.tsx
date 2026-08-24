@@ -12,7 +12,6 @@ export default function Pricing() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
-        {/* Tier 1 */}
         <div className="bg-[#0f0f12] border border-zinc-800 p-8 flex flex-col justify-between">
           <div>
             <span className="font-mono text-xs text-zinc-500 uppercase block mb-2">Applicants</span>
@@ -32,7 +31,6 @@ export default function Pricing() {
           </button>
         </div>
 
-        {/* Tier 2 */}
         <div className="bg-[#0f0f12] border-2 border-[#FF0055] p-8 flex flex-col justify-between relative">
           <div className="absolute -top-3 right-6 bg-[#FF0055] text-white text-[9px] font-mono uppercase font-bold px-2 py-0.5">
             POPULAR
@@ -55,7 +53,6 @@ export default function Pricing() {
           </button>
         </div>
 
-        {/* Tier 3 */}
         <div className="bg-[#0f0f12] border border-zinc-800 p-8 flex flex-col justify-between">
           <div>
             <span className="font-mono text-xs text-zinc-500 uppercase block mb-2">Enterprise</span>
