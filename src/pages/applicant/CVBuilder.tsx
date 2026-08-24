@@ -304,7 +304,7 @@ export default function CVBuilder() {
         toast.success('AI Professional Summary generated!');
       } else {
         toast.error(res.message || 'Could not generate summary.', 5000);
-        if (res.message === "Payment of ₦1,000 is required before generating your CV summary.") {
+        if (res.message === "Payment of ₦2,000 is required before generating your CV summary.") {
          setHasPaidCv(false)
         }
       }

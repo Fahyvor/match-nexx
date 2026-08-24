@@ -94,7 +94,7 @@ export default function CvPaywallModal({
         <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
           Pay a one-time fee of{" "}
           <strong className="text-accent-cyan font-bold">
-            ₦1,000
+            ₦2,000
           </strong>{" "}
           to construct, generate AI summaries, edit, and export
           your personal ATS-optimized CV.
@@ -109,7 +109,7 @@ export default function CvPaywallModal({
             </span>
 
             <span className="text-accent-cyan font-bold text-base">
-              ₦1,000
+              ₦2,000
             </span>
           </div>
 
@@ -130,7 +130,7 @@ export default function CvPaywallModal({
         >
           {loading
             ? "Initializing Payment..."
-            : "Pay ₦1,000 to Unlock CV Builder →"}
+            : "Pay ₦2,000 to Unlock CV Builder →"}
         </button>
 
         {/* Footer */}

@@ -103,7 +103,7 @@ export const cvController = {
         return {
           success: false,
           code: "CV_PAYMENT_REQUIRED",
-          message: "Payment of ₦1,000 is required before creating your CV.",
+          message: "Payment of ₦2,000 is required before creating your CV.",
         };
       }
 
@@ -311,7 +311,7 @@ export const cvController = {
         return {
           success: false,
           code: "CV_PAYMENT_REQUIRED",
-          message: "Payment of ₦1,000 is required before generating your CV summary.",
+          message: "Payment of ₦2,000 is required before generating your CV summary.",
         };
       }
 

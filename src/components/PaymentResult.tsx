@@ -178,7 +178,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           {/* Description */}
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
             Your payment of{" "}
-            <strong className="text-green-400 font-bold">₦1,000</strong>{" "}
+            <strong className="text-green-400 font-bold">₦2,000</strong>{" "}
             was successful. You now have full access to the CV Builder.
           </p>
 
@@ -201,7 +201,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
               )}
               <div className="flex justify-between items-center text-xs font-mono">
                 <span className="text-zinc-400">Amount</span>
-                <span className="text-green-400 font-bold">₦1,000</span>
+                <span className="text-green-400 font-bold">₦2,000</span>
               </div>
             </div>
           )}
