@@ -62,7 +62,7 @@ export default function Login() {
   return (
     <div className="h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
-      <div className="flex items-center justify-center h-screen px-6">
+      <div className="flex items-center justify-center lg:h-screen h-fit lg:py-0 py-24 px-6">
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-12 text-center">
