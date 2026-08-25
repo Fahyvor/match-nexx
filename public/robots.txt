@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://match-nexx.onrender.com/sitemap.xml
