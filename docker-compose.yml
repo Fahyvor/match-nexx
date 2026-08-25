@@ -1,0 +1,50 @@
+name: match-nexx
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: match-nexx-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL:-postgres://9b29f78b889a51fcecfaab0dbb7c9696fb2bf48ae7d5736ff96fa6475cbf0177:sk_kGkOjVwGsVq8NoX6V9W7C@pooled.db.prisma.io:5432/postgres?sslmode=require&uselibpqcompat=true}
+      - JWT_SECRET=${JWT_SECRET:-76PN6HTgF4UfabfZ337cxAYxi0ugYxz8EmbyUIoCeICohqkolDUvjtsehwCiZ_hO}
+      - FRONTEND_URL=${FRONTEND_URL:-https://match-nexx.onrender.com}
+      - SUPABASE_URL=${SUPABASE_URL:-http://lzjpplklcplatrglthmi.supabase.co}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6anBwbGtsY3BsYXRyZ2x0aG1pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Mjc5MTYzMCwiZXhwIjoyMDk4MzY3NjMwfQ.rUx6FhXhTs54m6T06gaA52ahRVaxPjn304g5I1CAdUk}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyBsVZoBtlijZb4f0nM9r5p0c8HTBhyJw_c}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-sk-3ccc8b423be64d3fa5ca0a3af4675d0b}
+      - BACH_API_URL=${BACH_API_URL:-https://api.bachs.io}
+      - BACHS_API_KEY=${BACHS_API_KEY:-sk_live_fbce4a97_XYSjbP6RfogFaSqGtYbwWawr1MxvRlhc9cgYZNWPy2A}
+      - BACHS_CV_PRODUCT_ID=${BACHS_CV_PRODUCT_ID:-prod_bd85ce1766f84558865c}
+      - BACHS_WEBHOOK_SECRET=${BACHS_WEBHOOK_SECRET:-whsec_fbb23f1d585455da24d83dcbae179afa4aff40caf242f3723f84e7c173ec7954}
+      - BACHS_API_SECRET=${BACHS_API_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: match-nexx-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: matchnexx
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d matchnexx"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
