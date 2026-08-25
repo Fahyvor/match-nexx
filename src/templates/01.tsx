@@ -18,7 +18,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
   ].filter((item) => item.value);
 
   return (
-    <div className="bg-white text-slate-900 lg:p-8 p-2 w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
+    <div className="bg-white text-slate-900 lg:p-8 p-4  w-full mx-auto shadow-lg rounded-sm font-sans border border-slate-200 print:shadow-none print:border-none print:p-0">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-extrabold uppercase tracking-loose text-slate-900">

@@ -47,27 +47,26 @@ select:-webkit-autofill:active {
     visibility: visible;
   }
 
-  .resume-print-area {
-    position: relative !important;
-    left: auto;
-    top: auto;
+.resume-print-area {
+  position: relative !important;
+  left: auto;
+  top: 0;
 
-    width: 210mm !important;
-    max-width: 210mm !important;
-    min-height: auto !important;
-    height: auto !important;
+  width: 210mm !important;
+  max-width: 210mm !important;
+  min-height: auto !important;
+  height: auto !important;
 
-    margin: 0 auto !important;
-    padding: 10mm !important;
+  margin: 0 auto !important;
+  padding: 10mm 10mm 10mm 10mm !important;
 
-    box-sizing: border-box;
-    overflow: visible !important;
+  box-sizing: border-box;
+  overflow: visible !important;
 
-    background: white !important;
-
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  background: white !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
   .resume-print-area * {
     -webkit-print-color-adjust: exact;
