@@ -122,60 +122,66 @@ const CVPreview: React.FC = () => {
 
   const effectiveResume = resumeFromStore || backendResume;
 
-  const handleDownloadPdf = async () => {
-    if (!printRef.current || downloading) return;
+const handleDownloadPdf = async () => {
+  if (!printRef.current || downloading) return;
 
-    try {
-      setDownloading(true);
+  try {
+    setDownloading(true);
 
-      // Ensure fonts + stylesheets are fully applied before capturing (critical on mobile)
-      if (document.fonts?.ready) {
-        await document.fonts.ready;
-      }
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        windowWidth: 794,
-        windowHeight: printRef.current.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-        logging: true, // temporarily on — check console for skipped/failed style warnings
-      });
+    const captureOptions = {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      windowWidth: 794,
+      windowHeight: printRef.current.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
+      foreignObjectRendering: false,
+    };
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+    const canvas = await html2canvas(printRef.current, captureOptions);
 
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
 
-      let heightLeft = imgHeight;
-      let position = 0;
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
+    }
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const name = `${effectiveResume?.personalInfo?.firstName || ''}-${effectiveResume?.personalInfo?.lastName || 'resume'}`
+    const fileName =
+      `${effectiveResume?.personalInfo?.firstName || ''}-${effectiveResume?.personalInfo?.lastName || 'resume'}`
         .replace(/^-|-$/g, '')
         .trim() || 'resume';
-      pdf.save(`${name}-CV.pdf`);
-    } catch (err) {
-      console.error('Failed to generate PDF:', err);
-    } finally {
-      setDownloading(false);
-    }
-  };
+    pdf.save(`${fileName}-CV.pdf`);
+  } catch (err) {
+    console.error('Failed to generate PDF:', err);
+  } finally {
+    setDownloading(false);
+  }
+};
+
+    // const handleDownloadPdf = () => {
+    //   window.print();
+    // };
 
   if (loading) {
     return (
