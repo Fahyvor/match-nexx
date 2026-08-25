@@ -128,11 +128,21 @@ const CVPreview: React.FC = () => {
     try {
       setDownloading(true);
 
+      // Ensure fonts + stylesheets are fully applied before capturing (critical on mobile)
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
         windowWidth: 794,
+        windowHeight: printRef.current.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+        logging: true, // temporarily on — check console for skipped/failed style warnings
       });
 
       const imgData = canvas.toDataURL('image/png');
