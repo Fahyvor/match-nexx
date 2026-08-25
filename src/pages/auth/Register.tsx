@@ -69,7 +69,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
-      <div className="flex items-center justify-center min-h-screen px-6 lg:py-12 py-4">
+      <div className="flex items-center justify-center min-h-screen lg:px-6 px-0 lg:py-12 py-4">
         <div className="w-full">
           {/* Header */}
           <div className="mb-12 text-center">
@@ -88,7 +88,7 @@ export default function Register() {
 
           {/* Form Container */}
           <form onSubmit={handleSubmit} className="w-5/6 mx-auto bg-panel-bg border border-panel-border p-8 relative">
-          <div className=" space-y-6 grid grid-cols-2 gap-4 ">
+          <div className=" space-y-6 grid lg:grid-cols-2 grid-cols-1 gap-4 ">
             {/* Status Indicator */}
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-cyan-light dark:text-accent-cyan/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 bg-accent-cyan animate-pulse rounded-full" />
@@ -219,9 +219,9 @@ export default function Register() {
             </div>
 
             {/* User Type Selection */}
-            <div className="space-y-2">
+            <div className="space-y-2 lg:py-0 py-2">
               <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Account Type</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid lg:grid-cols-2 grid-cols-1 gap-3">
                 {['applicant', 'recruiter'].map(type => (
                   <label key={type} className="cursor-pointer">
                     <input
@@ -245,7 +245,7 @@ export default function Register() {
             </div>
 
           </div>
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 lg:py-0 py-3">
             <label className="flex items-start gap-3 text-[11px] text-zinc-400">
               <input type="checkbox" className="w-4 h-4 accent-accent-cyan mt-0.5" required />
               I agree to the Terms of Service and Privacy Policy
