@@ -218,7 +218,7 @@ export default function RecruiterDashboard() {
               <Skeleton className="h-4 w-16" />
             ) : (
               <span className="text-[10px] font-mono text-zinc-500">
-                [{recruiterJobs?.data.filter((j) => j.status === "active").length}] LIVE
+                [{recruiterJobs?.data.filter((j) => j.status === "active")?.length}] LIVE
               </span>
             )}
           </div>
@@ -318,7 +318,7 @@ export default function RecruiterDashboard() {
               Top Candidates
             </h2>
             <span className="text-[10px] font-mono text-zinc-500">
-              [{candidatesLoading ? "…" : topCandidates.length}] SHOWN
+              [{candidatesLoading ? "…" : topCandidates?.length}] SHOWN
             </span>
           </div>
 
@@ -335,7 +335,7 @@ export default function RecruiterDashboard() {
                   <Skeleton className="h-3 w-16 mx-auto" />
                 </div>
               ))
-            ) : topCandidates.length === 0 ? (
+            ) : topCandidates?.length === 0 ? (
               <p className="col-span-full text-center text-sm text-zinc-500">
                 No candidates found yet.
               </p>
