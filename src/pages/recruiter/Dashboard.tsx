@@ -91,7 +91,7 @@ export default function RecruiterDashboard() {
   }, [token]);
 
   const stats = [
-    { label: 'Active Jobs', value: recruiterJobs?.data.length ?? 0, accent: 'text-accent-cyan-light dark:text-accent-cyan', icon: '📋' },
+    { label: 'Active Jobs', value: recruiterJobs?.data?.length ?? 0, accent: 'text-accent-cyan-light dark:text-accent-cyan', icon: '📋' },
     { label: 'Total Applicants', value: recruiterJobs?.totalApplicants ?? 0, accent: 'pink', icon: '👥' },
   ];
 
@@ -218,7 +218,7 @@ export default function RecruiterDashboard() {
               <Skeleton className="h-4 w-16" />
             ) : (
               <span className="text-[10px] font-mono text-zinc-500">
-                [{recruiterJobs?.data.filter((j) => j.status === "active")?.length}] LIVE
+                [{recruiterJobs?.data?.filter((j) => j.status === "active")?.length ?? 0}] LIVE
               </span>
             )}
           </div>
@@ -264,7 +264,7 @@ export default function RecruiterDashboard() {
                         </td>
                       </tr>
                     ))
-                  : recruiterJobs?.data.map((job, idx) => (
+                  : recruiterJobs?.data?.map((job, idx) => (
                       <tr
                         key={job.id}
                         className={`border-b border-panel-border hover:bg-white dark:bg-cyber-dark/50 transition-colors ${
