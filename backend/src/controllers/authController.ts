@@ -7,6 +7,13 @@ import { users } from "../db/schema";
 import { db } from "../db/db";
 import { eq } from "drizzle-orm";
 import { calculateProfileCompletion } from "../utils/profileCompletion";
+// import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import { emailService } from "../utils/email";
+import {
+  generateResetToken,
+  hashResetToken,
+} from "../utils/passwordReset";
 
 type AppError = {
   status?: number;
@@ -613,6 +620,347 @@ deleteOwnAccount: async ({
         success: false,
         message: e instanceof Error ? e.message : "Internal server error",
       };
+    }
+  },
+
+  contact: async ({
+    body,
+  }: Context & {
+    body: {
+      name: string;
+      email: string;
+      subject: string;
+      message: string;
+    };
+  }) => {
+    try {
+      const { name, email, subject, message } = body;
+
+      if (!name?.trim()) {
+        throw {
+          status: 400,
+          error: "Name is required",
+        };
+      }
+
+      if (!email?.trim()) {
+        throw {
+          status: 400,
+          error: "Email is required",
+        };
+      }
+
+      if (!subject?.trim()) {
+        throw {
+          status: 400,
+          error: "Subject is required",
+        };
+      }
+
+      if (!message?.trim()) {
+        throw {
+          status: 400,
+          error: "Message is required",
+        };
+      }
+
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        throw {
+          status: 400,
+          error: "Invalid email address",
+        };
+      }
+
+      await emailService.sendContactEmail({
+        name: name.trim(),
+        email: email.trim(),
+        subject: subject.trim(),
+        message: message.trim(),
+      });
+
+      return {
+        success: true,
+        message: "Your message has been sent successfully.",
+      };
+    } catch (error: unknown) {
+      console.error("CONTACT ERROR:", error);
+
+      const err = error as {
+        status?: number;
+        error?: string;
+        message?: string;
+      };
+
+      throw new Response(
+        JSON.stringify({
+          success: false,
+          message:
+            err.error ||
+            err.message ||
+            "Failed to send your message.",
+        }),
+        {
+          status: err.status || 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+  },
+
+  forgotPassword: async ({
+    body,
+  }: Context & {
+    body: {
+      email: string;
+    };
+  }) => {
+    try {
+      const email = body.email?.trim().toLowerCase();
+
+      if (!email) {
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message: "Email address is required.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) =>
+          eq(users.email, email),
+      });
+
+      /**
+       * IMPORTANT:
+       * Don't tell the requester whether the email exists.
+       *
+       * This prevents account enumeration.
+       */
+      if (!user) {
+        return {
+          success: true,
+          message:
+            "If an account exists with that email, a password reset link has been sent.",
+        };
+      }
+
+      const resetToken = generateResetToken();
+      const resetTokenHash = hashResetToken(resetToken);
+
+      /**
+       * Token expires after 30 minutes.
+       */
+      const resetTokenExpiresAt = new Date(
+        Date.now() + 30 * 60 * 1000
+      );
+
+      await db
+        .update(users)
+        .set({
+          resetTokenHash,
+          resetTokenExpiresAt,
+        })
+        .where(eq(users.id, user.id));
+
+      const frontendUrl =
+        process.env.FRONTEND_URL ||
+        "http://localhost:5173";
+
+      const resetUrl =
+        `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+
+      await emailService.sendPasswordResetEmail({
+        email: user.email,
+        firstName: user.firstName || undefined,
+        resetUrl,
+      });
+
+      return {
+        success: true,
+        message:
+          "If an account exists with that email, a password reset link has been sent.",
+      };
+    } catch (error: unknown) {
+      console.error("FORGOT PASSWORD ERROR:", error);
+
+      if (error instanceof Response) {
+        throw error;
+      }
+
+      return {
+        success: false,
+        message: "Unable to process password reset request.",
+      };
+    }
+  },
+
+  resetPassword: async ({
+    body,
+  }: Context & {
+    body: {
+      token: string;
+      password: string;
+    };
+  }) => {
+    try {
+      const { token, password } = body;
+
+      if (!token) {
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message: "Reset token is required.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      if (!password) {
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message: "New password is required.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      if (password.length < 8) {
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message:
+              "Password must be at least 8 characters long.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      const resetTokenHash = hashResetToken(token);
+
+      const user = await db.query.users.findFirst({
+        where: (users, { eq }) =>
+          eq(users.resetTokenHash, resetTokenHash),
+      });
+
+      if (!user) {
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message:
+              "Invalid or expired password reset link.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      if (
+        !user.resetTokenExpiresAt ||
+        new Date(user.resetTokenExpiresAt) < new Date()
+      ) {
+        /**
+         * Clean up expired token.
+         */
+        await db
+          .update(users)
+          .set({
+            resetTokenHash: null,
+            resetTokenExpiresAt: null,
+          })
+          .where(eq(users.id, user.id));
+
+        throw new Response(
+          JSON.stringify({
+            success: false,
+            message:
+              "Invalid or expired password reset link.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
+      /**
+       * Hash the new password.
+       */
+      const hashedPassword = await bcrypt.hash(
+        password,
+        12
+      );
+
+      /**
+       * Update password and immediately invalidate
+       * the reset token.
+       */
+      await db
+        .update(users)
+        .set({
+          password: hashedPassword,
+          resetTokenHash: null,
+          resetTokenExpiresAt: null,
+        })
+        .where(eq(users.id, user.id));
+
+      return {
+        success: true,
+        message:
+          "Password reset successfully. You can now log in.",
+      };
+    } catch (error: unknown) {
+      console.error("RESET PASSWORD ERROR:", error);
+
+      if (error instanceof Response) {
+        throw error;
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Failed to reset password.",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
   },
 };

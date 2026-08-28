@@ -1,14 +1,14 @@
-import axios from "axios";
+import { GoogleGenAI } from "@google/genai";
+import { createHash } from "node:crypto";
 
-const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-const deepseek = axios.create({
-  baseURL: DEEPSEEK_API_URL,
-  headers: {
-    Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-    "Content-Type": "application/json",
-  },
-  timeout: 60000,
+if (!GEMINI_API_KEY) {
+  console.warn("GEMINI_API_KEY is not configured");
+}
+
+const gemini = new GoogleGenAI({
+  apiKey: GEMINI_API_KEY,
 });
 
 interface ExperienceInput {
@@ -77,63 +77,230 @@ export interface ParsedCVData {
   skills: string[];
 }
 
+/* ------------------------------------------------------------------ */
+/*  Monitoring: lightweight in-process metrics + structured logging   */
+/* ------------------------------------------------------------------ */
+
+type OperationMetrics = {
+  count: number;
+  successCount: number;
+  errorCount: number;
+  cacheHitCount: number;
+  totalDurationMs: number;
+  lastDurationMs?: number;
+  lastError?: string;
+  lastErrorAt?: string;
+};
+
+const metricsStore: Record<string, OperationMetrics> = {};
+
+const getMetric = (op: string): OperationMetrics =>
+  metricsStore[op] ??
+  (metricsStore[op] = {
+    count: 0,
+    successCount: 0,
+    errorCount: 0,
+    cacheHitCount: 0,
+    totalDurationMs: 0,
+  });
+
+const recordSuccess = (op: string, durationMs: number) => {
+  const m = getMetric(op);
+  m.count += 1;
+  m.successCount += 1;
+  m.totalDurationMs += durationMs;
+  m.lastDurationMs = durationMs;
+};
+
+const recordError = (op: string, durationMs: number, error: unknown) => {
+  const m = getMetric(op);
+  m.count += 1;
+  m.errorCount += 1;
+  m.totalDurationMs += durationMs;
+  m.lastDurationMs = durationMs;
+  m.lastError = error instanceof Error ? error.message : String(error);
+  m.lastErrorAt = new Date().toISOString();
+};
+
+const recordCacheHit = (op: string) => {
+  getMetric(op).cacheHitCount += 1;
+};
 
 /**
- * DeepSeek helper
+ * Snapshot of current AIService metrics. Wire this up to a
+ * /health or /metrics endpoint, or ship it to your APM
+ * (Datadog, Sentry, CloudWatch, etc.) on an interval.
  */
-const callDeepSeek = async (
+export const getAIServiceMetrics = () =>
+  Object.fromEntries(
+    Object.entries(metricsStore).map(([op, m]) => [
+      op,
+      {
+        ...m,
+        avgDurationMs: m.count ? Math.round(m.totalDurationMs / m.count) : 0,
+        errorRate: m.count ? Number((m.errorCount / m.count).toFixed(3)) : 0,
+      },
+    ])
+  );
+
+let requestSeq = 0;
+const nextRequestId = (op: string) => `${op}-${Date.now()}-${++requestSeq}`;
+
+const log = (level: "info" | "warn" | "error", payload: Record<string, unknown>) => {
+  const line = JSON.stringify({ level, ts: new Date().toISOString(), ...payload });
+  if (level === "error") console.error(line);
+  else if (level === "warn") console.warn(line);
+  else console.log(line);
+};
+
+/**
+ * Wraps an async operation with timing, structured logs, and metrics.
+ */
+async function monitored<T>(op: string, fn: (requestId: string) => Promise<T>): Promise<T> {
+  const requestId = nextRequestId(op);
+  const start = Date.now();
+  log("info", { op, requestId, event: "start" });
+
+  try {
+    const result = await fn(requestId);
+    const durationMs = Date.now() - start;
+    recordSuccess(op, durationMs);
+    log("info", { op, requestId, event: "success", durationMs });
+    return result;
+  } catch (error) {
+    const durationMs = Date.now() - start;
+    recordError(op, durationMs, error);
+    log("error", {
+      op,
+      requestId,
+      event: "error",
+      durationMs,
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Speed / resilience helpers                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Races a promise against a timeout so a slow/hung Gemini call
+ * can never block a request indefinitely.
+ */
+const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
+};
+
+/**
+ * Retries only on transient errors (rate limit / server-side),
+ * with short exponential backoff. Never retries on bad input.
+ */
+async function withRetry<T>(fn: () => Promise<T>, retries = 1, baseDelayMs = 250): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const status = error?.status ?? error?.response?.status;
+      const isTransient = status === 429 || status === 500 || status === 503;
+      if (!isTransient || attempt === retries) throw error;
+      const delay = baseDelayMs * 2 ** attempt;
+      log("warn", { event: "retry", attempt: attempt + 1, delay, status });
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+  throw lastError;
+}
+
+const DEFAULT_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 15000);
+
+/**
+ * Gemini helper (now monitored, timed-out, and retried).
+ */
+const callGemini = async (
   prompt: string,
   options?: {
     temperature?: number;
     maxTokens?: number;
     jsonMode?: boolean;
+    timeoutMs?: number;
+    op?: string;
   }
 ): Promise<string> => {
-  if (!process.env.DEEPSEEK_API_KEY) {
-    throw new Error("DEEPSEEK_API_KEY is not configured");
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const response = await deepseek.post("", {
-    model: "deepseek-chat",
+  const op = options?.op ?? "gemini.call";
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an expert professional CV writer and CV parser. Follow the user's instructions exactly.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-
-    temperature: options?.temperature ?? 0.3,
-
-    max_tokens: options?.maxTokens ?? 1000,
-
-    ...(options?.jsonMode
-      ? {
-          response_format: {
-            type: "json_object",
+  return monitored(op, async () => {
+    const response = await withRetry(() =>
+      withTimeout(
+        gemini.models.generateContent({
+          model: "gemini-3.5-flash-lite",
+          contents: prompt,
+          config: {
+            temperature: options?.temperature ?? 0.3,
+            maxOutputTokens: options?.maxTokens ?? 1000,
+            ...(options?.jsonMode ? { responseMimeType: "application/json" } : {}),
           },
-        }
-      : {}),
+        }),
+        timeoutMs,
+        op
+      )
+    );
+
+    const content = response.text;
+
+    if (!content) {
+      throw new Error("Gemini returned an empty response");
+    }
+
+    return content.trim();
   });
-
-  const content =
-    response.data?.choices?.[0]?.message?.content;
-
-  if (!content) {
-    throw new Error("DeepSeek returned an empty response");
-  }
-
-  return content.trim();
 };
 
+/* ------------------------------------------------------------------ */
+/*  Simple TTL cache for CV extraction                                 */
+/*  Avoids re-calling Gemini for text that was already parsed          */
+/*  (duplicate submits, retries, dev/test loops, etc.)                 */
+/* ------------------------------------------------------------------ */
+
+const CACHE_TTL_MS = Number(process.env.CV_EXTRACT_CACHE_TTL_MS ?? 10 * 60 * 1000);
+const CACHE_MAX_ENTRIES = 200;
+
+const extractCache = new Map<string, { data: ParsedCVData; expiresAt: number }>();
+
+const hashText = (text: string) => createHash("sha256").update(text).digest("hex");
+
+const getFromCache = (key: string): ParsedCVData | undefined => {
+  const entry = extractCache.get(key);
+  if (!entry) return undefined;
+  if (entry.expiresAt < Date.now()) {
+    extractCache.delete(key);
+    return undefined;
+  }
+  return entry.data;
+};
+
+const setInCache = (key: string, data: ParsedCVData) => {
+  // Basic eviction so this can never grow unbounded.
+  if (extractCache.size >= CACHE_MAX_ENTRIES) {
+    const oldestKey = extractCache.keys().next().value;
+    if (oldestKey) extractCache.delete(oldestKey);
+  }
+  extractCache.set(key, { data, expiresAt: Date.now() + CACHE_TTL_MS });
+};
 
 export const AIService = {
-
   /**
    * Generate professional CV summary
    */
@@ -149,17 +316,11 @@ export const AIService = {
         ? experience
             .map(
               (exp) =>
-                `${exp.role} at ${exp.company} (${
-                  exp.startDate || "N/A"
-                } - ${
-                  exp.isCurrent
-                    ? "Present"
-                    : exp.endDate || "N/A"
-                })${
-                  exp.description
-                    ? `: ${exp.description}`
-                    : ""
-                }`
+                `${exp.role || "Role not specified"} at ${
+                  exp.company || "Company not specified"
+                } (${exp.startDate || "N/A"} - ${
+                  exp.isCurrent ? "Present" : exp.endDate || "N/A"
+                })${exp.description ? `: ${exp.description}` : ""}`
             )
             .join("\n")
         : "No work experience listed.";
@@ -168,27 +329,19 @@ export const AIService = {
         ? education
             .map(
               (edu) =>
-                `${edu.degree || ""} ${
-                  edu.department
-                    ? `in ${edu.department}`
-                    : ""
-                } at ${
-                  edu.institution
-                } (${
-                  edu.startDate || "N/A"
-                } - ${
-                  edu.endDate || "N/A"
-                })`.trim()
+                `${edu.degree || ""} ${edu.department ? `in ${edu.department}` : ""} at ${
+                  edu.institution || "Institution not specified"
+                } (${edu.startDate || "N/A"} - ${edu.endDate || "N/A"})`.trim()
             )
             .join("\n")
         : "No education listed.";
 
       const prompt = `
-Write a professional CV summary for this candidate.
+Write a well detailed professional CV summary for this candidate.
 
 Requirements:
 - 3 to 4 sentences.
-- Maximum 80 words.
+- Maximum 400 words.
 - Professional and ATS-friendly.
 - Write in resume style.
 - Do not use "I", "we", or "my".
@@ -196,7 +349,8 @@ Requirements:
 - Do not use headings.
 - Do not use bullet points.
 - Do not invent experience, skills, qualifications, or achievements.
-- Focus on the candidate's strongest relevant experience and skills.
+- Focus only on the candidate's strongest relevant experience and skills.
+- If experience or education is missing, do not invent it.
 - Return ONLY the summary text.
 
 Candidate:
@@ -215,69 +369,60 @@ Education:
 ${educationText}
       `.trim();
 
-      const summary = await callDeepSeek(prompt, {
+      const summary = await callGemini(prompt, {
         temperature: 0.4,
         maxTokens: 250,
+        timeoutMs: 12000,
+        op: "generateProfessionalSummary",
       });
 
       if (!summary) {
-        throw new Error(
-          "DeepSeek returned an empty summary"
-        );
+        throw new Error("Gemini returned an empty summary");
       }
 
       return summary;
-
     } catch (e) {
-      console.error(
-        "AIService.generateProfessionalSummary error:",
-        e
-      );
+      console.error("AIService.generateProfessionalSummary error:", e);
 
       /**
        * Fallback
-       * 
-       * The CV should still be generated if
-       * DeepSeek is unavailable.
+       *
+       * CV should still be generated if
+       * Gemini is unavailable.
        */
-      const topSkills = skills
-        .slice(0, 3)
-        .filter(Boolean)
-        .join(", ");
+
+      const topSkills = skills.slice(0, 3).filter(Boolean).join(", ");
 
       const latestRole = experience[0]?.role;
       const latestCompany = experience[0]?.company;
 
       if (latestRole && latestCompany) {
-        return `${
-          role || latestRole
-        } with hands-on experience at ${latestCompany}. Skilled in ${
+        return `${role || latestRole} with hands-on experience at ${latestCompany}. Skilled in ${
           topSkills || "relevant professional skills"
         }. Committed to delivering high-quality results and continuously developing professionally.`;
       }
 
-      return `${
-        role || "Motivated professional"
-      } skilled in ${
-        topSkills ||
-        "a range of technical and professional skills"
+      return `${role || "Motivated professional"} skilled in ${
+        topSkills || "a range of technical and professional skills"
       }. Eager to contribute effectively and grow within a dynamic organization.`;
     }
   },
 
-
   /**
    * Extract structured information from CV text
    */
-  extractCVData: async (
-    rawText: string
-  ): Promise<ParsedCVData> => {
+  extractCVData: async (rawText: string): Promise<ParsedCVData> => {
     try {
-
       if (!rawText?.trim()) {
-        throw new Error(
-          "CV text is empty"
-        );
+        throw new Error("CV text is empty");
+      }
+
+      const cacheKey = hashText(rawText.trim());
+      const cached = getFromCache(cacheKey);
+      if (cached) {
+        recordCacheHit("extractCVData");
+        log("info", { op: "extractCVData", event: "cache_hit" });
+        return cached;
       }
 
       const prompt = `
@@ -374,19 +519,15 @@ ${rawText}
 """
       `.trim();
 
-      const text = await callDeepSeek(prompt, {
+      const text = await callGemini(prompt, {
         temperature: 0,
         maxTokens: 4000,
         jsonMode: true,
+        timeoutMs: 20000,
+        op: "extractCVData",
       });
 
-      /**
-       * DeepSeek should already return JSON because
-       * response_format = json_object is enabled.
-       *
-       * Still remove accidental code fences just in case.
-       */
-      let cleanedText = text
+      const cleanedText = text
         .replace(/^```json\s*/i, "")
         .replace(/^```\s*/i, "")
         .replace(/```$/i, "")
@@ -395,42 +536,19 @@ ${rawText}
       let parsed: ParsedCVData;
 
       try {
-        parsed = JSON.parse(
-          cleanedText
-        ) as ParsedCVData;
+        parsed = JSON.parse(cleanedText) as ParsedCVData;
       } catch (parseError) {
-        console.error(
-          "Failed to parse DeepSeek CV response:"
-        );
+        console.error("Failed to parse Gemini CV response:");
+        console.error(cleanedText);
+        console.error(parseError);
 
-        console.error(
-          cleanedText
-        );
-
-        console.error(
-          parseError
-        );
-
-        throw new Error(
-          "Could not parse CV. Please try again or fill the form manually."
-        );
+        throw new Error("Could not parse CV. Please try again or fill the form manually.");
       }
 
-      /**
-       * Basic structure validation
-       */
-      if (
-        !parsed ||
-        typeof parsed !== "object"
-      ) {
-        throw new Error(
-          "DeepSeek returned invalid CV data"
-        );
+      if (!parsed || typeof parsed !== "object") {
+        throw new Error("Gemini returned invalid CV data");
       }
 
-      /**
-       * Ensure all expected properties exist.
-       */
       parsed.personalInfo ??= {
         phone: "",
         position: "",
@@ -449,29 +567,498 @@ ${rawText}
       parsed.projects ??= [];
       parsed.skills ??= [];
 
+      setInCache(cacheKey, parsed);
+
       return parsed;
-
     } catch (e) {
-      console.error(
-        "AIService.extractCVData error:",
-        e
-      );
+      console.error("AIService.extractCVData error:", e);
 
-      if (
-        e instanceof Error &&
-        e.message.includes(
-          "Could not parse CV"
-        )
-      ) {
+      if (e instanceof Error && e.message.includes("Could not parse CV")) {
         throw e;
       }
 
-      throw new Error(
-        "Could not process CV. Please try again or fill the form manually."
-      );
+      throw new Error("Could not process CV. Please try again or fill the form manually.");
     }
   },
+
+  getMetrics: getAIServiceMetrics,
 };
+
+
+// import axios from "axios";
+
+// const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+
+// const deepseek = axios.create({
+//   baseURL: DEEPSEEK_API_URL,
+//   headers: {
+//     Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+//     "Content-Type": "application/json",
+//   },
+//   timeout: 60000,
+// });
+
+// interface ExperienceInput {
+//   company: string;
+//   role: string;
+//   startDate?: string;
+//   endDate?: string;
+//   isCurrent?: boolean;
+//   description?: string;
+// }
+
+// interface EducationInput {
+//   institution: string;
+//   degree?: string;
+//   department?: string;
+//   startDate?: string;
+//   endDate?: string;
+// }
+
+// interface GenerateSummaryInput {
+//   fullName: string;
+//   experience: ExperienceInput[];
+//   skills: string[];
+//   education: EducationInput[];
+//   role?: string;
+// }
+
+// export interface ParsedCVData {
+//   personalInfo: {
+//     phone: string;
+//     position: string;
+//   };
+
+//   links: {
+//     portfolio: string;
+//     linkedIn: string;
+//     github: string;
+//     twitter: string;
+//     facebook: string;
+//   };
+
+//   experiences: {
+//     company: string;
+//     role: string;
+//     startDate: string;
+//     endDate: string;
+//     isCurrent: boolean;
+//     description: string;
+//   }[];
+
+//   educations: {
+//     institution: string;
+//     degree: string;
+//     department: string;
+//     startDate: string;
+//     endDate: string;
+//   }[];
+
+//   projects: {
+//     name: string;
+//     description: string;
+//     technologies: string[];
+//     link: string;
+//   }[];
+
+//   skills: string[];
+// }
+
+
+// /**
+//  * DeepSeek helper
+//  */
+// const callDeepSeek = async (
+//   prompt: string,
+//   options?: {
+//     temperature?: number;
+//     maxTokens?: number;
+//     jsonMode?: boolean;
+//   }
+// ): Promise<string> => {
+//   if (!process.env.DEEPSEEK_API_KEY) {
+//     throw new Error("DEEPSEEK_API_KEY is not configured");
+//   }
+
+//   const response = await deepseek.post("", {
+//     model: "deepseek-chat",
+
+//     messages: [
+//       {
+//         role: "system",
+//         content:
+//           "You are an expert professional CV writer and CV parser. Follow the user's instructions exactly and make this pass ATS checks.",
+//       },
+//       {
+//         role: "user",
+//         content: prompt,
+//       },
+//     ],
+
+//     temperature: options?.temperature ?? 0.3,
+
+//     max_tokens: options?.maxTokens ?? 1000,
+
+//     ...(options?.jsonMode
+//       ? {
+//           response_format: {
+//             type: "json_object",
+//           },
+//         }
+//       : {}),
+//   });
+
+//   const content =
+//     response.data?.choices?.[0]?.message?.content;
+
+//   if (!content) {
+//     throw new Error("DeepSeek returned an empty response");
+//   }
+
+//   return content.trim();
+// };
+
+
+// export const AIService = {
+
+//   /**
+//    * Generate professional CV summary
+//    */
+//   generateProfessionalSummary: async ({
+//     fullName,
+//     experience,
+//     skills,
+//     education,
+//     role,
+//   }: GenerateSummaryInput): Promise<string> => {
+//     try {
+//       const experienceText = experience.length
+//         ? experience
+//             .map(
+//               (exp) =>
+//                 `${exp.role} at ${exp.company} (${
+//                   exp.startDate || "N/A"
+//                 } - ${
+//                   exp.isCurrent
+//                     ? "Present"
+//                     : exp.endDate || "N/A"
+//                 })${
+//                   exp.description
+//                     ? `: ${exp.description}`
+//                     : ""
+//                 }`
+//             )
+//             .join("\n")
+//         : "No work experience listed.";
+
+//       const educationText = education.length
+//         ? education
+//             .map(
+//               (edu) =>
+//                 `${edu.degree || ""} ${
+//                   edu.department
+//                     ? `in ${edu.department}`
+//                     : ""
+//                 } at ${
+//                   edu.institution
+//                 } (${
+//                   edu.startDate || "N/A"
+//                 } - ${
+//                   edu.endDate || "N/A"
+//                 })`.trim()
+//             )
+//             .join("\n")
+//         : "No education listed.";
+
+//       const prompt = `
+// Write a full detailed professional CV summary for this candidate.
+
+// Requirements:
+// - 3 to 4 sentences.
+// - Maximum 400 words.
+// - Professional and ATS-friendly.
+// - Write in resume style.
+// - Do not use "I", "we", or "my".
+// - Do not use markdown.
+// - Do not use headings.
+// - Do not use bullet points.
+// - Do not invent experience, skills, qualifications, or achievements.
+// - Focus on the candidate's strongest relevant experience and skills.
+// - Return ONLY the summary text.
+
+// Candidate:
+// Name: ${fullName}
+
+// Target Role:
+// ${role || "Not specified"}
+
+// Skills:
+// ${skills.length ? skills.join(", ") : "None listed"}
+
+// Experience:
+// ${experienceText}
+
+// Education:
+// ${educationText}
+//       `.trim();
+
+//       const summary = await callDeepSeek(prompt, {
+//         temperature: 0.4,
+//         maxTokens: 250,
+//       });
+
+//       if (!summary) {
+//         throw new Error(
+//           "DeepSeek returned an empty summary"
+//         );
+//       }
+
+//       return summary;
+
+//     } catch (e) {
+//       console.error(
+//         "AIService.generateProfessionalSummary error:",
+//         e
+//       );
+
+//       /**
+//        * Fallback
+//        * 
+//        * The CV should still be generated if
+//        * DeepSeek is unavailable.
+//        */
+//       const topSkills = skills
+//         .slice(0, 3)
+//         .filter(Boolean)
+//         .join(", ");
+
+//       const latestRole = experience[0]?.role;
+//       const latestCompany = experience[0]?.company;
+
+//       if (latestRole && latestCompany) {
+//         return `${
+//           role || latestRole
+//         } with hands-on experience at ${latestCompany}. Skilled in ${
+//           topSkills || "relevant professional skills"
+//         }. Committed to delivering high-quality results and continuously developing professionally.`;
+//       }
+
+//       return `${
+//         role || "Motivated professional"
+//       } skilled in ${
+//         topSkills ||
+//         "a range of technical and professional skills"
+//       }. Eager to contribute effectively and grow within a dynamic organization.`;
+//     }
+//   },
+
+
+//   /**
+//    * Extract structured information from CV text
+//    */
+//   extractCVData: async (
+//     rawText: string
+//   ): Promise<ParsedCVData> => {
+//     try {
+
+//       if (!rawText?.trim()) {
+//         throw new Error(
+//           "CV text is empty"
+//         );
+//       }
+
+//       const prompt = `
+// Extract structured information from the CV text below.
+
+// Return ONLY valid JSON matching EXACTLY this structure:
+
+// {
+//   "personalInfo": {
+//     "phone": "",
+//     "position": ""
+//   },
+
+//   "links": {
+//     "portfolio": "",
+//     "linkedIn": "",
+//     "github": "",
+//     "twitter": "",
+//     "facebook": ""
+//   },
+
+//   "experiences": [
+//     {
+//       "company": "",
+//       "role": "",
+//       "startDate": "",
+//       "endDate": "",
+//       "isCurrent": false,
+//       "description": ""
+//     }
+//   ],
+
+//   "educations": [
+//     {
+//       "institution": "",
+//       "degree": "",
+//       "department": "",
+//       "startDate": "",
+//       "endDate": ""
+//     }
+//   ],
+
+//   "projects": [
+//     {
+//       "name": "",
+//       "description": "",
+//       "technologies": [],
+//       "link": ""
+//     }
+//   ],
+
+//   "skills": []
+// }
+
+// STRICT RULES:
+
+// 1. Do not invent information.
+
+// 2. If a field cannot be found, use:
+//    - "" for strings
+//    - [] for arrays
+//    - false for booleans
+
+// 3. "position" should contain the candidate's most recent or primary professional job title.
+
+// 4. Preserve dates in the format they appear in the CV.
+
+// 5. "isCurrent" must only be true when the CV explicitly indicates:
+//    - Present
+//    - Current
+//    - Currently
+//    - or an equivalent expression.
+
+// 6. Extract all relevant work experiences.
+
+// 7. Extract all relevant education entries.
+
+// 8. Extract projects when they are explicitly listed.
+
+// 9. Extract technologies associated with each project.
+
+// 10. Extract professional skills.
+
+// 11. Extract URLs exactly when possible.
+
+// 12. Do not add explanations outside the JSON.
+
+// 13. Do not wrap the JSON in markdown code fences.
+
+// CV TEXT:
+
+// """
+// ${rawText}
+// """
+//       `.trim();
+
+//       const text = await callDeepSeek(prompt, {
+//         temperature: 0,
+//         maxTokens: 4000,
+//         jsonMode: true,
+//       });
+
+//       /**
+//        * DeepSeek should already return JSON because
+//        * response_format = json_object is enabled.
+//        *
+//        * Still remove accidental code fences just in case.
+//        */
+//       let cleanedText = text
+//         .replace(/^```json\s*/i, "")
+//         .replace(/^```\s*/i, "")
+//         .replace(/```$/i, "")
+//         .trim();
+
+//       let parsed: ParsedCVData;
+
+//       try {
+//         parsed = JSON.parse(
+//           cleanedText
+//         ) as ParsedCVData;
+//       } catch (parseError) {
+//         console.error(
+//           "Failed to parse DeepSeek CV response:"
+//         );
+
+//         console.error(
+//           cleanedText
+//         );
+
+//         console.error(
+//           parseError
+//         );
+
+//         throw new Error(
+//           "Could not parse CV. Please try again or fill the form manually."
+//         );
+//       }
+
+//       /**
+//        * Basic structure validation
+//        */
+//       if (
+//         !parsed ||
+//         typeof parsed !== "object"
+//       ) {
+//         throw new Error(
+//           "DeepSeek returned invalid CV data"
+//         );
+//       }
+
+//       /**
+//        * Ensure all expected properties exist.
+//        */
+//       parsed.personalInfo ??= {
+//         phone: "",
+//         position: "",
+//       };
+
+//       parsed.links ??= {
+//         portfolio: "",
+//         linkedIn: "",
+//         github: "",
+//         twitter: "",
+//         facebook: "",
+//       };
+
+//       parsed.experiences ??= [];
+//       parsed.educations ??= [];
+//       parsed.projects ??= [];
+//       parsed.skills ??= [];
+
+//       return parsed;
+
+//     } catch (e) {
+//       console.error(
+//         "AIService.extractCVData error:",
+//         e
+//       );
+
+//       if (
+//         e instanceof Error &&
+//         e.message.includes(
+//           "Could not parse CV"
+//         )
+//       ) {
+//         throw e;
+//       }
+
+//       throw new Error(
+//         "Could not process CV. Please try again or fill the form manually."
+//       );
+//     }
+//   },
+// };
 
 // import { GoogleGenerativeAI } from "@google/generative-ai";
 

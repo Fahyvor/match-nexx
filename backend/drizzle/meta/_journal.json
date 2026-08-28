@@ -64,6 +64,13 @@
       "when": 1787444076656,
       "tag": "0008_nasty_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787843601889,
+      "tag": "0009_mysterious_speed_demon",
+      "breakpoints": true
     }
   ]
 }

@@ -114,8 +114,27 @@ class ApiClient {
     refreshToken: () =>
       this.client.post('/auth/refresh-token'),
 
-    getCurrentUser: () => 
-      this.client.get('/auth/get-single-user')
+    getCurrentUser: () =>
+      this.client.get('/auth/get-single-user'),
+
+    contact: (data: {
+      name: string;
+      email: string;
+      subject: string;
+      message: string;
+    }) =>
+      this.client.post('/auth/contact', data),
+
+    forgotPassword: (data: {
+      email: string;
+    }) =>
+      this.client.post('/auth/forgot-password', data),
+
+    resetPassword: (data: {
+      token: string;
+      password: string;
+    }) =>
+      this.client.post('/auth/reset-password', data),
   };
 
   // Job endpoints

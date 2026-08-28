@@ -326,7 +326,7 @@ export const cvController = {
         education: educationInput || [],
         role: personalInfo?.position,
       });
-
+      console.log("Summary:", summary)
       return { success: true, summary };
     } catch (e) {
       console.error("cvController.generateSummary error:", e);

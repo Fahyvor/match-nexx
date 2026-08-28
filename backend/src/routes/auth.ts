@@ -101,6 +101,67 @@ const app = new Elysia({ prefix: "/auth" })
   .get(
     "/get-single-user",
     async ({ user }) => authController.getUserProfile(user)
+  )
+
+  .post(
+    "/contact",
+    ({ body }) =>
+      authController.contact({
+        body,
+      } as any),
+    {
+      body: t.Object({
+        name: t.String({
+          minLength: 2,
+        }),
+
+        email: t.String({
+          format: "email",
+        }),
+
+        subject: t.String({
+          minLength: 2,
+        }),
+
+        message: t.String({
+          minLength: 5,
+        }),
+      }),
+    }
+  )
+
+  .post(
+    "/forgot-password",
+    ({ body }) =>
+      authController.forgotPassword({
+        body,
+      } as any),
+    {
+      body: t.Object({
+        email: t.String({
+          format: "email",
+        }),
+      }),
+    }
+  )
+
+  .post(
+    "/reset-password",
+    ({ body }) =>
+      authController.resetPassword({
+        body,
+      } as any),
+    {
+      body: t.Object({
+        token: t.String({
+          minLength: 1,
+        }),
+
+        password: t.String({
+          minLength: 8,
+        }),
+      }),
+    }
   );
 
 export default app;

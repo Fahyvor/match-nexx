@@ -44,6 +44,7 @@ export default function CVBuilder() {
   });
 
   const [skillsInput, setSkillsInput] = useState('');
+  const [projectTechnologiesInput, setProjectTechnologiesInput] = useState<Record<number, string>>({});
   const [professionalSummary, setProfessionalSummary] = useState('');
   const [educations, setEducations] = useState<EducationEntry[]>([]);
   const [experiences, setExperiences] = useState<ExperienceEntry[]>([]);
@@ -233,25 +234,69 @@ export default function CVBuilder() {
   const addProject = () => {
     setProjects((prev) => [
       ...prev,
-      { name: '', description: '', technologies: [], link: '' },
+      {
+        name: '',
+        description: '',
+        technologies: [],
+        link: '',
+      },
     ]);
   };
 
-  const updateProject = (index: number, field: keyof ProjectEntry, value: string) => {
+  // const updateProject = (index: number, field: keyof ProjectEntry, value: string) => {
+  //   setProjects((prev) =>
+  //     prev.map((proj, i) => {
+  //       if (i !== index) return proj;
+  //       if (field === 'technologies') {
+  //         return {
+  //           ...proj,
+  //           technologies: value
+  //             .split(',')
+  //             .map((t) => t.trim())
+  //             .filter(Boolean),
+  //         };
+  //       }
+  //       return { ...proj, [field]: value };
+  //     })
+  //   );
+  // };
+  const updateProject = (
+    index: number,
+    field: keyof ProjectEntry,
+    value: string
+  ) => {
     setProjects((prev) =>
-      prev.map((proj, i) => {
-        if (i !== index) return proj;
-        if (field === 'technologies') {
-          return {
-            ...proj,
-            technologies: value
-              .split(',')
-              .map((t) => t.trim())
-              .filter(Boolean),
-          };
-        }
-        return { ...proj, [field]: value };
-      })
+      prev.map((proj, i) =>
+        i === index
+          ? {
+              ...proj,
+              [field]: value,
+            }
+          : proj
+      )
+    );
+  };
+
+  const updateProjectTechnologies = (index: number, value: string) => {
+    setProjectTechnologiesInput((prev) => ({
+      ...prev,
+      [index]: value,
+    }));
+
+    const technologies = value
+      .split(',')
+      .map((tech) => tech.trim())
+      .filter(Boolean);
+
+    setProjects((prev) =>
+      prev.map((proj, i) =>
+        i === index
+          ? {
+              ...proj,
+              technologies,
+            }
+          : proj
+      )
     );
   };
 
@@ -416,7 +461,7 @@ export default function CVBuilder() {
         {/* Header */}
         <div className="mb-12 space-y-2 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-panel-border pb-8">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter uppercase leading-tight">
+            <h1 className="text-4xl md:text-4xl font-extrabold tracking-loose uppercase leading-tight">
               Construct Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-accent-pink">Professional CV</span>
             </h1>
             <p className="text-zinc-400 text-sm max-w-2xl mt-1">
@@ -590,7 +635,6 @@ export default function CVBuilder() {
                 <span className="w-2.5 h-2.5 bg-accent-cyan" />
                 Work Experience
               </h2>
-              <span className="text-xs font-mono text-accent-cyan">[{experiences.length}] ENTRIES</span>
             </div>
 
             <div className="space-y-6">
@@ -676,7 +720,6 @@ export default function CVBuilder() {
                 <span className="w-2.5 h-2.5 bg-accent-pink" />
                 Education
               </h2>
-              <span className="text-xs font-mono text-accent-pink">[{educations.length}] ENTRIES</span>
             </div>
 
             <div className="space-y-6">
@@ -783,7 +826,6 @@ export default function CVBuilder() {
                 <span className="w-2.5 h-2.5 bg-accent-cyan" />
                 Key Projects
               </h2>
-              <span className="text-xs font-mono text-accent-cyan">[{projects.length}] PROJECTS</span>
             </div>
 
             <div className="space-y-6">
@@ -805,13 +847,34 @@ export default function CVBuilder() {
                       className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                     />
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Technologies Used (Comma separated e.g. React, Next.js, Tailwind)"
-                    value={proj.technologies.join(', ')}
-                    onChange={(e) => updateProject(idx, 'technologies', e.target.value)}
-                    className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
-                  />
+                  <div>
+                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+                      Technologies Used (Comma separated)
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="React, TypeScript, Node.js, PostgreSQL"
+                      value={projectTechnologiesInput[idx] ?? proj.technologies.join(', ')}
+                      onChange={(e) =>
+                        updateProjectTechnologies(idx, e.target.value)
+                      }
+                      className="w-full mt-2 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
+                    />
+
+                    {proj.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {proj.technologies.map((technology, techIdx) => (
+                          <span
+                            key={techIdx}
+                            className="bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs px-3 py-1 rounded-full font-mono"
+                          >
+                            {technology}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <textarea
                     rows={3}
                     placeholder="Project Highlights / Description"
@@ -848,7 +911,6 @@ export default function CVBuilder() {
                 <span className="w-2.5 h-2.5 bg-accent-pink" />
                 References
               </h2>
-              <span className="text-xs font-mono text-accent-pink">[{references.length}] REFEREES</span>
             </div>
 
             <div className="space-y-6">
