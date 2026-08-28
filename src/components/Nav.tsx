@@ -166,8 +166,8 @@ const Nav = () => {
         `}
       >
         <div className="flex items-center justify-between px-6 pb-6 border-b border-zinc-800">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#00E5FF]">
-            // Navigation
+          <span className="text-xs font-bold uppercase tracking-widest text-[#00E5FF]">
+            Match Nexx
           </span>
           <button
             type="button"
@@ -179,7 +179,7 @@ const Nav = () => {
           </button>
         </div>
 
-        <div className="flex flex-col gap-4 px-6 py-6 font-mono text-xs uppercase">
+        <div className="flex flex-col gap-4 px-6 py-6 text-xs uppercase">
           <button
             type="button"
             onClick={handleJobs}

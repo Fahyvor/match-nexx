@@ -30,6 +30,9 @@ import SecurityOverview from './pages/Security';
 import ContactUs from './pages/Contact';
 import AboutUs from './pages/About';
 
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 export default function App() {
   const dispatch = useAppDispatch();
 
@@ -44,6 +47,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/privacy" element={<PrivacyPolicy/>}/>
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/pricing" element={<Pricing />} />

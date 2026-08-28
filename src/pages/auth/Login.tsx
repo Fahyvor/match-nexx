@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import SleekToast, { toast } from 'sleek-toast';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { useAppDispatch } from '../../redux/hooks';
@@ -121,7 +121,7 @@ export default function Login() {
                 <input type="checkbox" className="w-4 h-4 accent-accent-cyan" />
                 Remember me
               </label>
-              <a href="#" className="text-accent-cyan-light dark:text-accent-cyan hover:underline">Forgot Password?</a>
+              <Link to="/forgot-password" className="text-accent-cyan-light dark:text-accent-cyan hover:underline">Forgot Password?</Link>
             </div>
 
             {/* Submit Button */}

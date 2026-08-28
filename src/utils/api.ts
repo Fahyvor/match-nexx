@@ -152,6 +152,26 @@ interface ContactResponse {
   message: string;
 }
 
+interface ForgotPasswordRequest {
+  email: string;
+}
+
+interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -205,16 +225,7 @@ class ApiClient {
       return this.client.post('/auth/contact', data);
     },
 
-    forgotPassword: (data: {
-      email: string;
-    }) =>
-      this.client.post('/auth/forgot-password', data),
-
-    resetPassword: (data: {
-      token: string;
-      password: string;
-    }) =>
-      this.client.post('/auth/reset-password', data),
+    forgotPassword: async ( data: ForgotPasswordRequest ): Promise<ForgotPasswordResponse> => { return this.client.post('/auth/forgot-password', data); }, resetPassword: async ( data: ResetPasswordRequest ): Promise<ResetPasswordResponse> => { return this.client.post('/auth/reset-password', data); },
   };
 
   // Job endpoints

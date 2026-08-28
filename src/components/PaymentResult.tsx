@@ -171,7 +171,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/10 rounded-full blur-[100px] pointer-events-none" />
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/40 text-green-400 text-xs font-mono tracking-widest uppercase rounded-full">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/40 text-green-400 text-xs tracking-widest uppercase rounded-full">
             <FaCheckCircle className="w-3 h-3" />
             PAYMENT SUCCESSFUL
           </div>
