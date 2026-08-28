@@ -79,7 +79,7 @@ const app = new Elysia({ prefix: "/cv" })
 
   .post(
     "/generate-summary",
-    async ({ user, body }) => cvController.generateSummary(user?.sub, body as any),
+    async ({ user, body }) => cvController.generateSummary(user?.sub, body as Parameters<typeof cvController.generateSummary>[1]),
     {
       body: t.Object({
         personalInfo: t.Optional(

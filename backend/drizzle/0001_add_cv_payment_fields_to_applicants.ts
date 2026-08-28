@@ -1,7 +1,8 @@
-// migrations/0001_add_cv_payment_fields.ts
-import { sql } from "drizzle-orm";
+interface ExecDB {
+  execute: (query: ReturnType<typeof sql>) => Promise<unknown>;
+}
 
-export async function up(db: any) {
+export async function up(db: ExecDB) {
   // Add columns to applicants table
   await db.execute(sql`
     DO $$ 
@@ -68,7 +69,7 @@ export async function up(db: any) {
   `);
 }
 
-export async function down(db: any) {
+export async function down(db: ExecDB) {
   await db.execute(sql`
     -- Drop indexes
     DROP INDEX IF EXISTS idx_applicants_user_id;

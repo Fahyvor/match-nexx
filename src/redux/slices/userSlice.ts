@@ -79,10 +79,10 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response: any = await api.auth.register(data);
-      const payload = response.data?.data ?? response.data ?? response;
-      const user = payload.user || { id: payload.id, email: payload.email, role: payload.role || data.userType, firstName: data.firstName, lastName: data.lastName };
-      const token = payload.token || '';
+      const response = (await api.auth.register(data)) as unknown as Record<string, unknown>;
+      const payload = ((response.data as Record<string, unknown>)?.data ?? response.data ?? response) as Record<string, unknown>;
+      const user = (payload.user as User) || { id: payload.id as string, email: payload.email as string, role: (payload.role as 'applicant' | 'recruiter') || data.userType, firstName: data.firstName, lastName: data.lastName };
+      const token = (payload.token as string) || '';
       if (token) {
         const expiry = Date.now() + 24 * 60 * 60 * 1000;
         sessionStorage.setItem('auth', JSON.stringify({ token, user, expiry }));
@@ -105,8 +105,8 @@ export const loginUser = createAsyncThunk<
     try {
       const res = await api.auth.login(data);
 
-      const payload = res.data?.data ?? res.data;
-      const { token, user } = payload;
+      const payload = (res.data as Record<string, unknown>)?.data ?? res.data;
+      const { token, user } = payload as { token: string; user: User };
 
       const expiry = Date.now() + 24 * 60 * 60 * 1000;
 
@@ -124,7 +124,7 @@ export const loginUser = createAsyncThunk<
         error !== null &&
         'response' in error
       ) {
-        const err = error as any;
+        const err = error as { response?: { data?: { message?: string; error?: string; detail?: string } } };
 
         message =
           err.response?.data?.message ||

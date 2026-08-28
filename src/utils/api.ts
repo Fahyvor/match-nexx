@@ -68,6 +68,90 @@ export interface OfferData {
   notes?: string;
 }
 
+export interface LinksInfo {
+  linkedIn?: string;
+  portfolio?: string;
+  github?: string;
+  twitter?: string;
+  facebook?: string;
+}
+
+export interface CvCreatePayload {
+  personalInfo?: {
+    phone?: string;
+    position?: string;
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+  };
+  links?: LinksInfo;
+  skills?: string[];
+  experiences?: Array<{
+    company?: string;
+    role?: string;
+    startDate?: string;
+    endDate?: string;
+    isCurrent?: boolean;
+    description?: string;
+  }>;
+  educations?: Array<{
+    institution?: string;
+    degree?: string;
+    department?: string;
+    startDate?: string;
+    endDate?: string;
+  }>;
+  projects?: Array<{
+    name?: string;
+    description?: string;
+    technologies?: string[];
+    link?: string;
+  }>;
+  references?: Array<{
+    name?: string;
+    position?: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+  }>;
+  professionalSummary?: string;
+}
+
+export interface CvGenerateSummaryPayload {
+  personalInfo?: {
+    position?: string;
+    phone?: string;
+  };
+  skills?: string[];
+  experiences?: Array<{
+    company?: string;
+    role?: string;
+    startDate?: string;
+    endDate?: string;
+    isCurrent?: boolean;
+    description?: string;
+  }>;
+  educations?: Array<{
+    institution?: string;
+    degree?: string;
+    department?: string;
+    startDate?: string;
+    endDate?: string;
+  }>;
+}
+
+interface ContactRequest {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+interface ContactResponse {
+  success: boolean;
+  message: string;
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -117,13 +201,9 @@ class ApiClient {
     getCurrentUser: () =>
       this.client.get('/auth/get-single-user'),
 
-    contact: (data: {
-      name: string;
-      email: string;
-      subject: string;
-      message: string;
-    }) =>
-      this.client.post('/auth/contact', data),
+    contact: async (data: ContactRequest): Promise<ContactResponse> => {
+      return this.client.post('/auth/contact', data);
+    },
 
     forgotPassword: (data: {
       email: string;
@@ -221,10 +301,10 @@ class ApiClient {
     getMe: () =>
       this.client.get('/cv/me'),
 
-    create: (data: any) =>
+    create: (data: CvCreatePayload) =>
       this.client.post('/cv/create', data),
 
-    generateSummary: (data: any) =>
+    generateSummary: (data: CvGenerateSummaryPayload) =>
       this.client.post('/cv/generate-summary', data),
   };
 

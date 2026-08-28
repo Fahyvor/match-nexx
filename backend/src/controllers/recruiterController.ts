@@ -1,5 +1,5 @@
 import { db } from '../db/db';
-import { recruiters, jobs, applications } from '../db/schema';
+import { recruiters, jobs } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 export const recruiterController = {
@@ -15,8 +15,9 @@ export const recruiterController = {
       }
 
       return { success: true, data: recruiter };
-    } catch (e: any) {
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      const err = e as Error;
+      return { success: false, error: err.message };
     }
   },
 
@@ -24,8 +25,8 @@ export const recruiterController = {
   getDashboard: async (userId: string) => {
     try {
       const recruiterJobs = await db.select().from(jobs).where(eq(jobs.recruiterId, userId));
-      const activeJobs = recruiterJobs.filter((j: any) => j.status === 'active').length;
-      const totalApplicants = recruiterJobs.reduce((sum: number, j: any) => sum + (j.totalApplicants || 0), 0);
+      const activeJobs = recruiterJobs.filter((j) => j.status === 'active').length;
+      const totalApplicants = recruiterJobs.reduce((sum: number, j) => sum + (j.totalApplicants || 0), 0);
 
       return {
         success: true,
@@ -37,8 +38,9 @@ export const recruiterController = {
           jobs: recruiterJobs,
         },
       };
-    } catch (e: any) {
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      const err = e as Error;
+      return { success: false, error: err.message };
     }
   },
 };

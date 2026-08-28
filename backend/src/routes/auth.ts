@@ -47,7 +47,7 @@ const app = new Elysia({ prefix: "/auth" })
     ({ body }) =>
       authController.contact({
         body,
-      } as any),
+      } as Parameters<typeof authController.contact>[0]),
     {
       body: t.Object({
         name: t.String({
@@ -74,7 +74,7 @@ const app = new Elysia({ prefix: "/auth" })
     ({ body }) =>
       authController.forgotPassword({
         body,
-      } as any),
+      } as Parameters<typeof authController.forgotPassword>[0]),
     {
       body: t.Object({
         email: t.String({
@@ -89,7 +89,7 @@ const app = new Elysia({ prefix: "/auth" })
     ({ body }) =>
       authController.resetPassword({
         body,
-      } as any),
+      } as Parameters<typeof authController.resetPassword>[0]),
     {
       body: t.Object({
         token: t.String({

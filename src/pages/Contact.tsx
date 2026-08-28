@@ -23,7 +23,12 @@ export default function ContactUs() {
   ) => {
     e.preventDefault();
 
-    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !subject.trim() ||
+      !message.trim()
+    ) {
       toast.error('Please complete all fields.');
       return;
     }
@@ -38,9 +43,9 @@ export default function ContactUs() {
         message: message.trim(),
       });
 
-      // return console.log('CONTACT FORM RESPONSE:', response);
+      console.log('CONTACT FORM RESPONSE:', response);
 
-      if (response.data.success === true) {
+      if (response.success) {
         setSubmitted(true);
 
         setName('');
@@ -48,18 +53,31 @@ export default function ContactUs() {
         setSubject('');
         setMessage('');
 
-        toast.success(response?.data?.message);
+        toast.success(
+          response.message ||
+            'Your message has been sent successfully.'
+        );
       } else {
         toast.error(
-          response.data.message || 'Failed to send message.'
+          response.message ||
+            'Failed to send message.'
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('CONTACT FORM ERROR:', error);
 
+      const err = error as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+        message?: string;
+      };
+
       toast.error(
-        error.response?.data?.message ||
-          error.message ||
+        err.response?.data?.message ||
+          err.message ||
           'Failed to send your message.'
       );
     } finally {
@@ -164,7 +182,7 @@ export default function ContactUs() {
           {submitted ? (
             <div className="text-center py-12 space-y-3">
               <span className="text-[#00E5FF] text-lg font-bold block">
-                [ PACKET_TRANSMITTED ]
+                PACKET_TRANSMITTED
               </span>
 
               <p className="text-xs text-zinc-400">

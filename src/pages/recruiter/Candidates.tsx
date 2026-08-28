@@ -104,16 +104,17 @@ const Candidates = () => {
     setError(null);
     setRequiresSubscription(false);
     try {
-      const response: any = await api.recruiters.getCandidates();
+      const response = (await api.recruiters.getCandidates()) as { data?: Candidate[] | { data?: Candidate[] } };
       const list = response.data || response;
       if (Array.isArray(list)) {
         setCandidates(list);
-      } else if (Array.isArray(list.data)) {
+      } else if (list && typeof list === 'object' && 'data' in list && Array.isArray(list.data)) {
         setCandidates(list.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching candidates:", err);
-      if (err.response?.status === 402 || err.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
+      const errorResponse = err as { response?: { status?: number; data?: { code?: string } } };
+      if (errorResponse.response?.status === 402 || errorResponse.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
         setRequiresSubscription(true);
       } else {
         setError("Failed to load candidates. Please try again.");

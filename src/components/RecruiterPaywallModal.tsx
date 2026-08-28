@@ -13,7 +13,7 @@ export default function RecruiterPaywallModal({ onSuccess }: RecruiterPaywallMod
   const handleSubscribe = async () => {
     try {
       setLoading(true);
-      const res: any = await api.payments.activateSubscription(selectedPlan);
+      const res = (await api.payments.activateSubscription(selectedPlan)) as { success?: boolean; message?: string };
 
       if (res.success) {
         toast.success(res.message || 'Subscription activated successfully! Talent pool unlocked.');
@@ -23,8 +23,9 @@ export default function RecruiterPaywallModal({ onSuccess }: RecruiterPaywallMod
       } else {
         toast.error(res.message || 'Payment initialization failed. Please try again.');
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Subscription payment failed.');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(errorObj.response?.data?.message || errorObj.message || 'Subscription payment failed.');
     } finally {
       setLoading(false);
     }

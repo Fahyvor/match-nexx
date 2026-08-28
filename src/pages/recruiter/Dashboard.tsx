@@ -50,8 +50,20 @@ export default function RecruiterDashboard() {
 
   const fetchRecruiterJobs = async () => {
     try {
-      const response: any = await api.jobs.getRecruiterJobs();
-      setRecruiterJobs(response.data || response);
+      const response = (await api.jobs.getRecruiterJobs()) as unknown;
+      if (response && typeof response === 'object') {
+        const obj = response as { data?: RecruiterJobsResponse | Job[]; totalApplicants?: number };
+        if ('data' in obj && Array.isArray(obj.data)) {
+          setRecruiterJobs({
+            data: obj.data as Job[],
+            totalApplicants: typeof obj.totalApplicants === 'number' ? obj.totalApplicants : 0,
+          });
+        } else if ('totalApplicants' in obj && 'data' in obj) {
+          setRecruiterJobs(obj as unknown as RecruiterJobsResponse);
+        } else {
+          setRecruiterJobs(obj as unknown as RecruiterJobsResponse);
+        }
+      }
     } catch (error) {
       console.error('Error fetching recruiter jobs:', error);
       toast.error('Failed to load jobs. Please try again later.', 4000);
@@ -64,8 +76,10 @@ export default function RecruiterDashboard() {
     setCandidatesLoading(true);
     setRequiresSubscription(false);
     try {
-      const response: any = await api.recruiters.getCandidates();
-      const all: Candidate[] = response.data || response;
+      const response = (await api.recruiters.getCandidates()) as { data?: Candidate[] } | Candidate[];
+      const all: Candidate[] = Array.isArray(response)
+        ? response
+        : ('data' in response && Array.isArray(response.data) ? response.data : []);
 
       if (Array.isArray(all)) {
         const sorted = [...all]
@@ -73,9 +87,10 @@ export default function RecruiterDashboard() {
           .slice(0, 5);
         setTopCandidates(sorted);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching top candidates:', error);
-      if (error.response?.status === 402 || error.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
+      const err = error as { response?: { status?: number; data?: { code?: string } } };
+      if (err.response?.status === 402 || err.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
         setRequiresSubscription(true);
       } else {
         toast.error('Failed to load candidates. Please try again later.', 4000);

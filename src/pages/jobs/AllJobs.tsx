@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
@@ -20,7 +20,7 @@ export default function AllJobs() {
   const [loading, setLoading] = useState(false);
   const token = useSelector((state: RootState) => state.user.token);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get("/api/jobs/all-jobs", {
@@ -34,11 +34,11 @@ export default function AllJobs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [fetchJobs]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white px-6 lg:px-16 py-16">

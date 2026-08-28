@@ -15,12 +15,19 @@ interface PaymentResultProps {
   onRetry?: () => void;
 }
 
+interface PaymentDataDetails {
+  transactionId?: string;
+  chargeId?: string;
+  paidAt?: string;
+  [key: string]: unknown;
+}
+
 export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"success" | "failure" | "unknown">("unknown");
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const [paymentData, setPaymentData] = useState<PaymentDataDetails | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const checkoutId = searchParams.get("checkout_id");
@@ -59,13 +66,16 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
             verifyPayload.chargeId = chargeId;
           }
 
-          const response = await api.payments.verifyPayment(verifyPayload);
+          const response = (await api.payments.verifyPayment(verifyPayload)) as {
+            status?: number;
+            data?: { success?: boolean; message?: string; [key: string]: unknown };
+          };
 
           console.log("Response after payment", response)
 
           if (response?.data?.success === true || response?.status === 200) {
             setStatus("success");
-            setPaymentData(response.data);
+            setPaymentData(response.data as PaymentDataDetails);
             if (onSuccess) onSuccess();
           } else {
             setStatus("failure");
@@ -73,21 +83,24 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           }
         } else {
           // No parameters - check if user has already paid
-          const statusResponse = await api.payments.getCvStatus();
+          const statusResponse = (await api.payments.getCvStatus()) as {
+            data?: { hasPaidCv?: boolean; [key: string]: unknown };
+          };
           if (statusResponse?.data?.hasPaidCv) {
             setStatus("success");
-            setPaymentData(statusResponse.data);
+            setPaymentData(statusResponse.data as PaymentDataDetails);
           } else {
             setStatus("unknown");
             setErrorMessage("No payment information found.");
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Payment verification error:", error);
         setStatus("failure");
+        const err = error as { response?: { data?: { message?: string } }; message?: string };
         setErrorMessage(
-          error?.response?.data?.message ||
-          error?.message ||
+          err?.response?.data?.message ||
+          err?.message ||
           "Failed to verify payment status."
         );
         toast.error("Payment verification failed");
@@ -97,7 +110,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
     };
 
     verifyPayment();
-  }, [checkoutId, chargeId, statusParam]);
+  }, [checkoutId, chargeId, statusParam, onSuccess]);
 
   const handleRetry = () => {
     if (onRetry) {

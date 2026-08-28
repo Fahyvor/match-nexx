@@ -206,9 +206,10 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 1, baseDelayMs = 250
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
-      const status = error?.status ?? error?.response?.status;
+      const errObj = error as { status?: number; response?: { status?: number } };
+      const status = errObj?.status ?? errObj?.response?.status;
       const isTransient = status === 429 || status === 500 || status === 503;
       if (!isTransient || attempt === retries) throw error;
       const delay = baseDelayMs * 2 ** attempt;

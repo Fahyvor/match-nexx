@@ -13,7 +13,7 @@ export default new Elysia({ prefix: '/recruiters' })
     return {
       success: true,
       data: {
-        activeJobs: jobsList.filter((j: any) => j.status === 'active').length,
+        activeJobs: jobsList.filter((j: { status?: string | null }) => j.status === 'active').length,
         totalApplicants: jobsRes.totalApplicants || 0,
         scheduledInterviews: 0,
         offersExtended: 0,

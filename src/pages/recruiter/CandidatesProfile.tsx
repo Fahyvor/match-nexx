@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
 import RecruiterPaywallModal from "../../components/RecruiterPaywallModal";
 import api from "../../utils/api";
 
@@ -100,25 +98,25 @@ const AvatarPlaceholder = ({ gender }: { gender?: "male" | "female" | null }) =>
 const CandidatesProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const token = useSelector((state: RootState) => state.user.token);
 
   const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requiresSubscription, setRequiresSubscription] = useState(false);
 
-  const fetchApplicant = async () => {
+  const fetchApplicant = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     setError(null);
     setRequiresSubscription(false);
     try {
-      const response: any = await api.recruiters.getCandidate(id);
+      const response = (await api.recruiters.getCandidate(id)) as { data?: CandidateDetail | { data?: CandidateDetail } };
       const data = response.data || response;
-      setCandidate(data.data || data);
-    } catch (err: any) {
+      setCandidate((data as { data?: CandidateDetail }).data || (data as CandidateDetail));
+    } catch (err: unknown) {
       console.error("Error fetching applicant profile:", err);
-      if (err.response?.status === 402 || err.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
+      const errorResponse = err as { response?: { status?: number; data?: { code?: string } } };
+      if (errorResponse.response?.status === 402 || errorResponse.response?.data?.code === "SUBSCRIPTION_REQUIRED") {
         setRequiresSubscription(true);
       } else {
         setError("Failed to load this profile. Please try again.");
@@ -126,11 +124,11 @@ const CandidatesProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchApplicant();
-  }, [id, token]);
+  }, [fetchApplicant]);
 
   if (requiresSubscription) {
     return <RecruiterPaywallModal onSuccess={() => fetchApplicant()} />;

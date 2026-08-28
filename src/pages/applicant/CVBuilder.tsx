@@ -57,7 +57,7 @@ export default function CVBuilder() {
     const fetchUser = async () => {
       try {
         // Get the user data normally first.
-        const response: any = await api.auth.getCurrentUser();
+        const response = await api.auth.getCurrentUser();
         if (response) {
           // console.log("User Data", response.data || response);
           setPersonalInfo((prev) => ({
@@ -82,16 +82,16 @@ export default function CVBuilder() {
     const fetchCVDetails = async () => {
       try {
         setLoading(true);
-        const statusRes: any = await api.payments.getCvStatus();
-        if (statusRes.success && statusRes.data) {
+        const statusRes = await api.payments.getCvStatus();
+        if (statusRes.data.success && statusRes.data) {
           setHasPaidCv(statusRes.data.hasPaidCv);
         } else {
           setHasPaidCv(false);
         }
 
-        const res: any = await api.cv.getMe();
+        const res = await api.cv.getMe();
 
-        if (res.success && res.data) {
+        if (res.data.success && res.data) {
           const applicant = res.data;
           const user = applicant.user || userFromStore || {};
           const cv = applicant.cv || {};
@@ -117,43 +117,72 @@ export default function CVBuilder() {
           }
 
           if (Array.isArray(applicant.skills)) {
-            const names = applicant.skills.map((s: any) => (typeof s === 'string' ? s : s.name));
-            setSkillsInput(names.join(', '));
+            const names = applicant.skills.map(
+              (skill: string | { name?: string }) =>
+                typeof skill === 'string' ? skill : skill.name || ''
+            );
+
+            setSkillsInput(names.filter(Boolean).join(', '));
           }
 
           if (Array.isArray(applicant.educations)) {
             setEducations(
-              applicant.educations.map((edu: any) => ({
-                institution: edu.school || '',
-                department: edu.field || '',
-                degree: edu.degree || '',
-                startDate: edu.startYear || '',
-                endDate: edu.endYear || '',
-              }))
+              applicant.educations.map(
+                (edu: {
+                  school?: string;
+                  field?: string;
+                  degree?: string;
+                  startYear?: string;
+                  endYear?: string;
+                }) => ({
+                  institution: edu.school || '',
+                  department: edu.field || '',
+                  degree: edu.degree || '',
+                  startDate: edu.startYear || '',
+                  endDate: edu.endYear || '',
+                })
+              )
             );
           }
 
           if (Array.isArray(applicant.experiences)) {
             setExperiences(
-              applicant.experiences.map((exp: any) => ({
-                company: exp.company || '',
-                role: exp.role || '',
-                startDate: exp.startDate || '',
-                endDate: exp.endDate || '',
-                isCurrent: !exp.endDate,
-                description: exp.description || '',
-              }))
+              applicant.experiences.map(
+                (exp: {
+                  company?: string | null;
+                  role?: string | null;
+                  startDate?: string | null;
+                  endDate?: string | null;
+                  description?: string | null;
+                }) => ({
+                  company: exp.company || '',
+                  role: exp.role || '',
+                  startDate: exp.startDate || '',
+                  endDate: exp.endDate || '',
+                  isCurrent: !exp.endDate,
+                  description: exp.description || '',
+                })
+              )
             );
           }
 
           if (Array.isArray(applicant.projects)) {
             setProjects(
-              applicant.projects.map((proj: any) => ({
-                name: proj.name || '',
-                description: proj.description || '',
-                technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
-                link: proj.link || '',
-              }))
+              applicant.projects.map(
+                (proj: {
+                  name?: string | null;
+                  description?: string | null;
+                  technologies?: string[] | null;
+                  link?: string | null;
+                }) => ({
+                  name: proj.name || '',
+                  description: proj.description || '',
+                  technologies: Array.isArray(proj.technologies)
+                    ? proj.technologies
+                    : [],
+                  link: proj.link || '',
+                })
+              )
             );
           }
 
@@ -162,16 +191,26 @@ export default function CVBuilder() {
             : cv.references && Array.isArray(cv.references)
             ? cv.references
             : [];
+
           if (refs.length > 0) {
             setReferences(
-              refs.map((ref: any) => ({
-                name: ref.name || '',
-                position: ref.position || '',
-                company: ref.company || '',
-                email: ref.email || '',
-                phone: ref.phone || '',
-                relationship: ref.relationship || '',
-              }))
+              refs.map(
+                (ref: {
+                  name?: string | null;
+                  position?: string | null;
+                  company?: string | null;
+                  email?: string | null;
+                  phone?: string | null;
+                  relationship?: string | null;
+                }) => ({
+                  name: ref.name || '',
+                  position: ref.position || '',
+                  company: ref.company || '',
+                  email: ref.email || '',
+                  phone: ref.phone || '',
+                  relationship: ref.relationship || '',
+                })
+              )
             );
           }
         } else if (userFromStore) {
@@ -182,7 +221,7 @@ export default function CVBuilder() {
             email: userFromStore.email || '',
           }));
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to prefill CV details:', err);
       } finally {
         setLoading(false);
@@ -324,7 +363,7 @@ export default function CVBuilder() {
   const handleGenerateSummary = async () => {
     try {
       setGeneratingSummary(true);
-      const res: any = await api.cv.generateSummary({
+      const res = (await api.cv.generateSummary({
         personalInfo: { position: personalInfo.position, phone: personalInfo.phone },
         skills,
         experiences: experiences.map((exp) => ({
@@ -342,7 +381,7 @@ export default function CVBuilder() {
           startDate: edu.startDate,
           endDate: edu.endDate,
         })),
-      });
+      })) as { success?: boolean; summary?: string; message?: string };
 
       if (res.success && res.summary) {
         setProfessionalSummary(res.summary);
@@ -353,8 +392,9 @@ export default function CVBuilder() {
          setHasPaidCv(false)
         }
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Failed to generate summary.');
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(errorResponse.response?.data?.message || errorResponse.message || 'Failed to generate summary.');
     } finally {
       setGeneratingSummary(false);
     }
@@ -413,7 +453,7 @@ export default function CVBuilder() {
         professionalSummary,
       };
 
-      const res: any = await api.cv.create(payload);
+      const res = (await api.cv.create(payload)) as { success?: boolean; message?: string; data?: { cv?: { professionalSummary?: string } } };
 
       if (res.success) {
         toast.success(res.message || 'CV saved successfully!');
@@ -435,8 +475,9 @@ export default function CVBuilder() {
       } else {
         toast.error(res.message || 'Failed to save CV.');
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Error saving CV.');
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(errorResponse.response?.data?.message || errorResponse.message || 'Error saving CV.');
     } finally {
       setSaving(false);
     }

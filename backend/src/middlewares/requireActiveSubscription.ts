@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { paymentController } from "../controllers/paymentController";
 
 export const requireActiveSubscription = new Elysia().onBeforeHandle(
-  async ({ user, set }: { user?: { sub: string; id?: string; role: string }; set: any }) => {
+  async ({ user, set }: { user?: { sub: string; id?: string; role: string }; set: { status?: number | string } }) => {
     if (!user) {
       set.status = 401;
       return { success: false, message: "Unauthorized" };

@@ -147,7 +147,7 @@ export const paymentController = {
   /**
    * Handle Bachs webhook events
    */
-  handleWebhookEvent: async (event: any) => {
+  handleWebhookEvent: async (event: { type?: string; data?: { checkout_id?: string; charge_id?: string } }) => {
     try {
       console.log("Bachs webhook received:", JSON.stringify(event, null, 2));
 
@@ -612,7 +612,7 @@ initializeCvPayment: async (
       let failureReason =
         "Payment provider error";
 
-      let providerError: any = null;
+      let providerError: { detail?: string; message?: string } | null = null;
 
       if (
         axios.isAxiosError(
@@ -953,7 +953,7 @@ initializeCvPayment: async (
           // );
           // If verified, mark as paid
         } catch (verifyErr) {
-          console.log("Could not verify with Bachs API, marking as paid anyway");
+          console.log("Could not verify with Bachs API, marking as paid anyway", verifyErr);
         }
       }
 
@@ -1019,7 +1019,7 @@ initializeCvPayment: async (
   handleCvPaymentWebhook: async (
     checkoutId: string,
     chargeId: string,
-    event?: any
+    event?: { type?: string; data?: { status?: string; checkout_id?: string; charge_id?: string } }
   ) => {
     try {
       console.log("========== CV PAYMENT WEBHOOK ==========");

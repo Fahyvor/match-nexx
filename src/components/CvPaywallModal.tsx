@@ -3,19 +3,26 @@ import api from "../utils/api";
 import SleekToast, { toast } from "sleek-toast";
 
 interface CvPaywallModalProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
-export default function CvPaywallModal({
-  // onSuccess,
-}: CvPaywallModalProps) {
+export default function CvPaywallModal({ onSuccess }: CvPaywallModalProps) {
+  void onSuccess;
   const [loading, setLoading] = useState(false);
 
   const handlePayCv = async () => {
     try {
       setLoading(true);
 
-      const res: any = await api.payments.initializeCvPayment();
+      const res = (await api.payments.initializeCvPayment()) as {
+        success?: boolean;
+        message?: string;
+        data?: {
+          checkoutUrl?: string;
+          checkout_url?: string;
+          authorizationUrl?: string;
+        };
+      };
 
       console.log("CV PAYMENT INITIALIZE RESPONSE:", res);
 
@@ -51,16 +58,17 @@ export default function CvPaywallModal({
        * Redirect user to Bachs checkout.
        */
       window.location.href = checkoutUrl;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(
         "CV PAYMENT INITIALIZATION ERROR:",
         err
       );
 
+      const errorObj = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
       const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
+        errorObj?.response?.data?.message ||
+        errorObj?.response?.data?.error ||
+        errorObj?.message ||
         "CV Payment initialization failed.";
 
       toast.error(message);
