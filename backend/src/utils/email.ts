@@ -71,20 +71,20 @@ export const emailService = {
         // to the person who submitted the form.
         replyTo: email,
 
-        subject: `[MatchNexx Contact] ${subject}`,
+        subject: `MatchNexx Contact ${subject}`,
 
         text: `
-New MatchNexx Contact Form Submission
+            New MatchNexx Contact Form Submission
 
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
+            Name: ${name}
+            Email: ${email}
+            Subject: ${subject}
 
-Message:
-${message}
+            Message:
+            ${message}
 
---------------------------------
-This message was submitted through the MatchNexx contact form.
+        --------------------------------
+        This message was submitted through the MatchNexx contact form.
         `.trim(),
 
         html: `

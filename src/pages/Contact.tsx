@@ -38,7 +38,9 @@ export default function ContactUs() {
         message: message.trim(),
       });
 
-      if (response.status == 200) {
+      // return console.log('CONTACT FORM RESPONSE:', response);
+
+      if (response.data.success === true) {
         setSubmitted(true);
 
         setName('');
@@ -46,7 +48,7 @@ export default function ContactUs() {
         setSubject('');
         setMessage('');
 
-        toast.success('Message sent successfully!');
+        toast.success(response?.data?.message);
       } else {
         toast.error(
           response.data.message || 'Failed to send message.'

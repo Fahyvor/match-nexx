@@ -43,67 +43,6 @@ const app = new Elysia({ prefix: "/auth" })
   )
 
   .post(
-    "/forgot-password",
-    async () => ({
-      success: true,
-      message: "Password reset link sent to email",
-    }),
-    {
-      body: t.Object({ email: t.String({ format: "email" }) }),
-    }
-  )
-
-  .post(
-    "/reset-password",
-    async () => ({
-      success: true,
-      message: "Password reset successful",
-    }),
-    {
-      body: t.Object({
-        token: t.String(),
-        newPassword: t.String({ minLength: 8 }),
-      }),
-    }
-  )
-  .group("/user", (group) =>
-    group
-      .use(authMiddleware(["applicant", "recruiter", "admin"]))
-
-      .put("/profile", async ({ user, body }) => ({
-        success: true,
-        message: "Profile updated successfully",
-        data: { user, updates: body },
-      }))
-
-      .post("/logout", async () => authController.logout())
-  )
-
-  // Scoped so this doesn't leak into routes below it
-  .use(
-    new Elysia()
-      .use(authMiddleware(["recruiter", "admin"]))
-      .use(requireActiveSubscription)
-      .get("/all-applicants", authController.getAllApplicants)
-  )
-
-
-  .use(authMiddleware(["applicant", "recruiter", "admin"]))
-  .delete("/delete-account", async ({ user }) => ({
-    success: true,
-    message: "Account deleted successfully",
-    data: { user },
-  }))
-  .post("/refresh-token", async ({ headers }) =>
-    authController.refreshToken(headers.authorization ?? "")
-  )
-
-  .get(
-    "/get-single-user",
-    async ({ user }) => authController.getUserProfile(user)
-  )
-
-  .post(
     "/contact",
     ({ body }) =>
       authController.contact({
@@ -162,6 +101,44 @@ const app = new Elysia({ prefix: "/auth" })
         }),
       }),
     }
-  );
+  )
+  .group("/user", (group) =>
+    group
+      .use(authMiddleware(["applicant", "recruiter", "admin"]))
+
+      .put("/profile", async ({ user, body }) => ({
+        success: true,
+        message: "Profile updated successfully",
+        data: { user, updates: body },
+      }))
+
+      .post("/logout", async () => authController.logout())
+  )
+
+  // Scoped so this doesn't leak into routes below it
+  .use(
+    new Elysia()
+      .use(authMiddleware(["recruiter", "admin"]))
+      .use(requireActiveSubscription)
+      .get("/all-applicants", authController.getAllApplicants)
+  )
+
+
+  .use(authMiddleware(["applicant", "recruiter", "admin"]))
+  .delete("/delete-account", async ({ user }) => ({
+    success: true,
+    message: "Account deleted successfully",
+    data: { user },
+  }))
+  .post("/refresh-token", async ({ headers }) =>
+    authController.refreshToken(headers.authorization ?? "")
+  )
+
+  .get(
+    "/get-single-user",
+    async ({ user }) => authController.getUserProfile(user)
+  )
+
+  
 
 export default app;
