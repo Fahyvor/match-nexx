@@ -61,7 +61,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
-      <div className="flex items-center justify-center min-h-screen py-24 px-6 relative">
+      <div className="flex items-center justify-center min-h-screen lg:py-24 py-3 px-6 relative">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-accent-cyan/10 to-accent-pink/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
