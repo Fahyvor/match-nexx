@@ -73,7 +73,7 @@ const Nav = () => {
       ====================================================== */}
       <header className="sticky bg-black top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         <nav className="w-fit mx-auto bg-white/80 dark:bg-[#070708]/90 backdrop-blur-xl border-2 border-zinc-800/80 rounded-2xl px-6 py-4 flex gap-8 justify-between items-center shadow-2xl">
-          
+
           {/* LOGO */}
           <div
             className="flex items-center gap-2 min-w-0 cursor-pointer group"
@@ -173,7 +173,7 @@ const Nav = () => {
             type="button"
             onClick={handleCancel}
             aria-label="Close menu"
-            className="flex items-center justify-center w-8 h-8 rounded border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded border border-zinc-800 text-white hover:text-white transition-colors"
           >
             <FiX size={18} />
           </button>

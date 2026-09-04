@@ -24,7 +24,7 @@ export default function Documentation() {
       <main className="flex-1 space-y-10 text-sm">
         <section id="overview">
           <h1 className="text-3xl font-extrabold text-white uppercase mb-4">System Documentation</h1>
-          <p className="text-zinc-400 leading-relaxed">
+          <p className="text-white leading-relaxed">
             Welcome to the Match-Nexx developer and system guide. Match-Nexx operates as a high-speed telemetry network pairing engineering talent with recruiter queries.
           </p>
         </section>
@@ -33,7 +33,7 @@ export default function Documentation() {
           <h2 className="text-xl font-bold text-white uppercase border-l-2 border-[#00E5FF] pl-3">
             Quickstart
           </h2>
-          <div className="bg-[#0f0f12] border border-zinc-800 p-4 font-mono text-xs text-zinc-400 space-y-2">
+          <div className="bg-[#0f0f12] border border-zinc-800 p-4 font-mono text-xs text-white space-y-2">
             <p className="text-zinc-500">// Initialize candidate node via CLI or API</p>
             <p><span className="text-[#00E5FF]">curl</span> -X POST https://match-nexx.onrender.com/api/v1/profile/deploy</p>
           </div>

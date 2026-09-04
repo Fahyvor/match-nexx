@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
       </div>
 
       {/* Main Content */}
-      <div className="space-y-10 text-sm leading-relaxed text-zinc-400">
+      <div className="space-y-10 text-sm leading-relaxed text-white">
         <section>
           <h2 className="text-lg font-bold uppercase tracking-wider text-white mb-3 border-l-2 border-[#00E5FF] pl-3">
             1. Regulatory Framework
@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
             2. Information We Collect
           </h2>
           <p className="mb-3">We collect personal data that you provide directly, as well as metadata generated through telemetry and algorithmic matching:</p>
-          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-zinc-400">
+          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-white">
             <li><strong className="text-zinc-200">Applicant Data:</strong> Full name, contact details, work experience, educational history, CV files, portfolio links, and skill parameters.</li>
             <li><strong className="text-zinc-200">Recruiter Data:</strong> Work email, corporate credentials, hiring preferences, and candidate interaction logs.</li>
             <li><strong className="text-zinc-200">Automated Data:</strong> System telemetry (IP addresses, response latency, device descriptors, and session data).</li>
@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
             3. Legal Basis & Use of Data
           </h2>
           <p className="mb-3">Under the NDPA 2023, we process your data based on <em>Consent</em> and <em>Contractual Necessity</em> for the following purposes:</p>
-          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-zinc-400">
+          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-white">
             <li>Extracting and structuring CV metrics into AI candidate scoring engines.</li>
             <li>Syncing applicants with prospective recruiters via talent graph matching.</li>
             <li>Maintaining platform telemetry, network traffic security, and uptime performance.</li>

@@ -62,7 +62,7 @@ export default function Settings() {
         }
       });
 
-      if(response.status == 200) {
+      if (response.status == 200) {
         toast.success(response.data.message, 4000);
         console.log('Account deleted successfully:', response.data);
         handleLogout();
@@ -83,7 +83,7 @@ export default function Settings() {
         }
       );
 
-      if(response.status == 200) {
+      if (response.status == 200) {
         toast.success(response.data.message || 'Account updated successfully', 4000);
         console.log('Account updated successfully:', response.data);
       }
@@ -106,7 +106,7 @@ export default function Settings() {
           <h1 className="text-5xl font-extrabold tracking-tighter uppercase leading-tight">
             System <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-cyan to-accent-pink">Settings</span>
           </h1>
-          <p className="text-zinc-400 text-sm">Customize your experience and manage account preferences</p>
+          <p className="text-white text-sm">Customize your experience and manage account preferences</p>
         </div>
 
         <div className="space-y-8">
@@ -119,7 +119,7 @@ export default function Settings() {
 
             <form className="space-y-6" onSubmit={handleUpdateAccount}>
               <div>
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
                   Email Address
                 </label>
                 <input
@@ -131,7 +131,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
                   FirstName
                 </label>
                 <input
@@ -143,7 +143,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
                   LastName
                 </label>
                 <input
@@ -155,7 +155,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
                   Current Password
                 </label>
                 <input
@@ -212,7 +212,7 @@ export default function Settings() {
 
             <div className="space-y-6">
               <div>
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-3">
+                <label className="text-xs font-mono tracking-widest text-white uppercase block mb-3">
                   Profile Visibility
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -253,7 +253,7 @@ export default function Settings() {
             </div>
 
             <div>
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase block mb-3">
+              <label className="text-xs font-mono tracking-widest text-white uppercase block mb-3">
                 Theme
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -271,11 +271,10 @@ export default function Settings() {
                       className="sr-only"
                     />
                     <div
-                      className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${
-                        settings.theme === val
+                      className={`px-4 py-3 text-xs font-mono text-center uppercase tracking-widest border transition-all ${settings.theme === val
                           ? 'bg-accent-purple/20 border-accent-purple text-white'
-                          : 'bg-white dark:bg-cyber-dark/50 border-zinc-800 text-zinc-400 hover:border-zinc-600'
-                      }`}
+                          : 'bg-white dark:bg-cyber-dark/50 border-zinc-800 text-white hover:border-zinc-600'
+                        }`}
                     >
                       {val === 'dark' ? '🌙 Dark' : '☀️ Light'}
                     </div>
@@ -300,8 +299,8 @@ export default function Settings() {
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-zinc-400">These actions are irreversible. Proceed with caution.</p>
-              
+              <p className="text-sm text-white">These actions are irreversible. Proceed with caution.</p>
+
               <button
                 onClick={handleLogout}
                 className="relative w-full px-6 py-3 text-xs font-bold uppercase tracking-widest bg-transparent text-white border border-accent-orange hover:shadow-[0_0_20px_rgba(255,107,53,0.3)] transition-all duration-300 overflow-hidden group"

@@ -1,10 +1,10 @@
 import { FaXTwitter, FaLinkedin, FaGithub } from "react-icons/fa6";
 const Footer = () => {
   return (
-    <footer className="border-t border-zinc-900 bg-[#070708] text-zinc-400 font-sans text-xs">
+    <footer className="border-t border-zinc-900 bg-[#070708] text-white font-sans text-xs">
       {/* Top Section: Navigation Grid & Brand Intro */}
       <div className="w-full mx-auto px-6 lg:px-16 py-12 grid grid-cols-1 md:grid-cols-5 gap-8">
-        
+
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
           <div className="flex items-center gap-2">
@@ -17,30 +17,30 @@ const Footer = () => {
             Bridging elite talent with intelligent hiring systems. Automated CV structuring, real-time telemetry, and direct recruiter synchronization.
           </p>
           <div className="pt-2 flex items-center gap-4 text-zinc-500">
-            <a 
-              href="https://x.com/iamfavour3" 
-              target="_blank" 
-              rel="noreferrer" 
+            <a
+              href="https://x.com/iamfavour3"
+              target="_blank"
+              rel="noreferrer"
               aria-label="X (Twitter)"
               className="hover:text-[#00E5FF] transition-colors p-1"
             >
               <FaXTwitter className="w-4 h-4" />
             </a>
-            
-            <a 
-              href="https://linkedin.com/in/fahyvor" 
-              target="_blank" 
-              rel="noreferrer" 
+
+            <a
+              href="https://linkedin.com/in/fahyvor"
+              target="_blank"
+              rel="noreferrer"
               aria-label="LinkedIn"
               className="hover:text-[#00E5FF] transition-colors p-1"
             >
               <FaLinkedin className="w-4 h-4" />
             </a>
-            
-            <a 
-              href="https://github.com/fahyvor/match-nexx" 
-              target="_blank" 
-              rel="noreferrer" 
+
+            <a
+              href="https://github.com/fahyvor/match-nexx"
+              target="_blank"
+              rel="noreferrer"
               aria-label="GitHub"
               className="hover:text-[#00E5FF] transition-colors p-1"
             >
@@ -96,7 +96,7 @@ const Footer = () => {
         <div className="flex flex-wrap items-center gap-6">
           <span>STATUS: <span className="text-[#00E5FF]">ONLINE</span></span>
           <span>NET_TRAFFIC: <span className="text-[#FF0055]">STABLE</span></span>
-          <span>REGION: <span className="text-zinc-400">NG-LOS</span></span>
+          <span>REGION: <span className="text-white">NG-LOS</span></span>
         </div>
 
         {/* Copyright */}

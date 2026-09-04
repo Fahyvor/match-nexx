@@ -87,7 +87,7 @@ const AvatarPlaceholder = ({ gender }: { gender?: "male" | "female" | null }) =>
 
   return (
     <div className="w-16 h-16 rounded-full border-2 border-accent-cyan bg-zinc-500/10 flex items-center justify-center">
-      <svg viewBox="0 0 24 24" className="w-8 h-8 text-zinc-400" fill="currentColor">
+      <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="currentColor">
         <circle cx="12" cy="8" r="4" />
         <path d="M12 14c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6z" />
       </svg>
@@ -166,19 +166,19 @@ const CandidatesProfile = () => {
       {/* Header */}
       <div className="flex items-center gap-6 border-b border-panel-border pb-6">
         {candidate.applicant?.profilePicture ? (
-            <img
-                src={candidate.applicant.profilePicture}
-                alt={`${candidate.firstName} ${candidate.lastName}`}
-                className="w-16 h-16 rounded-full object-cover border-2 border-accent-cyan"
-            />
-            ) : (
-            <AvatarPlaceholder gender={candidate.applicant?.gender} />
+          <img
+            src={candidate.applicant.profilePicture}
+            alt={`${candidate.firstName} ${candidate.lastName}`}
+            className="w-16 h-16 rounded-full object-cover border-2 border-accent-cyan"
+          />
+        ) : (
+          <AvatarPlaceholder gender={candidate.applicant?.gender} />
         )}
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
             {candidate.firstName} {candidate.lastName}
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-zinc-600 dark:text-white">
             {applicant?.headline || "No headline provided"}
           </p>
           <p className="text-sm text-zinc-500 mt-1">
@@ -254,7 +254,7 @@ const CandidatesProfile = () => {
                 </div>
                 <p className="text-sm text-zinc-500">{exp.company}</p>
                 {exp.description && (
-                  <p className="text-sm mt-2 text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm mt-2 text-zinc-600 dark:text-white">
                     {exp.description}
                   </p>
                 )}
@@ -289,18 +289,19 @@ const CandidatesProfile = () => {
       {/* CV */}
       {applicant?.cvUrl && (
         <div className="py-6 border-t border-panel-border">
-          
-            <a href={applicant.cvUrl}
+
+          <a href={applicant.cvUrl}
             target="_blank"
             rel="noreferrer"
             className="inline-block px-4 py-2 rounded bg-accent-cyan text-black font-semibold hover:opacity-90">
-        
-          
+
+
             View CV
           </a>
         </div>
         // </div>
       )}
     </div>
-)}
+  )
+}
 export default CandidatesProfile;

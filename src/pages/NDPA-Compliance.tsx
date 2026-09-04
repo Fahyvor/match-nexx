@@ -14,7 +14,7 @@ export default function NDPACompliance() {
         </p>
       </div>
 
-      <div className="space-y-8 text-sm leading-relaxed text-zinc-400">
+      <div className="space-y-8 text-sm leading-relaxed text-white">
         <section>
           <h2 className="text-lg font-bold text-white uppercase border-l-2 border-[#00E5FF] pl-3 mb-3">
             Compliance Standards

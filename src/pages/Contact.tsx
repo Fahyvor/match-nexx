@@ -55,12 +55,12 @@ export default function ContactUs() {
 
         toast.success(
           response.message ||
-            'Your message has been sent successfully.'
+          'Your message has been sent successfully.'
         );
       } else {
         toast.error(
           response.message ||
-            'Failed to send message.'
+          'Failed to send message.'
         );
       }
     } catch (error: unknown) {
@@ -77,8 +77,8 @@ export default function ContactUs() {
 
       toast.error(
         err.response?.data?.message ||
-          err.message ||
-          'Failed to send your message.'
+        err.message ||
+        'Failed to send your message.'
       );
     } finally {
       setSubmitting(false);
@@ -108,7 +108,7 @@ export default function ContactUs() {
               DIRECT CHANNELS
             </span>
 
-            <div className="flex items-start gap-3 text-zinc-400">
+            <div className="flex items-start gap-3 text-white">
               <FaEnvelope className="text-[#00E5FF] mt-0.5" />
 
               <div>
@@ -122,7 +122,7 @@ export default function ContactUs() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 text-zinc-400 pt-2 border-t border-zinc-900">
+            <div className="flex items-start gap-3 text-white pt-2 border-t border-zinc-900">
               <FaLocationDot className="text-[#FF0055] mt-0.5" />
 
               <div>
@@ -143,7 +143,7 @@ export default function ContactUs() {
               NETWORK CHANNELS
             </span>
 
-            <div className="flex items-center gap-4 text-zinc-400">
+            <div className="flex items-center gap-4 text-white">
               <a
                 href="https://x.com/iamfavour3"
                 target="_blank"
@@ -185,7 +185,7 @@ export default function ContactUs() {
                 PACKET_TRANSMITTED
               </span>
 
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-white">
                 Your message has been delivered to our engineering
                 nodes. Expect a reply within 24 hours.
               </p>
@@ -205,7 +205,7 @@ export default function ContactUs() {
             >
               {/* Name */}
               <div>
-                <label className="block text-xs uppercase text-zinc-400 mb-2">
+                <label className="block text-xs uppercase text-white mb-2">
                   Identity / Full Name
                 </label>
 
@@ -221,7 +221,7 @@ export default function ContactUs() {
 
               {/* Email */}
               <div>
-                <label className="block text-xs uppercase text-zinc-400 mb-2">
+                <label className="block text-xs uppercase text-white mb-2">
                   Return Address (Email)
                 </label>
 
@@ -237,7 +237,7 @@ export default function ContactUs() {
 
               {/* Subject */}
               <div>
-                <label className="block text-xs uppercase text-zinc-400 mb-2">
+                <label className="block text-xs uppercase text-white mb-2">
                   Subject
                 </label>
 
@@ -253,7 +253,7 @@ export default function ContactUs() {
 
               {/* Message */}
               <div>
-                <label className="block text-xs uppercase text-zinc-400 mb-2">
+                <label className="block text-xs uppercase text-white mb-2">
                   Message Payload
                 </label>
 

@@ -51,14 +51,14 @@ export default function AllJobs() {
 
       {/* LIST */}
       {loading ? (
-        <p className="text-zinc-400">Loading jobs...</p>
+        <p className="text-white">Loading jobs...</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
           {jobs.map((job) => (
             <div
               key={job.id}
               className="border border-zinc-800 bg-[#0f0f12] p-6 hover:border-zinc-600 transition cursor-pointer"
-              onClick={() => window.location.href=`/applicant/apply-job/${job.id}`}
+              onClick={() => window.location.href = `/applicant/apply-job/${job.id}`}
             >
               <h3 className="text-xl font-bold mb-2">
                 {job.experienceLevel.charAt(0).toUpperCase() +
@@ -66,7 +66,7 @@ export default function AllJobs() {
                 {job.title}
               </h3>
 
-              <p className="text-sm text-zinc-400 mb-4">
+              <p className="text-sm text-white mb-4">
                 {job.description}
               </p>
 

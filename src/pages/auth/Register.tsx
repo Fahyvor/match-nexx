@@ -97,7 +97,7 @@ export default function Register() {
 
             {/* First Name Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">First Name</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">First Name</label>
               <input
                 type="text"
                 name="firstName"
@@ -109,7 +109,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Last Name</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Last Name</label>
               <input
                 type="text"
                 name="lastName"
@@ -122,7 +122,7 @@ export default function Register() {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Email Address</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Email Address</label>
               <input
                 type="email"
                 name="email"
@@ -134,7 +134,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Phone Number</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Phone Number</label>
               <input
                 type="text"
                 name="phone"
@@ -146,7 +146,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+              <label className='text-xs font-mono tracking-widest text-white uppcase'>State</label>
               <select
                 className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
                 required
@@ -163,7 +163,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+              <label className='text-xs font-mono tracking-widest text-white uppcase'>State</label>
               <select
                 className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
                 required
@@ -179,7 +179,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Address</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Address</label>
               <input
                 type="text"
                 name="address"
@@ -191,7 +191,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Years of Experience</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Years of Experience</label>
               <input
                 type="number"
                 name="years_of_experience"
@@ -204,7 +204,7 @@ export default function Register() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Password</label>
               <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -220,7 +220,7 @@ export default function Register() {
 
             {/* User Type Selection */}
             <div className="space-y-2 lg:py-0 py-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Account Type</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Account Type</label>
               <div className="grid lg:grid-cols-2 grid-cols-1 gap-3">
                 {['applicant', 'recruiter'].map(type => (
                   <label key={type} className="cursor-pointer">
@@ -246,7 +246,7 @@ export default function Register() {
 
           </div>
           <div className="flex flex-col gap-6 lg:py-0 py-3">
-            <label className="flex items-start gap-3 text-[11px] text-zinc-400">
+            <label className="flex items-start gap-3 text-[11px] text-white">
               <input type="checkbox" className="w-4 h-4 accent-accent-cyan mt-0.5" required />
               I agree to the Terms of Service and Privacy Policy
             </label>

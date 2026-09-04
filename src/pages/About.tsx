@@ -12,7 +12,7 @@ export default function AboutUs() {
         <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight text-white mb-4">
           Engineered to <span className="text-[#00E5FF]">Bridge</span> Talent.
         </h1>
-        <p className="text-zinc-400 max-w-2xl text-base leading-relaxed">
+        <p className="text-white max-w-2xl text-base leading-relaxed">
           Match-Nexx is built on a simple premise: traditional hiring workflows are broken, noisy, and inefficient. We build low-latency talent infrastructure that turns unstructured resume noise into sub-second hiring signals.
         </p>
       </div>
@@ -22,7 +22,7 @@ export default function AboutUs() {
         <div className="bg-[#0f0f12] border border-zinc-800 p-8 relative">
           {/* <span className="font-mono text-xs text-[#00E5FF] block mb-2">[ CORE_01 ]</span> */}
           <h3 className="text-lg font-bold text-white uppercase mb-3">Precision Matching</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             Eliminating keyword stuffing and superficial resume hacks. Our system parses experience into verified capability vectors.
           </p>
         </div>
@@ -30,7 +30,7 @@ export default function AboutUs() {
         <div className="bg-[#0f0f12] border border-zinc-800 p-8 relative">
           {/* <span className="font-mono text-xs text-[#FF0055] block mb-2">[ CORE_02 ]</span> */}
           <h3 className="text-lg font-bold text-white uppercase mb-3">Sub-Second Telemetry</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             Built for engineering teams that value speed. Recruiter queries stream matches instantaneously without manual sourcing deadlocks.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function AboutUs() {
         <div className="bg-[#0f0f12] border border-zinc-800 p-8 relative">
           {/* <span className="font-mono text-xs text-[#00E5FF] block mb-2">[ CORE_03 ]</span> */}
           <h3 className="text-lg font-bold text-white uppercase mb-3">NDPA Compliance</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             Built in Nigeria for global compliance. Every pipeline byte adheres to strict NDPA 2023 privacy and consent protocols.
           </p>
         </div>
@@ -56,12 +56,12 @@ export default function AboutUs() {
           <FaLocationDot className="text-[#FF0055]" />
           <span>ABUJA, NIGERIA (NG-ABJ)</span>
         </div>
-        <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed mb-6">
+        <p className="text-xs text-white max-w-2xl leading-relaxed mb-6">
           Architecting systems focused on high-performance web engineering, data pipelines, and intelligent recruitment protocols.
         </p>
 
         {/* Social Links */}
-        <div className="flex items-center gap-4 text-zinc-400">
+        <div className="flex items-center gap-4 text-white">
           <a
             href="https://x.com/iamfavour3"
             target="_blank"

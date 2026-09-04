@@ -11,7 +11,7 @@ export default function SecurityOverview() {
         </p>
       </div>
 
-      <div className="space-y-8 text-sm leading-relaxed text-zinc-400">
+      <div className="space-y-8 text-sm leading-relaxed text-white">
         <section className="grid md:grid-cols-3 gap-6 text-xs">
           <div className="bg-[#0f0f12] border border-zinc-800 p-6">
             <h3 className="text-white font-bold uppercase mb-2">AES-256 Encryption</h3>

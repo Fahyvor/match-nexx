@@ -89,7 +89,7 @@ export default function ResetPassword() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold uppercase tracking-tight text-white">Invalid Reset Link</h2>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-white leading-relaxed">
                   This password reset link is invalid or missing a security token. Please request a new link.
                 </p>
               </div>
@@ -110,7 +110,7 @@ export default function ResetPassword() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold uppercase tracking-tight text-white">Password Reset!</h2>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-white leading-relaxed">
                   Your password has been successfully updated. You can now log in with your new credentials.
                 </p>
               </div>
@@ -133,7 +133,7 @@ export default function ResetPassword() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase flex items-center gap-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase flex items-center gap-2">
                   <FaLock className="text-accent-cyan" /> New Password
                 </label>
                 <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex items-center justify-between focus-within:border-accent-cyan transition-colors">
@@ -158,7 +158,7 @@ export default function ResetPassword() {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase flex items-center gap-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase flex items-center gap-2">
                   <FaLock className="text-accent-cyan" /> Confirm New Password
                 </label>
                 <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex items-center justify-between focus-within:border-accent-cyan transition-colors">

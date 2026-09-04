@@ -104,7 +104,7 @@ export default function CreateJobPage() {
         className="w-full bg-[#0f0f12] border border-zinc-800 p-8 space-y-6 grid lg:grid-cols-2 gap-4"
       >
         <div className="job_title">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Title</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Job Title</label>
           <input
             placeholder="Job Title"
             value={form.title}
@@ -116,7 +116,7 @@ export default function CreateJobPage() {
         </div>
 
         <div className="company_name">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Company</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Company</label>
           <input
             placeholder="Company"
             value={form.company}
@@ -128,7 +128,7 @@ export default function CreateJobPage() {
         </div>
 
         <div className="job_type">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Type</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Job Type</label>
           <select
             value={form.type}
             title="type"
@@ -150,7 +150,7 @@ export default function CreateJobPage() {
         </div>
 
         <div className="">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Experience Level</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Experience Level</label>
           <select
             value={form.experienceLevel}
             name="experienceLevel"
@@ -170,7 +170,7 @@ export default function CreateJobPage() {
 
 
         <div className="">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Salary</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Salary</label>
           <input
             type="number"
             name="salary"
@@ -182,7 +182,7 @@ export default function CreateJobPage() {
         </div>
 
         <div className="space-y-2">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>State</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>State</label>
           <select
             className='w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700 autofill:bg-transparent'
             required
@@ -198,7 +198,7 @@ export default function CreateJobPage() {
         </div>
 
         <div>
-          <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">
+          <label className="text-xs font-mono tracking-widest text-white uppercase">
             Requirements
           </label>
 
@@ -252,9 +252,9 @@ export default function CreateJobPage() {
             </div>
           )}
         </div>
-        
+
         <div className="">
-          <label className='text-xs font-mono tracking-widest text-zinc-400 uppcase'>Job Description</label>
+          <label className='text-xs font-mono tracking-widest text-white uppcase'>Job Description</label>
           <textarea
             placeholder="Job Description"
             value={form.description}

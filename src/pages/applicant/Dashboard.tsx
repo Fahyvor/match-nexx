@@ -70,11 +70,11 @@ export default function ApplicantDashboard() {
   const dashOffset = circumference - (percentage / 100) * circumference;
 
   const getStatusColor = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'reviewing': return 'text-accent-cyan-light dark:text-accent-cyan border-accent-cyan/30 bg-accent-cyan/5';
       case 'interview': return 'text-accent-pink border-accent-pink/30 bg-accent-pink/5';
       case 'pending': return 'text-accent-lime border-accent-lime/30 bg-accent-lime/5';
-      default: return 'text-zinc-400 border-zinc-700';
+      default: return 'text-white border-zinc-700';
     }
   };
 
@@ -91,7 +91,7 @@ export default function ApplicantDashboard() {
           <h1 className="text-5xl font-extrabold tracking-tighter uppercase leading-tight">
             Your Application <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-cyan to-accent-pink">Pipeline</span>
           </h1>
-          <p className="text-zinc-400 text-sm">Track real-time application status and manage your professional profile</p>
+          <p className="text-white text-sm">Track real-time application status and manage your professional profile</p>
         </div>
 
         {/* Stats Grid */}
@@ -145,7 +145,7 @@ export default function ApplicantDashboard() {
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Build Your <br /><span className="text-accent-cyan-light dark:text-accent-cyan">CV</span>
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Create a parse-ready profile optimized for ATS systems and direct delivery to tech leads.
               </p>
               <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-cyan-light dark:text-accent-cyan">
@@ -156,7 +156,7 @@ export default function ApplicantDashboard() {
 
           <button
             className="group relative bg-panel-bg border border-panel-border p-8 transform hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer"
-            onClick={() => window.location.href="/jobs"}
+            onClick={() => window.location.href = "/jobs"}
           >
             <div className="absolute top-4 right-4 text-[10px] font-mono text-accent-pink/40 group-hover:text-accent-pink transition-colors">
               [ ACTION_02 ]
@@ -165,7 +165,7 @@ export default function ApplicantDashboard() {
               <h3 className="text-lg font-bold tracking-tight uppercase">
                 Browse <br /><span className="text-accent-pink">Opportunities</span>
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Explore curated job postings matched to your profile and experience level.
               </p>
               <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-accent-pink">
@@ -214,7 +214,7 @@ export default function ApplicantDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold uppercase tracking-tight mb-2">Profile Completion</h3>
-              <p className="text-sm text-zinc-400">Complete your profile to increase matching accuracy by 40%</p>
+              <p className="text-sm text-white">Complete your profile to increase matching accuracy by 40%</p>
             </div>
             <div className="w-24 h-24 relative">
               <svg className="w-full h-full" viewBox="0 0 100 100">

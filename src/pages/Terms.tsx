@@ -11,7 +11,7 @@ export default function TermsOfService() {
       </div>
 
       {/* Main Content */}
-      <div className="space-y-10 text-sm leading-relaxed text-zinc-400">
+      <div className="space-y-10 text-sm leading-relaxed text-white">
         <section>
           <h2 className="text-lg font-bold uppercase tracking-wider text-white mb-3 border-l-2 border-[#FF0055] pl-3">
             1. Acceptance of Terms
@@ -25,7 +25,7 @@ export default function TermsOfService() {
           <h2 className="text-lg font-bold uppercase tracking-wider text-white mb-3 border-l-2 border-[#FF0055] pl-3">
             2. Platform Provision & Account Usage
           </h2>
-          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-zinc-400">
+          <ul className="list-disc list-inside space-y-2 font-mono text-xs text-white">
             <li><strong className="text-zinc-200">Applicants:</strong> You warrant that all CV material, work history, and identity information submitted represent truthful and accurate personal data.</li>
             <li><strong className="text-zinc-200">Recruiters:</strong> You agree to use platform query engines strictly for authorized hiring purposes. Sourcing candidate profiles for secondary data resale or unsolicited mass marketing is strictly prohibited.</li>
           </ul>

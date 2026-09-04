@@ -90,7 +90,7 @@ export default function Login() {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Email Address</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Email Address</label>
               <input
                 type="email"
                 value={email}
@@ -102,7 +102,7 @@ export default function Login() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase">Password</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Password</label>
               <div className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 flex justify-between">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -111,13 +111,13 @@ export default function Login() {
                   placeholder="••••••••"
                   className="text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
                 />
-                {showPassword ? <FaEye className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/> : <FaEyeSlash className='cursor-pointer' onClick={() => setShowPassword(!showPassword)}/>}
+                {showPassword ? <FaEye className='cursor-pointer' onClick={() => setShowPassword(!showPassword)} /> : <FaEyeSlash className='cursor-pointer' onClick={() => setShowPassword(!showPassword)} />}
               </div>
             </div>
 
             {/* Remember & Forgot */}
             <div className="flex justify-between items-center text-[11px]">
-              <label className="flex items-center gap-2 text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-white cursor-pointer">
                 <input type="checkbox" className="w-4 h-4 accent-accent-cyan" />
                 Remember me
               </label>
@@ -137,7 +137,7 @@ export default function Login() {
             {/* Divider */}
             <div className="border-t border-zinc-800 pt-6">
               <p className="text-center text-zinc-500 text-xs">
-                New to HireFlow?{' '}
+                New to MatchNexx?{' '}
                 <a href="/register" className="text-accent-cyan-light dark:text-accent-cyan hover:underline font-mono">Create Account →</a>
               </p>
             </div>

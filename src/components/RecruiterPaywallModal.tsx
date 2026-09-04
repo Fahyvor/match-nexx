@@ -46,7 +46,7 @@ export default function RecruiterPaywallModal({ onSuccess }: RecruiterPaywallMod
           <h2 className="text-3xl font-extrabold tracking-tight uppercase text-zinc-900 dark:text-white">
             Unlock Talent Access
           </h2>
-          <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-sm text-white max-w-md mx-auto leading-relaxed">
             You must have an active recruiter subscription to search, review, and contact qualified candidates in our verified talent network.
           </p>
         </div>
@@ -62,12 +62,11 @@ export default function RecruiterPaywallModal({ onSuccess }: RecruiterPaywallMod
               onChange={() => setSelectedPlan('monthly')}
               className="sr-only"
             />
-            <div className={`p-5 rounded-xl border text-center transition-all ${
-              selectedPlan === 'monthly'
+            <div className={`p-5 rounded-xl border text-center transition-all ${selectedPlan === 'monthly'
                 ? 'border-accent-pink bg-accent-pink/10 shadow-[0_0_25px_rgba(255,0,85,0.2)]'
                 : 'border-zinc-800 bg-white dark:bg-cyber-dark/50 hover:border-zinc-700'
-            }`}>
-              <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest block mb-1">Monthly Plan</span>
+              }`}>
+              <span className="text-xs font-mono text-white uppercase tracking-widest block mb-1">Monthly Plan</span>
               <span className="text-2xl font-black text-accent-pink block">₦15,000</span>
               <span className="text-[10px] text-zinc-500 font-mono">Billed monthly • Unlimited candidate views</span>
             </div>
@@ -82,12 +81,11 @@ export default function RecruiterPaywallModal({ onSuccess }: RecruiterPaywallMod
               onChange={() => setSelectedPlan('yearly')}
               className="sr-only"
             />
-            <div className={`p-5 rounded-xl border text-center transition-all ${
-              selectedPlan === 'yearly'
+            <div className={`p-5 rounded-xl border text-center transition-all ${selectedPlan === 'yearly'
                 ? 'border-accent-cyan bg-accent-cyan/10 shadow-[0_0_25px_rgba(0,229,255,0.2)]'
                 : 'border-zinc-800 bg-white dark:bg-cyber-dark/50 hover:border-zinc-700'
-            }`}>
-              <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest block mb-1">Yearly Plan</span>
+              }`}>
+              <span className="text-xs font-mono text-white uppercase tracking-widest block mb-1">Yearly Plan</span>
               <span className="text-2xl font-black text-accent-cyan-light dark:text-accent-cyan block">₦150,000</span>
               <span className="text-[10px] text-accent-lime font-mono">Save 17% • 12 Months Access</span>
             </div>

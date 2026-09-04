@@ -63,32 +63,32 @@ const CVPreview: React.FC = () => {
 
             const educations: EducationEntry[] = Array.isArray(applicantData.educations)
               ? applicantData.educations.map((edu) => ({
-                  institution: edu.school || '',
-                  department: edu.field || '',
-                  degree: edu.degree || '',
-                  startDate: edu.startYear || '',
-                  endDate: edu.endYear || '',
-                }))
+                institution: edu.school || '',
+                department: edu.field || '',
+                degree: edu.degree || '',
+                startDate: edu.startYear || '',
+                endDate: edu.endYear || '',
+              }))
               : [];
 
             const experiences: ExperienceEntry[] = Array.isArray(applicantData.experiences)
               ? applicantData.experiences.map((exp) => ({
-                  company: exp.company || '',
-                  role: exp.role || '',
-                  startDate: exp.startDate || '',
-                  endDate: exp.endDate || '',
-                  isCurrent: !exp.endDate,
-                  description: exp.description || '',
-                }))
+                company: exp.company || '',
+                role: exp.role || '',
+                startDate: exp.startDate || '',
+                endDate: exp.endDate || '',
+                isCurrent: !exp.endDate,
+                description: exp.description || '',
+              }))
               : [];
 
             const projects: ProjectEntry[] = Array.isArray(applicantData.projects)
               ? applicantData.projects.map((proj) => ({
-                  name: proj.name || '',
-                  description: proj.description || '',
-                  technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
-                  link: proj.link || '',
-                }))
+                name: proj.name || '',
+                description: proj.description || '',
+                technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+                link: proj.link || '',
+              }))
               : [];
 
             const skillsList: string[] = Array.isArray(applicantData.skills)
@@ -98,8 +98,8 @@ const CVPreview: React.FC = () => {
             const references: ReferenceEntry[] = Array.isArray(applicantData.references)
               ? applicantData.references
               : cvData && Array.isArray(cvData.references)
-              ? cvData.references
-              : [];
+                ? cvData.references
+                : [];
 
             const assembledResume: ResumeData = {
               personalInfo: {
@@ -141,66 +141,66 @@ const CVPreview: React.FC = () => {
 
   const effectiveResume = resumeFromStore || backendResume;
 
-const handleDownloadPdf = async () => {
-  if (!printRef.current || downloading) return;
+  const handleDownloadPdf = async () => {
+    if (!printRef.current || downloading) return;
 
-  try {
-    setDownloading(true);
+    try {
+      setDownloading(true);
 
-    if (document.fonts?.ready) {
-      await document.fonts.ready;
-    }
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    const captureOptions = {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      windowWidth: 794,
-      windowHeight: printRef.current.scrollHeight,
-      scrollX: 0,
-      scrollY: 0,
-      foreignObjectRendering: false,
-    };
+      const captureOptions = {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 794,
+        windowHeight: printRef.current.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+        foreignObjectRendering: false,
+      };
 
-    const canvas = await html2canvas(printRef.current, captureOptions);
+      const canvas = await html2canvas(printRef.current, captureOptions);
 
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
 
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    let heightLeft = imgHeight;
-    let position = 0;
+      let heightLeft = imgHeight;
+      let position = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const fileName =
+        `${effectiveResume?.personalInfo?.firstName || ''}-${effectiveResume?.personalInfo?.lastName || 'resume'}`
+          .replace(/^-|-$/g, '')
+          .trim() || 'resume';
+      pdf.save(`${fileName}-CV.pdf`);
+    } catch (err) {
+      console.error('Failed to generate PDF:', err);
+    } finally {
+      setDownloading(false);
     }
+  };
 
-    const fileName =
-      `${effectiveResume?.personalInfo?.firstName || ''}-${effectiveResume?.personalInfo?.lastName || 'resume'}`
-        .replace(/^-|-$/g, '')
-        .trim() || 'resume';
-    pdf.save(`${fileName}-CV.pdf`);
-  } catch (err) {
-    console.error('Failed to generate PDF:', err);
-  } finally {
-    setDownloading(false);
-  }
-};
-
-    // const handleDownloadPdf = () => {
-    //   window.print();
-    // };
+  // const handleDownloadPdf = () => {
+  //   window.print();
+  // };
 
   if (loading) {
     return (
@@ -239,7 +239,7 @@ const handleDownloadPdf = async () => {
       <div className="w-full mx-auto flex items-center justify-between mb-6 print:hidden">
         <button
           onClick={() => navigate('/applicant/cv-builder')}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:text-accent-pink transition-colors"
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-white hover:text-accent-pink transition-colors"
         >
           ← Back to Builder
         </button>

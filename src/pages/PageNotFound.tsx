@@ -11,14 +11,14 @@ export default function PageNotFound() {
       </h1>
 
       {/* MESSAGE */}
-      <p className="text-zinc-400 text-center max-w-md text-sm md:text-base leading-relaxed mt-4">
+      <p className="text-white text-center max-w-md text-sm md:text-base leading-relaxed mt-4">
         The requested node could not be resolved. This endpoint may have been
         deprecated, relocated, or never initialized in the system.
       </p>
 
       {/* ACTION BUTTONS */}
       <div className="mt-10 flex flex-col sm:flex-row gap-4">
-        
+
         {/* GO HOME */}
         <button
           onClick={() => (window.location.href = "/")}

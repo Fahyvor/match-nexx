@@ -4,7 +4,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-[#FF0055] selection:text-white overflow-x-hidden">
 
       <main className="w-full mx-auto px-6 lg:px-16 pt-20 pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
+
         {/* Left Side: Heavyweight Futuristic Typography */}
         <div className="lg:col-span-6 space-y-8 relative">
           {/* Subtle Cybernetic Tag */}
@@ -12,12 +12,12 @@ export default function LandingPage() {
             <span className="w-1.5 h-1.5 bg-[#FF0055] animate-ping" />
             TALENT PIPELINE
           </div>
-          
+
           <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter uppercase leading-[0.85]">
             Bridging <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#FF0055]">Elite</span> Talent.
           </h1>
-          
-          <p className="text-zinc-400 font-light text-base md:text-lg max-w-xl leading-relaxed">
+
+          <p className="text-white font-light text-base md:text-lg max-w-xl leading-relaxed">
             A radical system built to generate hyper-optimized CV structures, track live application pipelines, and establish instant synchronization with top-tier hiring nodes.
           </p>
 
@@ -41,14 +41,14 @@ export default function LandingPage() {
 
           {/* Block 1: Blue Option (Applicants) */}
           <div className="group cursor-pointer relative bg-[#0f0f12] border-l-4 border-[#00E5FF] border-y border-r border-zinc-800/80 p-8 transform hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-          onClick={() => window.location.href = "/applicant/dashboard"}
+            onClick={() => window.location.href = "/applicant/dashboard"}
           >
-            
+
             <div className="space-y-6 pt-4">
               <h3 className="text-xl font-bold tracking-tight uppercase">
                 For <br /><span className="text-[#00E5FF]">Applicants</span>
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Build an automated, parse-ready profile that guarantees frictionless delivery directly to tech leads.
               </p>
               <button className="flex cursor-pointer items-center gap-2 text-xs font-mono tracking-widest text-[#00E5FF] uppercase group-hover:underline pt-4">
@@ -59,14 +59,14 @@ export default function LandingPage() {
 
           {/* Block 2: Red Option (Recruiters) - Offset Stacked */}
           <div className="group cursor-pointer relative bg-[#0f0f12] border-r-4 border-[#FF0055] border-y border-l border-zinc-800/80 p-8 sm:translate-y-8 transform hover:-translate-y-2 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-          onClick={() => window.location.href = "candidates"}
+            onClick={() => window.location.href = "candidates"}
           >
-            
+
             <div className="space-y-6 pt-4">
               <h3 className="text-xl font-bold tracking-tight uppercase">
                 For <br /><span className="text-[#FF0055]">Recruiters</span>
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-white leading-relaxed">
                 Bypass sourcing deadlocks. Execute high-speed querying across clean, highly calibrated candidate pools.
               </p>
               <button className="w-full bg-[#FF0055] hover:bg-[#ff1a66] text-white font-mono text-xs tracking-widest uppercase py-3 transition-colors text-center block">
@@ -96,21 +96,21 @@ export default function LandingPage() {
       <section className="px-6 lg:px-16 py-24 grid md:grid-cols-3 gap-8">
         <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
           <h3 className="font-bold uppercase text-sm mb-3">Smart Matching Engine</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             AI-driven candidate scoring system that maps skills, experience, and intent into structured hiring signals.
           </p>
         </div>
 
         <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
           <h3 className="font-bold uppercase text-sm mb-3">Real-Time Pipeline Tracking</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             Monitor applicant flow from application to decision in a live synchronized hiring dashboard.
           </p>
         </div>
 
         <div className="border border-zinc-800 p-6 bg-[#0f0f12] hover:border-zinc-600 transition">
           <h3 className="font-bold uppercase text-sm mb-3">Structured CV Intelligence</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed">
+          <p className="text-xs text-white leading-relaxed">
             Automatically transforms resumes into recruiter-ready structured data for instant evaluation.
           </p>
         </div>
@@ -125,21 +125,21 @@ export default function LandingPage() {
         <div className="grid md:grid-cols-3 gap-10 font-mono text-xs">
           <div>
             <p className="text-[#00E5FF] mb-2">01</p>
-            <p className="text-zinc-400">
+            <p className="text-white">
               Users create structured applicant or recruiter profiles within the system.
             </p>
           </div>
 
           <div>
             <p className="text-[#FF0055] mb-2">02</p>
-            <p className="text-zinc-400">
+            <p className="text-white">
               The engine analyzes, indexes, and maps skills into a searchable talent graph.
             </p>
           </div>
 
           <div>
-            <p className="text-zinc-400 mb-2">03</p>
-            <p className="text-zinc-400">
+            <p className="text-white mb-2">03</p>
+            <p className="text-white">
               Matches are streamed instantly into a live hiring pipeline interface.
             </p>
           </div>
@@ -156,7 +156,7 @@ export default function LandingPage() {
           Replace fragmented hiring workflows with a unified, intelligent talent infrastructure built for speed and precision.
         </p>
 
-        <button className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-10 py-4 text-black font-bold tracking-widest uppercase cursor-pointer" onClick={() => window.location.href="/login"}>
+        <button className="bg-gradient-to-r from-[#00E5FF] to-[#FF0055] px-10 py-4 text-black font-bold tracking-widest uppercase cursor-pointer" onClick={() => window.location.href = "/login"}>
           Get Started
         </button>
       </section>

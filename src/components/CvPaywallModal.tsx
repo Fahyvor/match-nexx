@@ -99,7 +99,7 @@ export default function CvPaywallModal({ onSuccess }: CvPaywallModalProps) {
         </h2>
 
         {/* Description */}
-        <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
+        <p className="text-sm text-white leading-relaxed max-w-md mx-auto">
           Pay a one-time fee of{" "}
           <strong className="text-accent-cyan font-bold">
             ₦2,000
@@ -112,7 +112,7 @@ export default function CvPaywallModal({ onSuccess }: CvPaywallModalProps) {
         <div className="p-6 bg-white dark:bg-cyber-dark/50 border border-zinc-800 rounded-xl space-y-3">
 
           <div className="flex justify-between items-center text-xs font-mono">
-            <span className="text-zinc-400">
+            <span className="text-white">
               Personal Account CV Fee
             </span>
 

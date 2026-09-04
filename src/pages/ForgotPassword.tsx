@@ -70,13 +70,13 @@ export default function ForgotPassword() {
                 RECOVERY
               </div>
 
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <p className="text-sm text-white leading-relaxed">
                 Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
               </p>
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-xs font-mono tracking-widest text-zinc-400 uppercase flex items-center gap-2">
+                <label className="text-xs font-mono tracking-widest text-white uppercase flex items-center gap-2">
                   <FaEnvelope className="text-accent-cyan" /> Email Address
                 </label>
                 <input
@@ -128,12 +128,12 @@ export default function ForgotPassword() {
 
               <div className="space-y-2">
                 <h2 className="text-xl font-bold uppercase tracking-tight text-white">Check Your Inbox</h2>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-white leading-relaxed">
                   If an account exists for <span className="text-accent-cyan font-mono">{email}</span>, you will receive an email with instructions on how to reset your password.
                 </p>
               </div>
 
-              <div className="p-4 bg-zinc-900/50 border border-zinc-800 text-xs text-zinc-400 text-left space-y-2 font-mono">
+              <div className="p-4 bg-zinc-900/50 border border-zinc-800 text-xs text-white text-left space-y-2 font-mono">
                 <p className="text-accent-pink font-semibold">Did not receive an email?</p>
                 <ul className="list-disc list-inside space-y-1 text-[11px] text-zinc-500">
                   <li>Check your spam/junk folder</li>

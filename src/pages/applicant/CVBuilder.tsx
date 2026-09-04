@@ -189,8 +189,8 @@ export default function CVBuilder() {
           const refs = Array.isArray(applicant.references)
             ? applicant.references
             : cv.references && Array.isArray(cv.references)
-            ? cv.references
-            : [];
+              ? cv.references
+              : [];
 
           if (refs.length > 0) {
             setReferences(
@@ -308,9 +308,9 @@ export default function CVBuilder() {
       prev.map((proj, i) =>
         i === index
           ? {
-              ...proj,
-              [field]: value,
-            }
+            ...proj,
+            [field]: value,
+          }
           : proj
       )
     );
@@ -331,9 +331,9 @@ export default function CVBuilder() {
       prev.map((proj, i) =>
         i === index
           ? {
-              ...proj,
-              technologies,
-            }
+            ...proj,
+            technologies,
+          }
           : proj
       )
     );
@@ -389,7 +389,7 @@ export default function CVBuilder() {
       } else {
         toast.error(res.message || 'Could not generate summary.', 5000);
         if (res.message === "Payment of ₦2,000 is required before generating your CV summary.") {
-         setHasPaidCv(false)
+          setHasPaidCv(false)
         }
       }
     } catch (err: unknown) {
@@ -505,7 +505,7 @@ export default function CVBuilder() {
             <h1 className="text-4xl md:text-4xl font-extrabold tracking-loose uppercase leading-tight">
               Construct Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-accent-pink">Professional CV</span>
             </h1>
-            <p className="text-zinc-400 text-sm max-w-2xl mt-1">
+            <p className="text-white text-sm max-w-2xl mt-1">
               Build an automated, parse-ready CV optimized for recruiters, ATS systems and tech leads.
             </p>
           </div>
@@ -530,7 +530,7 @@ export default function CVBuilder() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">First Name</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">First Name</label>
                 <input
                   type="text"
                   placeholder="John"
@@ -540,7 +540,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Last Name</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Last Name</label>
                 <input
                   type="text"
                   placeholder="Doe"
@@ -550,7 +550,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Job Title / Headline</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Job Title / Headline</label>
                 <input
                   type="text"
                   placeholder="Senior Full Stack Engineer"
@@ -560,7 +560,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Phone Number *</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Phone Number *</label>
                 <input
                   type="text"
                   placeholder="+234 8123456789"
@@ -570,7 +570,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Email Address</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Email Address</label>
                 <input
                   type="email"
                   placeholder="john@example.com"
@@ -580,7 +580,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Address / Location</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Address / Location</label>
                 <input
                   type="text"
                   placeholder="Abuja, Nigeria"
@@ -601,7 +601,7 @@ export default function CVBuilder() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">LinkedIn URL</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">LinkedIn URL</label>
                 <input
                   type="text"
                   placeholder="https://linkedin.in/in/username"
@@ -611,7 +611,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Portfolio URL</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Portfolio URL</label>
                 <input
                   type="text"
                   placeholder="https://myportfolio.com"
@@ -621,7 +621,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">GitHub URL</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">GitHub URL</label>
                 <input
                   type="text"
                   placeholder="https://github.com/username"
@@ -631,7 +631,7 @@ export default function CVBuilder() {
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Twitter / X URL</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Twitter / X URL</label>
                 <input
                   type="text"
                   placeholder="https://x.com/username"
@@ -714,7 +714,7 @@ export default function CVBuilder() {
                         onChange={(e) => updateExperience(idx, 'endDate', e.target.value)}
                         className="flex-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors disabled:opacity-50"
                       />
-                      <label className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono cursor-pointer whitespace-nowrap">
+                      <label className="flex items-center gap-1.5 text-xs text-white font-mono cursor-pointer whitespace-nowrap">
                         <input
                           type="checkbox"
                           checked={exp.isCurrent}
@@ -835,7 +835,7 @@ export default function CVBuilder() {
             </h2>
 
             <div>
-              <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+              <label className="text-xs font-mono text-white uppercase tracking-widest">
                 Skills (Comma separated)
               </label>
               <input
@@ -889,7 +889,7 @@ export default function CVBuilder() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+                    <label className="text-xs font-mono text-white uppercase tracking-widest">
                       Technologies Used (Comma separated)
                     </label>
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { 
-  FaCheckCircle, 
-  FaTimesCircle, 
-  FaArrowLeft, 
-  FaHome, 
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaArrowLeft,
+  FaHome,
   FaRedoAlt
 } from "react-icons/fa";
 import api from "../utils/api";
@@ -61,14 +61,14 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           const verifyPayload: { checkoutId: string; chargeId?: string } = {
             checkoutId,
           };
-          
+
           if (chargeId) {
             verifyPayload.chargeId = chargeId;
           }
 
           const response = (await api.payments.verifyPayment(verifyPayload)) as {
             status?: number;
-            data?: { success?: boolean; message?: string; [key: string]: unknown };
+            data?: { success?: boolean; message?: string;[key: string]: unknown };
           };
 
           console.log("Response after payment", response)
@@ -84,7 +84,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
         } else {
           // No parameters - check if user has already paid
           const statusResponse = (await api.payments.getCvStatus()) as {
-            data?: { hasPaidCv?: boolean; [key: string]: unknown };
+            data?: { hasPaidCv?: boolean;[key: string]: unknown };
           };
           if (statusResponse?.data?.hasPaidCv) {
             setStatus("success");
@@ -134,7 +134,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
         <SleekToast />
         <div className="w-full max-w-lg bg-panel-bg border border-accent-cyan/40 p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center space-y-8">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent-cyan/10 rounded-full blur-[100px] pointer-events-none" />
-          
+
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-cyan/10 border border-accent-cyan/40 text-accent-cyan text-xs font-mono tracking-widest uppercase rounded-full">
             <span className="w-2 h-2 bg-accent-cyan animate-ping rounded-full" />
             VERIFYING PAYMENT
@@ -147,10 +147,10 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
                 <div className="w-2 h-2 bg-accent-cyan rounded-full animate-pulse" />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">Please Wait</h3>
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-white">
                 Verifying your payment status...
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
     return (
       <div className="min-h-[70vh] bg-black flex items-center justify-center p-6 bg-panel-bg/80 backdrop-blur-md">
         <SleekToast />
-        
+
         <div className="w-full max-w-lg bg-panel-bg border border-green-500/40 p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center space-y-6 animate-in fade-in duration-500">
           {/* Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -189,7 +189,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           </h2>
 
           {/* Description */}
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
+          <p className="text-sm text-white leading-relaxed max-w-md mx-auto">
             Your payment of{" "}
             <strong className="text-green-400 font-bold">₦2,000</strong>{" "}
             was successful. You now have full access to the CV Builder.
@@ -199,21 +199,21 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           {paymentData && (
             <div className="p-4 bg-white dark:bg-cyber-dark/50 border border-zinc-800 rounded-xl space-y-2 text-left">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-zinc-400">Transaction ID</span>
+                <span className="text-white">Transaction ID</span>
                 <span className="text-zinc-300 truncate max-w-[200px]">
                   {paymentData.transactionId || paymentData.chargeId || checkoutId || "N/A"}
                 </span>
               </div>
               {paymentData.paidAt && (
                 <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-zinc-400">Date</span>
+                  <span className="text-white">Date</span>
                   <span className="text-zinc-300">
                     {new Date(paymentData.paidAt).toLocaleString()}
                   </span>
                 </div>
               )}
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-zinc-400">Amount</span>
+                <span className="text-white">Amount</span>
                 <span className="text-green-400 font-bold">₦2,000</span>
               </div>
             </div>
@@ -228,10 +228,10 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
               <FaCheckCircle className="w-4 h-4" />
               Start Building Your CV →
             </button>
-            
+
             <button
               onClick={handleGoHome}
-              className="w-full py-3 px-6 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-6 text-sm font-medium text-white hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
             >
               <FaHome className="w-4 h-4" />
               Go to Dashboard
@@ -252,7 +252,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
     return (
       <div className="min-h-[70vh] bg-black flex items-center justify-center p-6 bg-panel-bg/80 backdrop-blur-md">
         <SleekToast />
-        
+
         <div className="w-full max-w-lg bg-panel-bg border border-red-500/40 p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center space-y-6 animate-in fade-in duration-500">
           {/* Glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -276,7 +276,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           </h2>
 
           {/* Description */}
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
+          <p className="text-sm text-white leading-relaxed max-w-md mx-auto">
             {errorMessage || "Your payment could not be processed. Please try again."}
           </p>
 
@@ -296,10 +296,10 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
               <FaRedoAlt className="w-4 h-4" />
               Try Again
             </button>
-            
+
             <button
               onClick={handleGoBack}
-              className="w-full py-3 px-6 text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-6 text-sm font-medium text-white hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
             >
               <FaArrowLeft className="w-4 h-4" />
               Go Back
@@ -319,11 +319,11 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
   return (
     <div className="min-h-[70vh] bg-black flex items-center justify-center p-6 bg-panel-bg/80 backdrop-blur-md">
       <SleekToast />
-      
+
       <div className="w-full max-w-lg bg-panel-bg border border-zinc-700/40 p-8 rounded-2xl shadow-2xl relative overflow-hidden text-center space-y-6">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-zinc-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-500/10 border border-zinc-500/40 text-zinc-400 text-xs font-mono tracking-widest uppercase rounded-full">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-500/10 border border-zinc-500/40 text-white text-xs font-mono tracking-widest uppercase rounded-full">
           <FaTimesCircle className="w-3 h-3" />
           NO PAYMENT FOUND
         </div>
@@ -332,7 +332,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           Payment Information Not Found
         </h2>
 
-        <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
+        <p className="text-sm text-white leading-relaxed max-w-md mx-auto">
           We couldn't find any payment information. Please try initiating a new payment.
         </p>
 
