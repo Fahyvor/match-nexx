@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
+import { FaLock, FaDownload } from 'react-icons/fa';
 import type { RootState } from '../../redux/store';
 import { setResume } from '../../redux/slices/resumeSlice';
 import Template01 from '../../templates/01';
@@ -21,6 +22,7 @@ const CVPreview: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [hasPaidCv, setHasPaidCv] = useState<boolean | null>(null);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -139,6 +141,19 @@ const CVPreview: React.FC = () => {
     fetchUserCV();
   }, [resumeFromStore, dispatch]);
 
+  // Intercept browser print when user has not paid
+  useEffect(() => {
+    const handleBeforePrint = (e: Event) => {
+      if (!hasPaidCv) {
+        e.preventDefault();
+        setShowPaywallModal(true);
+      }
+    };
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    return () => window.removeEventListener('beforeprint', handleBeforePrint);
+  }, [hasPaidCv]);
+
   const effectiveResume = resumeFromStore || backendResume;
 
   const handleDownloadPdf = async () => {
@@ -198,9 +213,13 @@ const CVPreview: React.FC = () => {
     }
   };
 
-  // const handleDownloadPdf = () => {
-  //   window.print();
-  // };
+  const handleDownloadClick = () => {
+    if (!hasPaidCv) {
+      setShowPaywallModal(true);
+      return;
+    }
+    handleDownloadPdf();
+  };
 
   if (loading) {
     return (
@@ -208,10 +227,6 @@ const CVPreview: React.FC = () => {
         <p className="text-zinc-500 font-medium animate-pulse">Loading CV Preview...</p>
       </div>
     );
-  }
-
-  if (hasPaidCv === false) {
-    return <CvPaywallModal onSuccess={() => setHasPaidCv(true)} />;
   }
 
   if (!effectiveResume) {
@@ -235,22 +250,66 @@ const CVPreview: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-cyber-dark text-zinc-800 dark:text-zinc-200 lg:py-8 py-2 px-4 print:bg-white print:p-0">
       <SleekToast />
+
+      {/* CSS safeguard against unauthorized browser printing */}
+      {!hasPaidCv && (
+        <style>{`
+          @media print {
+            .resume-print-area {
+              display: none !important;
+            }
+            body::before {
+              content: "Payment of ₦2,000 required to print or download CV.";
+              display: block;
+              font-family: sans-serif;
+              font-size: 18px;
+              text-align: center;
+              padding: 40px;
+              color: #ef4444;
+            }
+          }
+        `}</style>
+      )}
+
+      {/* Paywall Modal overlay */}
+      {showPaywallModal && (
+        <CvPaywallModal
+          onClose={() => setShowPaywallModal(false)}
+          onSuccess={() => {
+            setHasPaidCv(true);
+            setShowPaywallModal(false);
+          }}
+        />
+      )}
+
       {/* Top Action Bar */}
       <div className="w-full mx-auto flex items-center justify-between mb-6 print:hidden">
         <button
           onClick={() => navigate('/applicant/cv-builder')}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-white hover:text-accent-pink transition-colors"
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-white hover:text-accent-pink transition-colors cursor-pointer"
         >
           ← Back to Builder
         </button>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={handleDownloadPdf}
+            onClick={handleDownloadClick}
             disabled={downloading}
-            className="px-5 py-2 bg-gradient-to-r from-accent-cyan to-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+            className="px-5 py-2.5 bg-gradient-to-r from-accent-cyan to-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-60 flex items-center gap-2 cursor-pointer"
           >
-            {downloading ? 'Generating...' : 'Download PDF'}
+            {downloading ? (
+              'Generating...'
+            ) : hasPaidCv ? (
+              <>
+                <FaDownload className="w-3.5 h-3.5" />
+                <span>Download PDF</span>
+              </>
+            ) : (
+              <>
+                <FaLock className="w-3.5 h-3.5" />
+                <span>Unlock & Download PDF</span>
+              </>
+            )}
           </button>
         </div>
       </div>

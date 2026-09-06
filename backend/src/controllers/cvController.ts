@@ -99,13 +99,6 @@ export const cvController = {
         applicant = created[0];
       }
 
-      if (applicant.hasPaidCv !== true) {
-        return {
-          success: false,
-          code: "CV_PAYMENT_REQUIRED",
-          message: "Payment of ₦2,000 is required before creating your CV.",
-        };
-      }
 
       const existingCv = await db.query.cvs.findFirst({
         where: eq(cvs.applicantId, applicant.id),
@@ -307,13 +300,6 @@ export const cvController = {
         where: eq(applicants.userId, userId),
       });
 
-      if (!applicant || applicant.hasPaidCv !== true) {
-        return {
-          success: false,
-          code: "CV_PAYMENT_REQUIRED",
-          message: "Payment of ₦2,000 is required before generating your CV summary.",
-        };
-      }
 
       const { personalInfo, skills: skillNames, educations: educationInput, experiences: experienceInput } = body;
       const user = await db.query.users.findFirst({ where: eq(users.id, userId) });

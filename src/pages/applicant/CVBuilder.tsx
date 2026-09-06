@@ -14,7 +14,6 @@ import type {
 } from '../../types/resume';
 import api from '../../utils/api';
 import SleekToast, { toast } from 'sleek-toast';
-import CvPaywallModal from '../../components/CvPaywallModal';
 
 export default function CVBuilder() {
   const navigate = useNavigate();
@@ -388,9 +387,6 @@ export default function CVBuilder() {
         toast.success('AI Professional Summary generated!');
       } else {
         toast.error(res.message || 'Could not generate summary.', 5000);
-        if (res.message === "Payment of ₦2,000 is required before generating your CV summary.") {
-          setHasPaidCv(false)
-        }
       }
     } catch (err: unknown) {
       const errorResponse = err as { response?: { data?: { message?: string } }; message?: string };
@@ -489,10 +485,6 @@ export default function CVBuilder() {
         <p className="text-zinc-500 font-mono text-sm animate-pulse">Loading Profile & CV Data...</p>
       </div>
     );
-  }
-
-  if (hasPaidCv === false) {
-    return <CvPaywallModal onSuccess={() => setHasPaidCv(true)} />;
   }
 
   return (

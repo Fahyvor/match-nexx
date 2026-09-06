@@ -222,16 +222,16 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
           {/* Action Buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => navigate("/applicant/cv/builder")}
-              className="w-full py-4 px-6 text-sm font-bold uppercase tracking-widest bg-gradient-to-r from-green-500 via-emerald-400 to-teal-400 text-black rounded-xl shadow-lg hover:shadow-green-500/30 transition-all duration-300 transform active:scale-[0.99] flex items-center justify-center gap-2"
+              onClick={() => navigate("/applicant/cv-preview")}
+              className="w-full py-4 px-6 text-sm font-bold uppercase tracking-widest bg-gradient-to-r from-green-500 via-emerald-400 to-teal-400 text-black rounded-xl shadow-lg hover:shadow-green-500/30 transition-all duration-300 transform active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
             >
               <FaCheckCircle className="w-4 h-4" />
-              Start Building Your CV →
+              View & Download Your CV →
             </button>
 
             <button
               onClick={handleGoHome}
-              className="w-full py-3 px-6 text-sm font-medium text-white hover:text-white transition-colors duration-300 flex items-center justify-center gap-2"
+              className="w-full py-3 px-6 text-sm font-medium text-white hover:text-white transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
               <FaHome className="w-4 h-4" />
               Go to Dashboard
@@ -240,7 +240,7 @@ export default function PaymentResult({ onSuccess, onRetry }: PaymentResultProps
 
           {/* Footer */}
           <p className="text-[11px] text-zinc-500 font-mono">
-            Your CV Builder is now permanently unlocked for this account
+            Your CV download is now permanently unlocked for this account
           </p>
         </div>
       </div>
