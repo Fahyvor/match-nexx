@@ -24,7 +24,6 @@ export default function CVBuilder() {
   const [loading, setLoading] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [hasPaidCv, setHasPaidCv] = useState<boolean | null>(null);
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: '',
@@ -50,7 +49,7 @@ export default function CVBuilder() {
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
   const [references, setReferences] = useState<ReferenceEntry[]>([]);
 
-  // Check CV payment status and fetch existing CV on mount
+  // Fetch existing CV on mount
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -81,13 +80,6 @@ export default function CVBuilder() {
     const fetchCVDetails = async () => {
       try {
         setLoading(true);
-        const statusRes = await api.payments.getCvStatus();
-        if (statusRes.data.success && statusRes.data) {
-          setHasPaidCv(statusRes.data.hasPaidCv);
-        } else {
-          setHasPaidCv(false);
-        }
-
         const res = await api.cv.getMe();
 
         if (res.data.success && res.data) {
