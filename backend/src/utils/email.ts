@@ -1,15 +1,21 @@
 import nodemailer from "nodemailer";
 
-const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
+// Strip surrounding quotes that dotenvx may inject (e.g. SMTP_USER="foo" -> foo)
+function stripQuotes(value: string): string {
+  return value.replace(/^"|"$/g, "").trim();
+}
+
+const SMTP_HOST = stripQuotes(process.env.SMTP_HOST || "smtp.gmail.com");
+// Default to 465 (SSL) — more reliable than 587 on restricted networks
 const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASSWORD = process.env.SMTP_PASSWORD || "";
+const SMTP_USER = stripQuotes(process.env.SMTP_USER || "");
+const SMTP_PASSWORD = stripQuotes(process.env.SMTP_PASSWORD || "");
 
 const EMAIL_FROM =
   process.env.EMAIL_FROM || SMTP_USER;
 
 const CONTACT_EMAIL =
-  process.env.CONTACT_EMAIL || "elreytechnologies@gmail.com";
+  stripQuotes(process.env.CONTACT_EMAIL || "elreytechnologies@gmail.com");
 
 console.log("SMTP_HOST:", SMTP_HOST);
 console.log("SMTP_PORT:", SMTP_PORT);
@@ -19,19 +25,23 @@ console.log("CONTACT_EMAIL:", CONTACT_EMAIL);
 
 /**
  * SMTP transporter
+ *
+ * Port 465 uses implicit SSL (secure: true).
+ * Port 587 uses STARTTLS (secure: false).
+ * Port 465 is preferred when 587 is blocked by ISP/firewall.
  */
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
-
-  // 465 = SSL
-  // 587 = STARTTLS
   secure: SMTP_PORT === 465,
-
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASSWORD,
   },
+  // Timeout settings so errors surface quickly
+  connectionTimeout: 10_000, // 10 s
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
 });
 
 /**
