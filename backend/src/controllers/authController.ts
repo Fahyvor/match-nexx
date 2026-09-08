@@ -1,4 +1,4 @@
-import { registerUser, loginUser, updateUser } from "../modules/auth";
+import { registerUser, loginUser, updateUser, hashPassword } from "../modules/auth";
 import { createToken, verifyToken } from "../utils/jwt";
 import type { Context } from "elysia";
 import type { User } from "../models/User";
@@ -7,8 +7,6 @@ import { users } from "../db/schema";
 import { db } from "../db/db";
 import { eq } from "drizzle-orm";
 import { calculateProfileCompletion } from "../utils/profileCompletion";
-// import crypto from "crypto";
-import bcrypt from "bcryptjs";
 import { emailService } from "../utils/email";
 import {
   generateResetToken,
@@ -865,12 +863,15 @@ deleteOwnAccount: async ({
 
       const resetTokenHash = hashResetToken(token);
 
+      console.log(`[resetPassword] token length: ${token.length}, hash preview: ${resetTokenHash.substring(0, 10)}`);
+
       const user = await db.query.users.findFirst({
         where: (users, { eq }) =>
           eq(users.resetTokenHash, resetTokenHash),
       });
 
       if (!user) {
+        console.error(`[resetPassword] No user found for hash: ${resetTokenHash.substring(0, 10)}`);
         throw new Response(
           JSON.stringify({
             success: false,
@@ -890,6 +891,7 @@ deleteOwnAccount: async ({
         !user.resetTokenExpiresAt ||
         new Date(user.resetTokenExpiresAt) < new Date()
       ) {
+        console.error(`[resetPassword] Token EXPIRED for user: ${user.email}, expired at: ${user.resetTokenExpiresAt}`);
         /**
          * Clean up expired token.
          */
@@ -905,7 +907,7 @@ deleteOwnAccount: async ({
           JSON.stringify({
             success: false,
             message:
-              "Invalid or expired password reset link.",
+              "Password reset link has expired. Please request a new one.",
           }),
           {
             status: 400,
@@ -917,12 +919,9 @@ deleteOwnAccount: async ({
       }
 
       /**
-       * Hash the new password.
+       * Hash the new password using the same method as registration.
        */
-      const hashedPassword = await bcrypt.hash(
-        password,
-        12
-      );
+      const hashedPassword = hashPassword(password);
 
       /**
        * Update password and immediately invalidate

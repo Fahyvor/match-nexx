@@ -45,14 +45,22 @@ export default function ResetPassword() {
         toast.error(response.message || 'Failed to reset password', 4000);
       }
     } catch (err: unknown) {
-      let message = 'Failed to reset password. Token may have expired.';
-      if (typeof err === 'object' && err !== null && 'response' in err) {
-        const errorObj = err as { response?: { data?: { message?: string; error?: string } } };
-        message = errorObj.response?.data?.message || errorObj.response?.data?.error || message;
-      } else if (err instanceof Error) {
-        message = err.message;
+      let message = 'Failed to reset password. The link may have expired.';
+      if (typeof err === 'object' && err !== null) {
+        const errorObj = err as {
+          response?: { data?: { message?: string; error?: string }; status?: number };
+          message?: string;
+        };
+        // Axios error with response body
+        if (errorObj.response?.data?.message) {
+          message = errorObj.response.data.message;
+        } else if (errorObj.response?.data?.error) {
+          message = errorObj.response.data.error;
+        } else if (errorObj.message) {
+          message = errorObj.message;
+        }
       }
-      toast.error(message, 4000);
+      toast.error(message, 5000);
     } finally {
       setIsSubmitting(false);
     }
