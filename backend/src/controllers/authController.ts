@@ -750,7 +750,7 @@ deleteOwnAccount: async ({
         return {
           success: true,
           message:
-            "If an account exists with that email, a password reset link has been sent.",
+            "Please, check your email and try again.",
         };
       }
 
@@ -788,7 +788,7 @@ deleteOwnAccount: async ({
       return {
         success: true,
         message:
-          "If an account exists with that email, a password reset link has been sent.",
+          "Kindly, check your email to reset your password.",
       };
     } catch (error: unknown) {
       console.error("FORGOT PASSWORD ERROR:", error);
