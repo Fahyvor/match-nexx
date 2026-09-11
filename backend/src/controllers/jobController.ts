@@ -4,9 +4,8 @@ import { jobs } from "../db/schema";
 import { randomUUID } from "crypto";
 
 export const jobController = {
-  /* =========================
-     GET ALL JOBS
-  ========================= */
+
+  //  GET ALL JOBS
   getAllJobs: async (page = 1, limit = 20) => {
     const offset = (page - 1) * limit;
 
@@ -25,9 +24,7 @@ export const jobController = {
     };
   },
 
-  /* =========================
-     GET JOB BY ID
-  ========================= */
+  //  GET JOB BY ID
   getJobById: async (jobId: string) => {
     const result = await db
       .select()
@@ -73,9 +70,7 @@ export const jobController = {
     };
   },
 
-  /* =========================
-     CREATE JOB
-  ========================= */
+    //  CREATE JOB
   createJob: async (
     recruiterId: string,
     jobData: {
@@ -135,9 +130,7 @@ export const jobController = {
     };
   },
 
-  /* =========================
-     UPDATE JOB
-  ========================= */
+    //  UPDATE JOB
   updateJob: async (
     jobId: string,
     recruiterId: string,
@@ -178,9 +171,7 @@ export const jobController = {
     };
   },
 
-  /* =========================
-     DELETE JOB
-  ========================= */
+    //  DELETE JOB
   deleteJob: async (jobId: string, recruiterId: string) => {
     const existing = await db
       .select()

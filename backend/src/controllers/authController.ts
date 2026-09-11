@@ -918,9 +918,6 @@ deleteOwnAccount: async ({
         );
       }
 
-      /**
-       * Hash the new password using the same method as registration.
-       */
       const hashedPassword = hashPassword(password);
 
       /**
