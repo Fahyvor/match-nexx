@@ -627,32 +627,6 @@ export default function CVBuilder() {
             </div>
           </section>
 
-          {/* AI Professional Summary */}
-          <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
-                <span className="w-2.5 h-2.5 bg-accent-lime" />
-                Professional Summary
-              </h2>
-              <button
-                type="button"
-                onClick={handleGenerateSummary}
-                disabled={generatingSummary}
-                className="px-4 py-1.5 bg-accent-lime/20 border border-accent-lime text-accent-lime hover:bg-accent-lime hover:text-black transition-all font-mono text-xs font-bold uppercase tracking-wider rounded flex items-center gap-2 self-start"
-              >
-                {generatingSummary ? 'Generating...' : 'Generate with AI'}
-              </button>
-            </div>
-
-            <textarea
-              rows={4}
-              placeholder="Write a brief professional summary or click 'Generate with AI'..."
-              value={professionalSummary}
-              onChange={(e) => setProfessionalSummary(e.target.value)}
-              className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-lime transition-colors leading-relaxed"
-            />
-          </section>
-
           {/* Work Experience Section */}
           <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
             <div className="flex lg:flex-row flex-col lg:items-center items-start justify-between mb-6">
@@ -1002,6 +976,32 @@ export default function CVBuilder() {
             >
               + Add Reference
             </button>
+          </section>
+          
+          {/* AI Professional Summary */}
+          <section className="bg-panel-bg border border-panel-border p-8 rounded-lg shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
+                <span className="w-2.5 h-2.5 bg-accent-lime" />
+                Professional Summary
+              </h2>
+              <button
+                type="button"
+                onClick={handleGenerateSummary}
+                disabled={generatingSummary}
+                className="px-4 py-1.5 bg-accent-lime/20 border border-accent-lime text-accent-lime hover:bg-accent-lime hover:text-black transition-all font-mono text-xs font-bold uppercase tracking-wider rounded flex items-center gap-2 self-start"
+              >
+                {generatingSummary ? 'Generating...' : 'Generate with AI'}
+              </button>
+            </div>
+
+            <textarea
+              rows={4}
+              placeholder="Write a brief professional summary or click 'Generate with AI'... (Fill out other fields to enable the LLM give a better summary)"
+              value={professionalSummary}
+              onChange={(e) => setProfessionalSummary(e.target.value)}
+              className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-lime transition-colors leading-relaxed"
+            />
           </section>
 
           {/* Action Buttons */}
