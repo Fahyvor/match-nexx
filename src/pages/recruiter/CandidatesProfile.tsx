@@ -155,7 +155,7 @@ const CandidatesProfile = () => {
   const { applicant } = candidate;
 
   return (
-    <div className="w-full h-screen mx-auto p-6 bg-white dark:bg-cyber-dark">
+    <div className="w-full mx-auto p-6 bg-white dark:bg-cyber-dark">
       <button
         onClick={() => navigate(-1)}
         className="mb-6 text-sm text-accent-cyan-light dark:text-accent-cyan hover:underline"

@@ -209,7 +209,7 @@ const Candidates = () => {
           {filteredCandidates.map((candidate) => (
             <div
               key={candidate.id}
-              className="group bg-panel-bg border border-panel-border rounded-lg overflow-hidden hover:border-accent-cyan transition-all duration-300 hover:-translate-y-1"
+              className="group bg-panel-bg border border-panel-border rounded-lg overflow-hidden hover:border-accent-cyan transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
             >
               <div className="relative p-6 border-b border-panel-border">
                 <div className="absolute top-4 right-4">
