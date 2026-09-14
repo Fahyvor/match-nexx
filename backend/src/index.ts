@@ -44,6 +44,10 @@ if (isProd) {
       const pathname = new URL(request.url).pathname;
       return Bun.file(path.join(publicPath, pathname));
     })
+    .get("/sitemap.xml", ({ set }) => {
+      set.headers['Content-Type'] = 'application/xml';
+      return Bun.file(path.join(publicPath, "sitemap.xml"));
+    })
     .get("/", () => Bun.file(path.join(publicPath, "index.html")))
     .get("/*", ({ request }) => {
       const pathname = new URL(request.url).pathname;
