@@ -1012,10 +1012,7 @@ initializeCvPayment: async (
     }
   },
 
-  /**
-   * Handle CV payment webhook specifically
-   * This can be called from a dedicated webhook endpoint
-   */
+  // CV Payment Webhook
   handleCvPaymentWebhook: async (
     checkoutId: string,
     chargeId: string,
@@ -1031,9 +1028,7 @@ initializeCvPayment: async (
       );
       console.log("========================================");
 
-      /* =====================================================
-        1. VALIDATE REQUIRED IDENTIFIERS
-      ===================================================== */
+        // 1. VALIDATE REQUIRED IDENTIFIERS
 
       if (!checkoutId) {
         return {
@@ -1049,9 +1044,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        2. VERIFY WEBHOOK EVENT
-      ===================================================== */
+        // 2. VERIFY WEBHOOK EVENT
 
       if (
         event &&
@@ -1070,9 +1063,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        3. VERIFY PAYMENT STATUS
-      ===================================================== */
+        // 3. VERIFY PAYMENT STATUS
 
       if (
         event?.data?.status &&
@@ -1083,14 +1074,7 @@ initializeCvPayment: async (
           message: "Payment has not succeeded",
         };
       }
-
-      /* =====================================================
-        4. FIND TRANSACTION
-        
-        IMPORTANT:
-        We now use the transaction as the source of truth
-        instead of relying only on applicants.bachsCheckoutId.
-      ===================================================== */
+        // 4. FIND TRANSACTION
 
       const transaction =
         await db.query.transactions.findFirst({
@@ -1118,10 +1102,7 @@ initializeCvPayment: async (
         transaction.id
       );
 
-      /* =====================================================
-        5. VERIFY THIS IS A CV PAYMENT
-      ===================================================== */
-
+        // 5. VERIFY THIS IS A CV PAYMENT
       if (transaction.type !== "cv_builder") {
         console.error(
           "Invalid transaction type:",
@@ -1135,14 +1116,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        6. IDEMPOTENCY CHECK
-        
-        Webhooks can arrive multiple times.
-
-        If the transaction is already successful,
-        DO NOT process the payment again.
-      ===================================================== */
+        // 6. IDEMPOTENCY CHECK
 
       if (transaction.status === "successful") {
         console.log(
@@ -1183,9 +1157,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        7. MAKE SURE TRANSACTION IS EXPECTED
-      ===================================================== */
+        // 7. MAKE SURE TRANSACTION IS EXPECTED
 
       if (transaction.status !== "pending") {
         console.warn(
@@ -1207,9 +1179,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        8. FIND APPLICANT
-      ===================================================== */
+        // 8. FIND APPLICANT
 
       if (!transaction.applicantId) {
         console.error(
@@ -1247,16 +1217,7 @@ initializeCvPayment: async (
         };
       }
 
-      /* =====================================================
-        9. SECOND IDEMPOTENCY CHECK
-        
-        The applicant may already have been marked as paid
-        by another successful webhook.
-
-        We don't blindly reject it because the transaction
-        itself is our primary payment record.
-      ===================================================== */
-
+        // 9. SECOND IDEMPOTENCY CHECK
       if (applicant.hasPaidCv === true) {
         console.log(
           "Applicant already has CV access:",
@@ -1323,15 +1284,7 @@ initializeCvPayment: async (
           },
         };
       }
-
-      /* =====================================================
-        10. CONFIRM PAYMENT ATOMICALLY
-        
-        Both the transaction and applicant are updated
-        inside ONE database transaction.
-
-        Either BOTH succeed or BOTH roll back.
-      ===================================================== */
+        // 10. CONFIRM PAYMENT ATOMICALLY
 
       const paidAt = new Date();
 
@@ -1507,9 +1460,7 @@ initializeCvPayment: async (
           }
         );
 
-      /* =====================================================
-        11. HANDLE CONCURRENT / DUPLICATE WEBHOOK
-      ===================================================== */
+        // 11. HANDLE CONCURRENT / DUPLICATE WEBHOOK
 
       if (result.alreadyProcessed) {
         console.log(
@@ -1545,10 +1496,7 @@ initializeCvPayment: async (
           },
         };
       }
-
-      /* =====================================================
-        12. SUCCESS
-      ===================================================== */
+      // 12. SUCCESS
 
       console.log(
         "========================================"
@@ -1606,10 +1554,6 @@ initializeCvPayment: async (
       };
 
     } catch (e) {
-      /* =====================================================
-        ERROR HANDLING
-      ===================================================== */
-
       console.error(
         "handleCvPaymentWebhook error:",
         e
