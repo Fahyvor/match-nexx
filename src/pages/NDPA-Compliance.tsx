@@ -1,7 +1,14 @@
 
+import SEO from "../components/SEO";
+
 export default function NDPACompliance() {
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto">
+      <SEO
+        title="NDPA Compliance Statement | Nigerian Data Protection Act 2023"
+        description="MatchNexx NDPA compliance statement, data privacy standards, and regulatory alignment with the Nigeria Data Protection Commission (NDPC)."
+        canonicalPath="/ndpa-compliance"
+      />
       <div className="border-b border-zinc-900 pb-8 mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 text-[11px] font-mono tracking-widest text-[#00E5FF] mb-4">
           NIGERIA_DATA_PROTECTION_ACT 2023

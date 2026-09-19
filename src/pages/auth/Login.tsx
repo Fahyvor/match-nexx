@@ -4,6 +4,7 @@ import SleekToast, { toast } from 'sleek-toast';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { useAppDispatch } from '../../redux/hooks';
 import { loginUser } from '../../redux/slices/userSlice';
+import SEO from '../../components/SEO';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -61,6 +62,11 @@ export default function Login() {
 
   return (
     <div className="h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <SEO
+        title="Sign In | Applicant & Recruiter Access"
+        description="Sign in to your MatchNexx account to manage your CV profile or access verified candidate talent pipelines."
+        canonicalPath="/login"
+      />
       <SleekToast />
       <div className="flex items-center justify-center lg:h-screen h-fit lg:py-0 py-24 px-6">
         <div className="w-full max-w-md">

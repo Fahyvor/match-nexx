@@ -1,6 +1,14 @@
+import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
+
 export default function PageNotFound() {
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      <SEO
+        title="404 Node Not Found"
+        description="The requested page could not be located on MatchNexx."
+        noindex={true}
+      />
 
       {/* Ambient Glow */}
       <div className="absolute w-96 h-96 bg-gradient-to-r from-[#00E5FF]/20 to-[#FF0055]/20 blur-[120px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -18,17 +26,17 @@ export default function PageNotFound() {
 
       {/* ACTION BUTTONS */}
       <div className="mt-10 flex flex-col sm:flex-row gap-4">
-
         {/* GO HOME */}
-        <button
-          onClick={() => (window.location.href = "/")}
-          className="px-8 py-3 bg-gradient-to-r from-[#00E5FF] to-[#FF0055] text-black font-bold text-xs tracking-widest uppercase cursor-pointer"
+        <Link
+          to="/"
+          className="px-8 py-3 bg-gradient-to-r from-[#00E5FF] to-[#FF0055] text-black font-bold text-xs tracking-widest uppercase cursor-pointer text-center"
         >
           Return Home
-        </button>
+        </Link>
 
         {/* GO BACK */}
         <button
+          type="button"
           onClick={() => window.history.back()}
           className="px-8 py-3 border border-zinc-700 text-zinc-700 dark:text-zinc-300 font-mono text-xs tracking-widest uppercase hover:border-zinc-500 cursor-pointer"
         >

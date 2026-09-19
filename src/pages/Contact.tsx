@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa6';
 import api from '../utils/api';
 import SleekToast, { toast } from 'sleek-toast';
+import SEO from '../components/SEO';
 
 export default function ContactUs() {
   const [submitted, setSubmitted] = useState(false);
@@ -87,6 +88,11 @@ export default function ContactUs() {
 
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto">
+      <SEO
+        title="Contact Us | Engineering & Support Protocol"
+        description="Get in touch with the MatchNexx team. Inquire about recruitment partnerships, platform access, enterprise talent infrastructure, or technical support."
+        canonicalPath="/contact"
+      />
       <SleekToast />
 
       {/* Header */}

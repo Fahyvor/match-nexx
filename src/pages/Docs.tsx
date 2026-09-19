@@ -1,7 +1,14 @@
 
+import SEO from "../components/SEO";
+
 export default function Documentation() {
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto flex flex-col md:flex-row gap-12">
+      <SEO
+        title="Developer Documentation & API Protocol"
+        description="MatchNexx developer guide, API reference, CV parsing protocol, and telemetry documentation."
+        canonicalPath="/docs"
+      />
       {/* Sidebar */}
       <aside className="w-full md:w-64 space-y-6 font-mono text-xs border-r border-zinc-900 pr-6">
         <div>

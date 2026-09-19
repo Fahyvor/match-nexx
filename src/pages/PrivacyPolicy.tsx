@@ -1,8 +1,15 @@
 
 
+import SEO from "../components/SEO";
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto">
+      <SEO
+        title="Privacy Policy | Data Protection & NDPA Framework"
+        description="MatchNexx privacy policy detailing our data handling practices under the Nigeria Data Protection Act (NDPA) 2023."
+        canonicalPath="/privacy"
+      />
       {/* Header */}
       <div className="border-b border-zinc-900 pb-8 mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white mb-2">

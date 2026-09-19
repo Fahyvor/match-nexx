@@ -1,7 +1,14 @@
 
+import SEO from "../components/SEO";
+
 export default function SystemStatus() {
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto">
+      <SEO
+        title="System Status & Real-Time Telemetry"
+        description="Live uptime, latency telemetry, and service operational status for MatchNexx recruitment infrastructure."
+        canonicalPath="/status"
+      />
       <div className="border-b border-zinc-900 pb-8 mb-12 flex justify-between items-end">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 text-[11px] font-mono tracking-widest text-[#00E5FF] mb-4">

@@ -1,7 +1,14 @@
 
+import SEO from "../components/SEO";
+
 export default function SecurityOverview() {
   return (
     <div className="min-h-screen bg-[#070708] text-zinc-300 font-sans antialiased px-6 lg:px-16 pt-20 pb-32 w-full mx-auto">
+      <SEO
+        title="Security Overview | Data Protection & Encryption Standards"
+        description="Explore MatchNexx security architecture, AES-256 encryption at rest, TLS 1.3 in transit, and role-based access controls."
+        canonicalPath="/security"
+      />
       <div className="border-b border-zinc-900 pb-8 mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white mb-2">
           Security Overview

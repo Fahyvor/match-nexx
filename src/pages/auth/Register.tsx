@@ -5,6 +5,7 @@ import type { RootState } from "../../redux/store";
 import axios from 'axios';
 import SleekToast, { toast } from 'sleek-toast';
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import SEO from '../../components/SEO';
 
 export default function Register() {
 
@@ -68,6 +69,11 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
+      <SEO
+        title="Create an Account | Join the MatchNexx Talent Network"
+        description="Sign up for MatchNexx to build structured CVs, apply for verified tech jobs, or source pre-vetted developer talent."
+        canonicalPath="/register"
+      />
       <SleekToast />
       <div className="flex items-center justify-center min-h-screen lg:px-6 px-0 lg:py-12 py-4">
         <div className="w-full">

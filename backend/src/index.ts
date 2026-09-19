@@ -40,20 +40,37 @@ const app = new Elysia()
 
 if (isProd) {
   app
+    .get("/sitemap.xml", ({ set }) => {
+      set.headers['Content-Type'] = 'application/xml; charset=utf-8';
+      return Bun.file(path.join(publicPath, "sitemap.xml"));
+    })
+    .get("/robots.txt", ({ set }) => {
+      set.headers['Content-Type'] = 'text/plain; charset=utf-8';
+      return Bun.file(path.join(publicPath, "robots.txt"));
+    })
     .get("/assets/*", ({ request }) => {
       const pathname = new URL(request.url).pathname;
       return Bun.file(path.join(publicPath, pathname));
     })
-    .get("/sitemap.xml", ({ set }) => {
-      set.headers['Content-Type'] = 'application/xml';
-      return Bun.file(path.join(publicPath, "sitemap.xml"));
-    })
     .get("/", () => Bun.file(path.join(publicPath, "index.html")))
-    .get("/*", ({ request }) => {
+    .get("/*", async ({ request }) => {
       const pathname = new URL(request.url).pathname;
-      if (pathname.startsWith("/api") || pathname.includes(".")) {
+      if (pathname.startsWith("/api")) {
         return new Response("Not Found", { status: 404 });
       }
+
+      // Check if file exists in public directory (e.g. /og-image.png, /favicon.svg, /site.webmanifest)
+      const targetFile = Bun.file(path.join(publicPath, pathname));
+      if (await targetFile.exists()) {
+        return targetFile;
+      }
+
+      // If requested file has an extension but doesn't exist, return 404
+      if (pathname.includes(".")) {
+        return new Response("Not Found", { status: 404 });
+      }
+
+      // SPA client-side routing fallback
       return Bun.file(path.join(publicPath, "index.html"));
     });
 }

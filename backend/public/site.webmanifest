@@ -1,0 +1,28 @@
+{
+  "name": "MatchNexx | AI Job Matching & Talent Pipeline",
+  "short_name": "MatchNexx",
+  "description": "AI-powered talent pipeline and CV intelligence platform bridging elite candidates with modern recruiters.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070708",
+  "theme_color": "#070708",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ],
+  "categories": [
+    "business",
+    "productivity",
+    "recruitment"
+  ]
+}

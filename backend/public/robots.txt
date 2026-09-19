@@ -1,4 +1,23 @@
 User-agent: *
 Allow: /
+Allow: /jobs
+Allow: /about
+Allow: /pricing
+Allow: /contact
+Allow: /docs
+Allow: /status
+Allow: /privacy
+Allow: /terms
+Allow: /ndpa-compliance
+Allow: /security
+Allow: /login
+Allow: /register
 
-Sitemap: https://match-nexx.com/sitemap.xml
+# Disallow private user dashboards and API endpoints to optimize crawl budget
+Disallow: /applicant/
+Disallow: /recruiter/
+Disallow: /settings
+Disallow: /candidates/
+Disallow: /api/
+
+Sitemap: https://match-nexx.onrender.com/sitemap.xml

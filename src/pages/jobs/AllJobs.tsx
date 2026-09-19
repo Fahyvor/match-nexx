@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
+import SEO from "../../components/SEO";
 
 type Job = {
   id: string;
@@ -42,6 +43,11 @@ export default function AllJobs() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white px-6 lg:px-16 py-16">
+      <SEO
+        title="Browse Tech Jobs & Engineering Roles"
+        description="Explore open engineering, design, and tech opportunities matched to your skill profile on MatchNexx."
+        canonicalPath="/jobs"
+      />
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-extrabold uppercase">

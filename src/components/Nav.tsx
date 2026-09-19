@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { FaBriefcase, FaInfoCircle, FaEnvelope } from "react-icons/fa";
 import { RiUserSettingsFill } from "react-icons/ri";
@@ -33,37 +33,12 @@ const Nav = () => {
     }
   };
 
-  const handleJobs = () => {
+  const handleCancel = () => {
     setOpen(false);
-    navigate("/jobs");
-  };
-
-  const handleAbout = () => {
-    setOpen(false);
-    navigate("/about");
-  };
-
-  const handleContact = () => {
-    setOpen(false);
-    navigate("/contact");
-  };
-
-  const handleSettings = () => {
-    setOpen(false);
-    navigate("/settings");
-  };
-
-  const handleLogoClick = () => {
-    setOpen(false);
-    navigate("/");
   };
 
   const toggleMobileMenu = () => {
     setOpen((prev) => !prev);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
   };
 
   return (
@@ -72,12 +47,16 @@ const Nav = () => {
           FLOATING CENTERED NAVBAR CONTAINER
       ====================================================== */}
       <header className="sticky bg-black top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 pb-2">
-        <nav className="w-fit mx-auto bg-white/80 dark:bg-[#070708]/90 backdrop-blur-xl border-2 border-zinc-800/80 rounded-2xl px-6 py-4 flex gap-8 justify-between items-center shadow-2xl">
-
+        <nav
+          aria-label="Main Navigation"
+          className="w-fit mx-auto bg-white/80 dark:bg-[#070708]/90 backdrop-blur-xl border-2 border-zinc-800/80 rounded-2xl px-6 py-4 flex gap-8 justify-between items-center shadow-2xl"
+        >
           {/* LOGO */}
-          <div
+          <Link
+            to="/"
+            onClick={handleCancel}
+            aria-label="MatchNexx Home"
             className="flex items-center gap-2 min-w-0 cursor-pointer group"
-            onClick={handleLogoClick}
           >
             <div className="relative w-6 h-6 shrink-0">
               <div className="absolute inset-0 bg-[#00E5FF] transform -skew-x-12 group-hover:translate-x-1 transition-transform duration-300" />
@@ -86,34 +65,37 @@ const Nav = () => {
             <span className="text-lg sm:text-xl font-black tracking-tight text-white uppercase font-mono truncate">
               MATCH<span className="text-[#00E5FF]">.</span>NEXX
             </span>
-          </div>
+          </Link>
 
           {/* DESKTOP NAVIGATION */}
           <div className="hidden md:flex items-center gap-8 shrink-0">
-            <button
-              type="button"
-              onClick={handleJobs}
+            <Link
+              to="/jobs"
               className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer flex items-center gap-2"
             >
-              {/* <FaBriefcase className="w-4 h-4 text-[#00E5FF]" /> */}
               <span>Jobs</span>
-            </button>
+            </Link>
 
-            <button
-              type="button"
-              onClick={handleAbout}
+            <Link
+              to="/about"
               className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer"
             >
               About
-            </button>
+            </Link>
 
-            <button
-              type="button"
-              onClick={handleContact}
+            <Link
+              to="/pricing"
+              className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer"
+            >
+              Pricing
+            </Link>
+
+            <Link
+              to="/contact"
               className="text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-[#00E5FF] transition-colors cursor-pointer"
             >
               Contact
-            </button>
+            </Link>
 
             <button
               type="button"
@@ -126,14 +108,13 @@ const Nav = () => {
               <div className="absolute inset-0 bg-[#FF0055] transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0" />
             </button>
 
-            <button
-              type="button"
-              onClick={handleSettings}
-              aria-label="Settings"
+            <Link
+              to="/settings"
+              aria-label="Account Settings"
               className="text-white cursor-pointer hover:text-[#00E5FF] transition-colors duration-200"
             >
               <RiUserSettingsFill className="w-5 h-5" />
-            </button>
+            </Link>
           </div>
 
           {/* MOBILE MENU BUTTON */}
@@ -173,39 +154,48 @@ const Nav = () => {
             type="button"
             onClick={handleCancel}
             aria-label="Close menu"
-            className="flex items-center justify-center w-8 h-8 rounded border border-zinc-800 text-white hover:text-white transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded border border-zinc-800 text-white hover:text-white transition-colors cursor-pointer"
           >
             <FiX size={18} />
           </button>
         </div>
 
         <div className="flex flex-col gap-4 px-6 py-6 text-xs uppercase">
-          <button
-            type="button"
-            onClick={handleJobs}
+          <Link
+            to="/jobs"
+            onClick={handleCancel}
             className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
             <FaBriefcase className="w-4 h-4 text-[#00E5FF]" />
             <span>Jobs</span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            onClick={handleAbout}
+          <Link
+            to="/about"
+            onClick={handleCancel}
             className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
             <FaInfoCircle className="w-4 h-4 text-[#00E5FF]" />
             <span>About Us</span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            onClick={handleContact}
+          <Link
+            to="/pricing"
+            onClick={handleCancel}
+            className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
+          >
+            <FaBriefcase className="w-4 h-4 text-[#FF0055]" />
+            <span>Pricing</span>
+          </Link>
+
+          <Link
+            to="/contact"
+            onClick={handleCancel}
             className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
             <FaEnvelope className="w-4 h-4 text-[#FF0055]" />
             <span>Contact Us</span>
-          </button>
+          </Link>
 
           <button
             type="button"
@@ -216,19 +206,19 @@ const Nav = () => {
             <span>Dashboard</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleSettings}
+          <Link
+            to="/settings"
+            onClick={handleCancel}
             className="flex items-center gap-3 text-zinc-300 hover:text-[#00E5FF] transition-colors text-left py-2 border-b border-zinc-900"
           >
             <RiUserSettingsFill className="w-4 h-4 text-[#FF0055]" />
             <span>Profile Settings</span>
-          </button>
+          </Link>
 
           <button
             type="button"
             onClick={handleDashboard}
-            className="mt-4 w-full bg-[#FF0055] hover:bg-[#ff1a66] text-white font-bold py-3 uppercase tracking-widest transition-colors text-center"
+            className="mt-4 w-full bg-[#FF0055] hover:bg-[#ff1a66] text-white font-bold py-3 uppercase tracking-widest transition-colors text-center cursor-pointer"
           >
             {isAuthenticated ? `Welcome, ${firstName || "User"}` : "Get Started"}
           </button>
