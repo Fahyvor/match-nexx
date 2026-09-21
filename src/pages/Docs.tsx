@@ -42,7 +42,7 @@ export default function Documentation() {
           </h2>
           <div className="bg-[#0f0f12] border border-zinc-800 p-4 font-mono text-xs text-white space-y-2">
             <p className="text-zinc-500">// Initialize candidate node via CLI or API</p>
-            <p><span className="text-[#00E5FF]">curl</span> -X POST https://match-nexx.onrender.com/api/v1/profile/deploy</p>
+            <p><span className="text-[#00E5FF]">curl</span> -X POST https://match-nexx.com/api/v1/profile/deploy</p>
           </div>
         </section>
       </main>

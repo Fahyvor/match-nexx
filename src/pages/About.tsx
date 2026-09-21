@@ -23,11 +23,11 @@ export default function AboutUs() {
     name: "About MatchNexx",
     description:
       "MatchNexx is an intelligent recruitment infrastructure and AI-driven talent pipeline platform engineered to bridge elite technical talent with modern recruiters through structured CV intelligence and real-time telemetry.",
-    url: "https://match-nexx.onrender.com/about",
+    url: "https://match-nexx.com/about",
     mainEntity: {
       "@type": "Organization",
       name: "MatchNexx",
-      url: "https://match-nexx.onrender.com",
+      url: "https://match-nexx.com",
       foundingLocation: {
         "@type": "Place",
         name: "Abuja, Nigeria",

@@ -20,4 +20,4 @@ Disallow: /settings
 Disallow: /candidates/
 Disallow: /api/
 
-Sitemap: https://match-nexx.onrender.com/sitemap.xml
+Sitemap: https://match-nexx.com/sitemap.xml

@@ -14,7 +14,7 @@ services:
       - PORT=3000
       - DATABASE_URL=${DATABASE_URL:-postgres://9b29f78b889a51fcecfaab0dbb7c9696fb2bf48ae7d5736ff96fa6475cbf0177:sk_kGkOjVwGsVq8NoX6V9W7C@pooled.db.prisma.io:5432/postgres?sslmode=require&uselibpqcompat=true}
       - JWT_SECRET=${JWT_SECRET:-76PN6HTgF4UfabfZ337cxAYxi0ugYxz8EmbyUIoCeICohqkolDUvjtsehwCiZ_hO}
-      - FRONTEND_URL=${FRONTEND_URL:-https://match-nexx.onrender.com}
+      - FRONTEND_URL=${FRONTEND_URL:-https://match-nexx.com}
       - SUPABASE_URL=${SUPABASE_URL:-http://lzjpplklcplatrglthmi.supabase.co}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6anBwbGtsY3BsYXRyZ2x0aG1pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Mjc5MTYzMCwiZXhwIjoyMDk4MzY3NjMwfQ.rUx6FhXhTs54m6T06gaA52ahRVaxPjn304g5I1CAdUk}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyBsVZoBtlijZb4f0nM9r5p0c8HTBhyJw_c}

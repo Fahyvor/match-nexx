@@ -16,7 +16,7 @@ const DEFAULT_DESCRIPTION =
   "MatchNexx bridges elite tech talent and recruiters with AI-driven CV structuring, live application pipeline tracking, and instant candidate matching.";
 const DEFAULT_KEYWORDS =
   "MatchNexx, tech jobs, tech recruitment Nigeria, AI resume builder, CV structurer, recruiter talent pool, developer jobs, job matching, remote jobs Africa";
-const BASE_URL = "https://match-nexx.onrender.com";
+const BASE_URL = "https://match-nexx.com";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 function setMetaTag(selector: string, attribute: string, value: string, createAttr: Record<string, string>) {
