@@ -72,11 +72,11 @@ export default function App() {
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/create-job" element={<CreateJobPage />} />
         </Route>
+        <Route path="/jobs" element={<AllJobs />} />
 
         {/* Settings Route */}
         <Route element={<ProtectedRoute />}>
           <Route path="/settings" element={<Settings />} />
-          <Route path="/jobs" element={<AllJobs />} />
           <Route path="/candidates" element={<Candidates />} />
           <Route path="/candidates/:id" element={<CandidatesProfile />} />
         </Route>
