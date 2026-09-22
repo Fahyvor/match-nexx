@@ -15,6 +15,21 @@ import type {
 import api from '../../utils/api';
 import SleekToast, { toast } from 'sleek-toast';
 
+const formatDateForInput = (val?: string | null): string => {
+  if (!val) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0, 10);
+  const parsed = new Date(val);
+  if (!isNaN(parsed.getTime())) {
+    try {
+      return parsed.toISOString().slice(0, 10);
+    } catch {
+      return '';
+    }
+  }
+  return '';
+};
+
 export default function CVBuilder() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -148,8 +163,8 @@ export default function CVBuilder() {
                 }) => ({
                   company: exp.company || '',
                   role: exp.role || '',
-                  startDate: exp.startDate || '',
-                  endDate: exp.endDate || '',
+                  startDate: formatDateForInput(exp.startDate),
+                  endDate: formatDateForInput(exp.endDate),
                   isCurrent: !exp.endDate,
                   description: exp.description || '',
                 })
@@ -236,7 +251,17 @@ export default function CVBuilder() {
 
   const updateExperience = (index: number, field: keyof ExperienceEntry, value: string | boolean) => {
     setExperiences((prev) =>
-      prev.map((exp, i) => (i === index ? { ...exp, [field]: value } : exp))
+      prev.map((exp, i) => {
+        if (i !== index) return exp;
+        if (field === 'isCurrent') {
+          return {
+            ...exp,
+            isCurrent: Boolean(value),
+            endDate: Boolean(value) ? '' : exp.endDate,
+          };
+        }
+        return { ...exp, [field]: value };
+      })
     );
   };
 
@@ -655,32 +680,40 @@ export default function CVBuilder() {
                       className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                     />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4 items-center">
-                    <input
-                      type="text"
-                      placeholder="Start Date (e.g., Jan 2022)"
-                      value={exp.startDate}
-                      onChange={(e) => updateExperience(idx, 'startDate', e.target.value)}
-                      className="bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
-                    />
-                    <div className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        placeholder="End Date (e.g., Dec 2023)"
-                        disabled={exp.isCurrent}
-                        value={exp.isCurrent ? 'Present' : exp.endDate}
-                        onChange={(e) => updateExperience(idx, 'endDate', e.target.value)}
-                        className="flex-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan transition-colors disabled:opacity-50"
-                      />
-                      <label className="flex items-center gap-1.5 text-xs text-white font-mono cursor-pointer whitespace-nowrap">
-                        <input
-                          type="checkbox"
-                          checked={exp.isCurrent}
-                          onChange={(e) => updateExperience(idx, 'isCurrent', e.target.checked)}
-                          className="accent-accent-cyan"
-                        />
-                        Present
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-mono text-zinc-400 uppercase tracking-widest mb-1.5">
+                        Start Date
                       </label>
+                      <input
+                        type="date"
+                        value={exp.startDate || ''}
+                        onChange={(e) => updateExperience(idx, 'startDate', e.target.value)}
+                        className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm text-zinc-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-accent-cyan transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+                          End Date
+                        </label>
+                        <label className="flex items-center gap-1.5 text-xs text-white font-mono cursor-pointer whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={exp.isCurrent}
+                            onChange={(e) => updateExperience(idx, 'isCurrent', e.target.checked)}
+                            className="accent-accent-cyan"
+                          />
+                          Present
+                        </label>
+                      </div>
+                      <input
+                        type="date"
+                        disabled={exp.isCurrent}
+                        value={exp.isCurrent ? '' : (exp.endDate || '')}
+                        onChange={(e) => updateExperience(idx, 'endDate', e.target.value)}
+                        className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm text-zinc-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-accent-cyan transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      />
                     </div>
                   </div>
                   <textarea

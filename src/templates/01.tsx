@@ -5,6 +5,20 @@ interface Template01Props {
   resume: ResumeData;
 }
 
+const formatResumeDate = (dateStr?: string) => {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}(-\d{2})?$/.test(dateStr)) {
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parts[1] ? parseInt(parts[1], 10) - 1 : 0;
+    const date = new Date(year, month);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+  }
+  return dateStr;
+};
+
 const Template01: FC<Template01Props> = ({ resume }) => {
   const { personalInfo, links, skills, educations, experiences, projects, references, professionalSummary } = resume;
 
@@ -120,7 +134,7 @@ const Template01: FC<Template01Props> = ({ resume }) => {
                       <span className="text-slate-500 font-normal ml-2">@ {exp.company}</span>
                     </div>
                     <span className="text-slate-500 font-normal">
-                      {exp.startDate} {exp.isCurrent ? '- Present' : exp.endDate && `- ${exp.endDate}`}
+                      {formatResumeDate(exp.startDate)} {exp.isCurrent ? '- Present' : exp.endDate && `- ${formatResumeDate(exp.endDate)}`}
                     </span>
                   </div>
                   {bullets.length > 0 && (
