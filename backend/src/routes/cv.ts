@@ -13,8 +13,8 @@ const app = new Elysia({ prefix: "/cv" })
         personalInfo: t.Object({
           phone: t.String(),
           position: t.Optional(t.String()),
-          firstName: t.Optional(t.String()),
-          lastName: t.Optional(t.String()),
+          firstName: t.Optional(t.String({ minLength: 1 })),
+          lastName: t.Optional(t.String({ minLength: 1 })),
           address: t.Optional(t.String()),
         }),
         skills: t.Array(t.String()),

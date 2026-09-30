@@ -109,10 +109,13 @@ export const cvController = {
         return { success: false, message: "User not found." };
       }
 
-      if (personalInfo.firstName || personalInfo.lastName || personalInfo.address) {
+      const trimmedFirstName = personalInfo.firstName?.trim();
+      const trimmedLastName = personalInfo.lastName?.trim();
+
+      if (trimmedFirstName || trimmedLastName || personalInfo.address) {
         const userUpdates: Record<string, unknown> = {};
-        if (personalInfo.firstName) userUpdates.firstName = personalInfo.firstName;
-        if (personalInfo.lastName) userUpdates.lastName = personalInfo.lastName;
+        if (trimmedFirstName) userUpdates.firstName = trimmedFirstName;
+        if (trimmedLastName) userUpdates.lastName = trimmedLastName;
         if (personalInfo.address) {
           const parts = personalInfo.address.split(",").map((s) => s.trim());
           if (parts.length >= 2) {

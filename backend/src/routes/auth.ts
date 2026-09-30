@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { authMiddleware } from "../middlewares/auth";
 import { requireActiveSubscription } from "../middlewares/requireActiveSubscription";
 import { authController } from "../controllers/authController";
+import { updateUser } from "../modules/auth";
 
 const app = new Elysia({ prefix: "/auth" })
 
@@ -13,8 +14,8 @@ const app = new Elysia({ prefix: "/auth" })
     ({ body }) => authController.register(body),
     {
       body: t.Object({
-        firstName: t.String(),
-        lastName: t.String(),
+        firstName: t.String({ minLength: 1, error: "First name is required" }),
+        lastName: t.String({ minLength: 1, error: "Last name is required" }),
         phone: t.String(),
         address: t.String(),
         state: t.String(),
@@ -106,11 +107,37 @@ const app = new Elysia({ prefix: "/auth" })
     group
       .use(authMiddleware(["applicant", "recruiter", "admin"]))
 
-      .put("/profile", async ({ user, body }) => ({
-        success: true,
-        message: "Profile updated successfully",
-        data: { user, updates: body },
-      }))
+      .put(
+        "/profile",
+        async ({ user, body, set }: any) => {
+          try {
+            const updated = await updateUser({
+              id: user.id,
+              firstName: body?.firstName,
+              lastName: body?.lastName,
+              email: body?.email,
+            });
+            return {
+              success: true,
+              message: "Profile updated successfully",
+              data: updated,
+            };
+          } catch (err: any) {
+            set.status = err.status || 500;
+            return {
+              success: false,
+              message: err.error || "Failed to update profile",
+            };
+          }
+        },
+        {
+          body: t.Object({
+            firstName: t.Optional(t.String({ minLength: 1, error: "First name cannot be empty" })),
+            lastName: t.Optional(t.String({ minLength: 1, error: "Last name cannot be empty" })),
+            email: t.Optional(t.String()),
+          }),
+        }
+      )
 
       .post("/logout", async () => authController.logout())
   )

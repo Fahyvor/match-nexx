@@ -33,11 +33,27 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const trimmedFirstName = formData.firstName.trim();
+    const trimmedLastName = formData.lastName.trim();
+
+    if (!trimmedFirstName) {
+      toast.error("First name is required and cannot be empty");
+      return;
+    }
+
+    if (!trimmedLastName) {
+      toast.error("Last name is required and cannot be empty");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const payload = {
         ...formData,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
         years_of_experience: Number(formData.years_of_experience),
       };
 
@@ -103,10 +119,11 @@ export default function Register() {
 
             {/* First Name Field */}
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-white uppercase">First Name</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">First Name *</label>
               <input
                 type="text"
                 name="firstName"
+                required
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="John"
@@ -115,10 +132,11 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono tracking-widest text-white uppercase">Last Name</label>
+              <label className="text-xs font-mono tracking-widest text-white uppercase">Last Name *</label>
               <input
                 type="text"
                 name="lastName"
+                required
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Doe"

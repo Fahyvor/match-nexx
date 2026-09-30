@@ -56,23 +56,32 @@ export const authController = {
       console.error("REGISTER ERROR FULL:", err);
 
       let message = "Unknown error";
+      let status = 400;
 
       if (err instanceof Error) {
         message = err.message;
       } else if (
         typeof err === "object" &&
-        err !== null &&
-        "error" in err
+        err !== null
       ) {
-        const e = err as { error?: string };
+        const e = err as { error?: string; status?: number };
         message = e.error || message;
+        if (e.status) status = e.status;
       }
 
-      return {
-        success: false,
-        message: "Registration failed",
-        error: message,
-      };
+      throw new Response(
+        JSON.stringify({
+          success: false,
+          message,
+          error: message,
+        }),
+        {
+          status,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
   },
 

@@ -40,6 +40,17 @@ export const registerUser = async (data: {
     throw { status: 409, error: "Email already registered" };
   }
 
+  const trimmedFirstName = data.firstName?.trim();
+  const trimmedLastName = data.lastName?.trim();
+
+  if (!trimmedFirstName) {
+    throw { status: 400, error: "First name is required and cannot be empty" };
+  }
+
+  if (!trimmedLastName) {
+    throw { status: 400, error: "Last name is required and cannot be empty" };
+  }
+
   if (data.password.length < 8) {
     throw { status: 400, error: "Password must be at least 8 characters" };
   }
@@ -48,8 +59,8 @@ export const registerUser = async (data: {
     id: randomUUID(),
     email: data.email,
     password: hashPassword(data.password),
-    firstName: data.firstName,
-    lastName: data.lastName,
+    firstName: trimmedFirstName,
+    lastName: trimmedLastName,
     state: data.state,
     country: data.country,
     years_of_experience: data.years_of_experience,
@@ -117,8 +128,20 @@ export const updateUser = async (data: {
     updatedAt: new Date(),
   };
 
-  if (data.firstName) updatedUser.firstName = data.firstName;
-  if (data.lastName) updatedUser.lastName = data.lastName;
+  if (data.firstName !== undefined) {
+    const trimmed = data.firstName.trim();
+    if (!trimmed) {
+      throw { status: 400, error: "First name cannot be empty" };
+    }
+    updatedUser.firstName = trimmed;
+  }
+  if (data.lastName !== undefined) {
+    const trimmed = data.lastName.trim();
+    if (!trimmed) {
+      throw { status: 400, error: "Last name cannot be empty" };
+    }
+    updatedUser.lastName = trimmed;
+  }
   if (data.email) updatedUser.email = data.email;
   if (data.state) updatedUser.state = data.state;
   if (data.country) updatedUser.country = data.country;

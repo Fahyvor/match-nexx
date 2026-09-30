@@ -414,6 +414,17 @@ export default function CVBuilder() {
   };
 
   const handleSave = async (shouldNavigateToPreview = false) => {
+    const trimmedFirstName = personalInfo.firstName?.trim();
+    const trimmedLastName = personalInfo.lastName?.trim();
+
+    if (!trimmedFirstName) {
+      toast.error('First name is required.');
+      return;
+    }
+    if (!trimmedLastName) {
+      toast.error('Last name is required.');
+      return;
+    }
     if (!personalInfo.phone.trim()) {
       toast.error('Phone number is required.');
       return;
@@ -427,11 +438,11 @@ export default function CVBuilder() {
       setSaving(true);
       const payload = {
         personalInfo: {
-          phone: personalInfo.phone,
-          position: personalInfo.position,
-          firstName: personalInfo.firstName,
-          lastName: personalInfo.lastName,
-          address: personalInfo.address,
+          phone: personalInfo.phone.trim(),
+          position: personalInfo.position?.trim() || '',
+          firstName: trimmedFirstName,
+          lastName: trimmedLastName,
+          address: personalInfo.address?.trim() || '',
         },
         links,
         skills,
@@ -539,20 +550,22 @@ export default function CVBuilder() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-mono text-white uppercase tracking-widest">First Name</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">First Name *</label>
                 <input
                   type="text"
                   placeholder="John"
+                  required
                   value={personalInfo.firstName}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, firstName: e.target.value })}
                   className="w-full mt-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
               <div>
-                <label className="text-xs font-mono text-white uppercase tracking-widest">Last Name</label>
+                <label className="text-xs font-mono text-white uppercase tracking-widest">Last Name *</label>
                 <input
                   type="text"
                   placeholder="Doe"
+                  required
                   value={personalInfo.lastName}
                   onChange={(e) => setPersonalInfo({ ...personalInfo, lastName: e.target.value })}
                   className="w-full mt-1 bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan transition-colors"

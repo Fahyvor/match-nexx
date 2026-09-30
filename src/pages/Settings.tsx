@@ -42,13 +42,23 @@ export default function Settings() {
     lastName: user?.lastName || '',
   });
 
+  useEffect(() => {
+    if (user) {
+      setUpdatedUser({
+        email: user.email || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+      });
+    }
+  }, [user]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUpdatedUser((prev) => ({
       ...prev,
       [name]: value,
     }));
-  }
+  };
   const handleLogout = () => {
     sessionStorage.removeItem('auth');
     navigate('/login');
@@ -70,12 +80,28 @@ export default function Settings() {
     } catch (error) {
       console.error('Error deleting account:', error);
     }
-  }
+  };
 
   const handleUpdateAccount = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    const trimmedFirstName = updatedUser.firstName.trim();
+    const trimmedLastName = updatedUser.lastName.trim();
+
+    if (!trimmedFirstName) {
+      toast.error('First name is required');
+      return;
+    }
+    if (!trimmedLastName) {
+      toast.error('Last name is required');
+      return;
+    }
+
     try {
-      const response = await axios.put('/api/auth/user/profile', updatedUser,
+      const response = await axios.put('/api/auth/user/profile', {
+        ...updatedUser,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+      },
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -83,14 +109,16 @@ export default function Settings() {
         }
       );
 
-      if (response.status == 200) {
+      if (response.status === 200) {
         toast.success(response.data.message || 'Account updated successfully', 4000);
         console.log('Account updated successfully:', response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || error?.response?.data?.error || 'Error updating account';
+      toast.error(errorMsg);
       console.error('Error updating account:', error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
@@ -124,32 +152,38 @@ export default function Settings() {
                 </label>
                 <input
                   type="email"
-                  defaultValue={user?.email || ''}
+                  name="email"
+                  value={updatedUser.email}
                   onChange={handleInputChange}
+                  required
                   className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
-                  FirstName
+                  FirstName <span className="text-accent-pink">*</span>
                 </label>
                 <input
                   type="text"
-                  defaultValue={user?.firstName || ''}
+                  name="firstName"
+                  value={updatedUser.firstName}
                   onChange={handleInputChange}
+                  required
                   className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-mono tracking-widest text-white uppercase block mb-2">
-                  LastName
+                  LastName <span className="text-accent-pink">*</span>
                 </label>
                 <input
                   type="text"
-                  defaultValue={user?.lastName || ''}
+                  name="lastName"
+                  value={updatedUser.lastName}
                   onChange={handleInputChange}
+                  required
                   className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors"
                 />
               </div>
