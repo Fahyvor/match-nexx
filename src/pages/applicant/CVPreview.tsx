@@ -3,11 +3,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
-import { FaLock, FaDownload } from 'react-icons/fa';
+import { FaLock, FaDownload, FaGraduationCap, FaBriefcase } from 'react-icons/fa';
 import type { RootState } from '../../redux/store';
 import { setResume } from '../../redux/slices/resumeSlice';
 import Template01 from '../../templates/01';
-import type { ResumeData, EducationEntry, ExperienceEntry, ProjectEntry, ReferenceEntry } from '../../types/resume';
+import Template02 from '../../templates/02';
+import type { ResumeData, EducationEntry, ExperienceEntry, ProjectEntry, ReferenceEntry, CvTemplateType } from '../../types/resume';
 import api from '../../utils/api';
 import SleekToast from 'sleek-toast';
 
@@ -24,7 +25,17 @@ const CVPreview: React.FC = () => {
   const [hasPaidCv, setHasPaidCv] = useState<boolean | null>(null);
   const [showPaywallModal, setShowPaywallModal] = useState(false);
 
+  const [selectedTemplate, setSelectedTemplate] = useState<CvTemplateType>(() => {
+    const stored = localStorage.getItem('matchnexx_selected_cv_template') as CvTemplateType;
+    return stored || (resumeFromStore?.templateType as CvTemplateType) || 'professional';
+  });
+
   const printRef = useRef<HTMLDivElement>(null);
+
+  const handleTemplateChange = (tmpl: CvTemplateType) => {
+    setSelectedTemplate(tmpl);
+    localStorage.setItem('matchnexx_selected_cv_template', tmpl);
+  };
 
   useEffect(() => {
     const fetchUserCV = async () => {
@@ -35,6 +46,17 @@ const CVPreview: React.FC = () => {
           setHasPaidCv(statusRes.data.hasPaidCv ?? false);
         } else {
           setHasPaidCv(false);
+        }
+
+        // Retrieve local academic extra fields if any
+        let localAcademicData: Partial<ResumeData> = {};
+        try {
+          const raw = localStorage.getItem('matchnexx_academic_cv_data');
+          if (raw) {
+            localAcademicData = JSON.parse(raw);
+          }
+        } catch {
+          // ignore
         }
 
         if (!resumeFromStore) {
@@ -104,6 +126,7 @@ const CVPreview: React.FC = () => {
                 : [];
 
             const assembledResume: ResumeData = {
+              templateType: selectedTemplate,
               personalInfo: {
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
@@ -125,6 +148,7 @@ const CVPreview: React.FC = () => {
               projects,
               references,
               professionalSummary: cvData.professionalSummary || applicantData.summary || '',
+              ...localAcademicData,
             };
 
             setBackendResume(assembledResume);
@@ -139,7 +163,7 @@ const CVPreview: React.FC = () => {
     };
 
     fetchUserCV();
-  }, [resumeFromStore, dispatch]);
+  }, [resumeFromStore, dispatch, selectedTemplate]);
 
   // Intercept browser print when user has not paid
   useEffect(() => {
@@ -154,7 +178,25 @@ const CVPreview: React.FC = () => {
     return () => window.removeEventListener('beforeprint', handleBeforePrint);
   }, [hasPaidCv]);
 
-  const effectiveResume = resumeFromStore || backendResume;
+  // Merge stored academic data if present
+  let localAcademicFields: Partial<ResumeData> = {};
+  try {
+    const raw = localStorage.getItem('matchnexx_academic_cv_data');
+    if (raw) {
+      localAcademicFields = JSON.parse(raw);
+    }
+  } catch {
+    // ignore
+  }
+
+  const baseResume = resumeFromStore || backendResume;
+  const effectiveResume: ResumeData | null = baseResume
+    ? {
+        ...baseResume,
+        ...localAcademicFields,
+        templateType: selectedTemplate,
+      }
+    : null;
 
   const handleDownloadPdf = async () => {
     if (!printRef.current || downloading) return;
@@ -205,7 +247,7 @@ const CVPreview: React.FC = () => {
         `${effectiveResume?.personalInfo?.firstName || ''}-${effectiveResume?.personalInfo?.lastName || 'resume'}`
           .replace(/^-|-$/g, '')
           .trim() || 'resume';
-      pdf.save(`${fileName}-CV.pdf`);
+      pdf.save(`${fileName}-${selectedTemplate === 'academic' ? 'Academic' : 'Industry'}-CV.pdf`);
     } catch (err) {
       console.error('Failed to generate PDF:', err);
     } finally {
@@ -274,6 +316,10 @@ const CVPreview: React.FC = () => {
       {/* Paywall Modal overlay */}
       {showPaywallModal && (
         <CvPaywallModal
+          title={selectedTemplate === 'academic' ? "Download Your Academic & Research CV" : "Download Your Professional CV"}
+          description="Pay a one-time fee of ₦2,000 to unlock and download your personal, publication & ATS-ready CV in high-resolution PDF format."
+          badgeText="₦2,000 PAYMENT REQUIRED TO DOWNLOAD"
+          buttonText="Pay ₦2,000 to Download CV →"
           onClose={() => setShowPaywallModal(false)}
           onSuccess={() => {
             setHasPaidCv(true);
@@ -283,15 +329,44 @@ const CVPreview: React.FC = () => {
       )}
 
       {/* Top Action Bar */}
-      <div className="w-full mx-auto flex items-center justify-between mb-6 print:hidden">
+      <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-6 print:hidden">
         <button
           onClick={() => navigate('/applicant/cv-builder')}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-white hover:text-accent-pink transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-white hover:text-accent-pink transition-colors cursor-pointer self-start md:self-auto"
         >
           ← Back to Builder
         </button>
 
-        <div className="flex items-center gap-3">
+        {/* Template Switcher Tabs */}
+        <div className="flex items-center bg-zinc-200 dark:bg-panel-bg p-1 rounded-xl border border-zinc-300 dark:border-panel-border text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => handleTemplateChange('professional')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all cursor-pointer ${
+              selectedTemplate === 'professional'
+                ? 'bg-accent-cyan text-black shadow-md font-bold'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-white'
+            }`}
+          >
+            <FaBriefcase className="w-3.5 h-3.5" />
+            <span>Template 01: Modern ATS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTemplateChange('academic')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all cursor-pointer ${
+              selectedTemplate === 'academic'
+                ? 'bg-accent-cyan text-black shadow-md font-bold'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-white'
+            }`}
+          >
+            <FaGraduationCap className="w-4 h-4" />
+            <span>Template 02: Academic & Research</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 self-end md:self-auto">
           <button
             onClick={handleDownloadClick}
             disabled={downloading}
@@ -307,7 +382,7 @@ const CVPreview: React.FC = () => {
             ) : (
               <>
                 <FaLock className="w-3.5 h-3.5" />
-                <span>Unlock & Download PDF</span>
+                <span>Unlock & Download PDF (₦2,000)</span>
               </>
             )}
           </button>
@@ -315,15 +390,15 @@ const CVPreview: React.FC = () => {
       </div>
 
       {/* Printable Area */}
-      <div className="resume-print-area w-full mx-auto" ref={printRef}>
-        <Template01 resume={effectiveResume} />
+      <div className="resume-print-area w-full max-w-4xl mx-auto" ref={printRef}>
+        {selectedTemplate === 'academic' ? (
+          <Template02 resume={effectiveResume} />
+        ) : (
+          <Template01 resume={effectiveResume} />
+        )}
       </div>
     </div>
   );
 };
 
 export default CVPreview;
-
-// import { useState, useEffect, useRef } from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-
