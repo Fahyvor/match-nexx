@@ -21,6 +21,24 @@ export default new Elysia({ prefix: "/jobs" })
 
   .use(authMiddleware(["recruiter", "admin"]))
   .post(
+    "/improve-description",
+    ({ body }) => {
+      return jobController.improveDescription(body);
+    },
+    {
+      body: t.Object({
+        title: t.Optional(t.String()),
+        company: t.Optional(t.String()),
+        description: t.String(),
+        requirements: t.Optional(t.Array(t.String())),
+        experienceLevel: t.Optional(t.String()),
+        type: t.Optional(t.String()),
+        location: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  .post(
     "/create-job",
     ({ body, user}) => {
       const recruiterId = user?.sub

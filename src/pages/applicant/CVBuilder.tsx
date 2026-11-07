@@ -9,6 +9,11 @@ import {
   FaExchangeAlt,
   FaTrash,
   FaPlus,
+  FaCloudUploadAlt,
+  FaFileUpload,
+  FaSpinner,
+  FaMagic,
+  FaUndo,
 } from 'react-icons/fa';
 import type { RootState } from '../../redux/store';
 import { setResume } from '../../redux/slices/resumeSlice';
@@ -29,12 +34,19 @@ import SleekToast, { toast } from 'sleek-toast';
 
 const formatDateForInput = (val?: string | null): string => {
   if (!val) return '';
-  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
-  if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0, 10);
-  const parsed = new Date(val);
+  const trimmed = val.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
+  if (/^\d{4}-\d{2}$/.test(trimmed)) return `${trimmed}-01`;
+  if (/^\d{4}$/.test(trimmed)) return `${trimmed}-01-01`;
+
+  const parsed = new Date(trimmed);
   if (!isNaN(parsed.getTime())) {
     try {
-      return parsed.toISOString().slice(0, 10);
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, '0');
+      const day = String(parsed.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     } catch {
       return '';
     }
@@ -57,6 +69,10 @@ export default function CVBuilder() {
   const [loading, setLoading] = useState(false);
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingCv, setUploadingCv] = useState(false);
+  const [importedFromCv, setImportedFromCv] = useState(false);
+  const [improvingExpIndex, setImprovingExpIndex] = useState<number | null>(null);
+  const [expHistory, setExpHistory] = useState<Record<number, string>>({});
 
   // Core Personal Info
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -342,6 +358,63 @@ export default function CVBuilder() {
 
   const removeExperience = (index: number) => {
     setExperiences((prev) => prev.filter((_, i) => i !== index));
+    setExpHistory((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+  };
+
+  const handleImproveExperience = async (index: number) => {
+    const targetExp = experiences[index];
+    if (!targetExp) return;
+
+    if (!targetExp.description.trim() && !targetExp.role.trim()) {
+      toast.error('Please enter a role or draft your responsibilities to improve for ATS.');
+      return;
+    }
+
+    try {
+      setImprovingExpIndex(index);
+      const draft =
+        targetExp.description.trim() ||
+        `Core responsibilities and accomplishments as ${targetExp.role || 'professional'} at ${
+          targetExp.company || 'organization'
+        }.`;
+
+      const res = (await api.cv.improveExperience({
+        role: targetExp.role,
+        company: targetExp.company,
+        description: draft,
+      })) as { data?: { data?: string; success?: boolean; message?: string } };
+
+      const improved = res.data?.data;
+      if (improved && typeof improved === 'string') {
+        setExpHistory((prev) => ({ ...prev, [index]: targetExp.description }));
+        updateExperience(index, 'description', improved);
+        toast.success('Responsibilities enhanced for ATS! You can edit any line below.');
+      } else {
+        toast.error('Could not improve responsibilities. You can edit them manually.');
+      }
+    } catch (err: unknown) {
+      console.error('Failed to improve experience:', err);
+      const errorResponse = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(errorResponse.response?.data?.message || 'Failed to improve responsibilities.');
+    } finally {
+      setImprovingExpIndex(null);
+    }
+  };
+
+  const handleRevertExperience = (index: number) => {
+    if (expHistory[index] !== undefined) {
+      updateExperience(index, 'description', expHistory[index]);
+      setExpHistory((prev) => {
+        const next = { ...prev };
+        delete next[index];
+        return next;
+      });
+      toast.info('Reverted to previous responsibilities.');
+    }
   };
 
   // Education handlers
@@ -660,11 +733,204 @@ export default function CVBuilder() {
     }
   };
 
+  const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    e.target.value = '';
+
+    const validExtensions = ['.pdf', '.docx', '.doc', '.txt'];
+    const fileExt = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    if (!validExtensions.includes(fileExt)) {
+      toast.error('Please upload a PDF (.pdf), Word document (.docx), or text file (.txt).');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size exceeds 10MB limit.');
+      return;
+    }
+
+    try {
+      setUploadingCv(true);
+      const res = await api.cv.parseCV(file);
+
+      if (res.data?.success && res.data?.data) {
+        const parsed = res.data.data;
+
+        // 1. Personal Info
+        if (parsed.personalInfo) {
+          setPersonalInfo((prev) => ({
+            ...prev,
+            firstName: parsed.personalInfo.firstName || prev.firstName,
+            lastName: parsed.personalInfo.lastName || prev.lastName,
+            position: parsed.personalInfo.position || prev.position,
+            phone: parsed.personalInfo.phone || prev.phone,
+            email: parsed.personalInfo.email || prev.email,
+            address: parsed.personalInfo.address || prev.address,
+          }));
+        }
+
+        // 2. Links
+        if (parsed.links) {
+          setLinks((prev) => ({
+            ...prev,
+            portfolio: parsed.links.portfolio || prev.portfolio,
+            linkedIn: parsed.links.linkedIn || prev.linkedIn,
+            github: parsed.links.github || prev.github,
+            twitter: parsed.links.twitter || prev.twitter,
+          }));
+        }
+
+        // 3. Professional Summary
+        if (parsed.professionalSummary) {
+          setProfessionalSummary(parsed.professionalSummary);
+          setAcademicProfile((prev) => prev || parsed.professionalSummary);
+        }
+
+        // 4. Skills
+        if (Array.isArray(parsed.skills) && parsed.skills.length > 0) {
+          setSkillsInput(parsed.skills.join(', '));
+        }
+
+        // 5. Experiences
+        if (Array.isArray(parsed.experiences) && parsed.experiences.length > 0) {
+          setExperiences(
+            parsed.experiences.map((exp: {
+              company?: string;
+              role?: string;
+              startDate?: string;
+              endDate?: string;
+              isCurrent?: boolean;
+              description?: string;
+            }) => ({
+              company: exp.company || '',
+              role: exp.role || '',
+              startDate: formatDateForInput(exp.startDate),
+              endDate: formatDateForInput(exp.endDate),
+              isCurrent: Boolean(exp.isCurrent || (!exp.endDate && exp.startDate)),
+              description: exp.description || '',
+            }))
+          );
+        }
+
+        // 6. Educations
+        if (Array.isArray(parsed.educations) && parsed.educations.length > 0) {
+          setEducations(
+            parsed.educations.map((edu: {
+              institution?: string;
+              department?: string;
+              degree?: string;
+              startDate?: string;
+              endDate?: string;
+              cgpa?: string;
+            }) => ({
+              institution: edu.institution || '',
+              department: edu.department || '',
+              degree: edu.degree || '',
+              startDate: edu.startDate || '',
+              endDate: edu.endDate || '',
+              location: '',
+              studyPeriod:
+                edu.startDate && edu.endDate
+                  ? `${edu.startDate} – ${edu.endDate}`
+                  : edu.startDate || '',
+              degreeConferred: '',
+              cgpa: edu.cgpa || '',
+              classification: '',
+            }))
+          );
+        }
+
+        // 7. Projects
+        if (Array.isArray(parsed.projects) && parsed.projects.length > 0) {
+          setProjects(
+            parsed.projects.map((proj: {
+              name?: string;
+              description?: string;
+              technologies?: string[];
+              link?: string;
+            }) => ({
+              name: proj.name || '',
+              description: proj.description || '',
+              technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+              link: proj.link || '',
+            }))
+          );
+        }
+
+        // 8. References
+        if (Array.isArray(parsed.references) && parsed.references.length > 0) {
+          setReferences(
+            parsed.references.map((ref: {
+              name?: string;
+              position?: string;
+              company?: string;
+              email?: string;
+              phone?: string;
+              relationship?: string;
+            }) => ({
+              name: ref.name || '',
+              position: ref.position || '',
+              company: ref.company || '',
+              email: ref.email || '',
+              phone: ref.phone || '',
+              relationship: ref.relationship || '',
+            }))
+          );
+          setUseReferencesList(true);
+        }
+
+        // Default to professional template if still choosing
+        if (!chosenTemplate) {
+          setChosenTemplate('professional');
+          localStorage.setItem('matchnexx_selected_cv_template', 'professional');
+        }
+
+        setImportedFromCv(true);
+        toast.success('CV parsed successfully! Review and edit your details below.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        toast.error(res.data?.message || 'Could not parse CV details. You can enter them manually.');
+      }
+    } catch (err: unknown) {
+      console.error('CV parse error:', err);
+      const errorResponse = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(errorResponse.response?.data?.message || errorResponse.message || 'Failed to extract CV details.');
+    } finally {
+      setUploadingCv(false);
+    }
+  };
+
   const handleSelectTemplate = (type: CvTemplateType) => {
     setChosenTemplate(type);
     localStorage.setItem('matchnexx_selected_cv_template', type);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const uploadingModal = uploadingCv && (
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#0f0f12] border border-accent-cyan/60 rounded-2xl p-8 max-w-md w-full text-center space-y-5 shadow-2xl shadow-accent-cyan/20 animate-fadeIn">
+        <div className="w-16 h-16 rounded-2xl bg-accent-cyan/20 border border-accent-cyan/40 flex items-center justify-center mx-auto text-accent-cyan text-2xl animate-pulse">
+          <FaSpinner className="animate-spin" />
+        </div>
+        <div>
+          <h3 className="text-xl font-black text-white uppercase tracking-wider">
+            Extracting Your CV Details
+          </h3>
+          <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+            Our AI is analyzing your uploaded document and extracting your work experience, education, skills, projects, and personal details into the builder.
+          </p>
+        </div>
+        <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-gradient-to-r from-accent-cyan via-purple-500 to-accent-pink h-full w-3/4 animate-pulse" />
+        </div>
+        <p className="text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
+          All details will be 100% editable once loaded
+        </p>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -682,6 +948,7 @@ export default function CVBuilder() {
     return (
       <div className="min-h-screen bg-zinc-950 text-white font-sans antialiased selection:bg-accent-pink selection:text-white py-12 px-4 sm:px-6 lg:px-8">
         <SleekToast />
+        {uploadingModal}
         <div className="max-w-5xl mx-auto space-y-12">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -695,6 +962,55 @@ export default function CVBuilder() {
             <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
               Select the structure tailored to your career goal before entering the builder. Your builder fields and live preview will automatically adapt to your chosen format.
             </p>
+          </div>
+
+          {/* Quick AI Import from Previous CV Hero Card */}
+          <div className="bg-panel-bg border border-zinc-800 hover:border-accent-cyan/50 transition-all rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xl">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-accent-cyan/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-xs font-mono tracking-widest uppercase rounded-full">
+                  <FaMagic className="text-xs" />
+                  <span>AI Fast-Track Import</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+                  Have an Existing CV? Let AI Fill It In
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-400 max-w-xl leading-relaxed">
+                  Upload your previous CV (PDF, Word DOCX, or TXT). Our AI will instantly extract your work experiences, educations, skills, projects, and personal information into the builder. <strong className="text-zinc-200">All extracted details remain 100% editable.</strong>
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center gap-2 shrink-0 w-full md:w-auto">
+                <label
+                  className={`w-full md:w-auto px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-widest bg-gradient-to-r from-accent-cyan to-accent-pink hover:opacity-95 text-black flex items-center justify-center gap-2.5 shadow-lg shadow-accent-cyan/20 cursor-pointer transition-all ${
+                    uploadingCv ? 'opacity-50 pointer-events-none' : ''
+                  }`}
+                >
+                  {uploadingCv ? (
+                    <>
+                      <FaSpinner className="animate-spin text-sm" />
+                      <span>Extracting Details with AI...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaCloudUploadAlt className="text-lg" />
+                      <span>Upload & Extract Previous CV</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept=".pdf,.docx,.doc,.txt"
+                    className="hidden"
+                    disabled={uploadingCv}
+                    onChange={handleCvUpload}
+                  />
+                </label>
+                <span className="text-[11px] font-mono text-zinc-500 uppercase">
+                  Supports PDF, DOCX, TXT • Max 10MB
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Cards Grid */}
@@ -841,6 +1157,7 @@ export default function CVBuilder() {
   return (
     <div className="min-h-screen bg-white dark:bg-cyber-dark text-zinc-700 dark:text-zinc-300 font-sans antialiased selection:bg-accent-pink selection:text-white">
       <SleekToast />
+      {uploadingModal}
 
       <main className="w-full mx-auto px-4 sm:px-6 lg:px-16 py-10 pb-24">
         {/* Top Switcher Bar */}
@@ -870,6 +1187,78 @@ export default function CVBuilder() {
             </button>
           </div>
         </div>
+
+        {/* AI CV Import Quick Bar */}
+        <div className="mb-8 p-4 sm:p-5 bg-panel-bg border border-zinc-800 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan text-lg shrink-0">
+              <FaFileUpload />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-mono font-bold tracking-widest uppercase text-white">
+                  Import Details from Previous CV
+                </p>
+                <span className="text-[10px] font-mono uppercase bg-accent-cyan/10 text-accent-cyan px-2 py-0.5 rounded border border-accent-cyan/30">
+                  AI Auto-Fill
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Upload your previous CV to automatically extract details into the builder. All fields remain 100% editable.
+              </p>
+            </div>
+          </div>
+
+          <label
+            className={`px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono font-bold uppercase rounded-lg border border-zinc-700 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-sm ${
+              uploadingCv ? 'opacity-50 pointer-events-none' : ''
+            }`}
+          >
+            {uploadingCv ? (
+              <>
+                <FaSpinner className="animate-spin text-xs" />
+                <span>Extracting with AI...</span>
+              </>
+            ) : (
+              <>
+                <FaCloudUploadAlt className="text-accent-cyan text-base" />
+                <span>Upload Previous CV</span>
+              </>
+            )}
+            <input
+              type="file"
+              accept=".pdf,.docx,.doc,.txt"
+              className="hidden"
+              disabled={uploadingCv}
+              onChange={handleCvUpload}
+            />
+          </label>
+        </div>
+
+        {/* Success Alert Banner when CV is imported */}
+        {importedFromCv && (
+          <div className="mb-8 p-4 bg-accent-cyan/10 border border-accent-cyan/40 rounded-xl flex items-start sm:items-center justify-between gap-4 animate-fadeIn">
+            <div className="flex items-center gap-3">
+              <FaCheckCircle className="text-accent-cyan text-xl shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-white uppercase font-mono tracking-wider">
+                  Previous CV Extracted Successfully
+                </p>
+                <p className="text-xs text-zinc-300 mt-0.5">
+                  Your work experiences, education, skills, projects, and personal info have been populated. You can freely review, edit, add, or delete any detail below before saving.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setImportedFromCv(false)}
+              className="text-xs font-mono text-zinc-400 hover:text-white px-2 py-1 cursor-pointer shrink-0"
+              title="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-panel-border pb-6">
@@ -1385,13 +1774,66 @@ export default function CVBuilder() {
                     </div>
                   </div>
 
-                  <textarea
-                    rows={4}
-                    placeholder="Responsibilities & Accomplishments (Each line becomes a bullet point)"
-                    value={exp.description}
-                    onChange={(e) => updateExperience(idx, 'description', e.target.value)}
-                    className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2 text-sm focus:outline-none focus:border-accent-cyan"
-                  />
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <label className="text-[11px] font-mono text-zinc-300 uppercase tracking-widest font-semibold">
+                          Responsibilities & Achievements
+                        </label>
+                        {expHistory[idx] !== undefined && (
+                          <span className="text-[10px] font-mono uppercase bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan px-2 py-0.5 rounded">
+                            ATS Enhanced • Editable
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {expHistory[idx] !== undefined && (
+                          <button
+                            type="button"
+                            onClick={() => handleRevertExperience(idx)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-mono uppercase rounded border border-zinc-700 transition-colors cursor-pointer"
+                            title="Revert to your previous input"
+                          >
+                            <FaUndo className="text-[10px]" />
+                            <span>Revert</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleImproveExperience(idx)}
+                          disabled={improvingExpIndex === idx}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-accent-cyan to-accent-pink hover:opacity-95 text-black font-bold text-[11px] font-mono uppercase tracking-wider rounded transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                          title="Enhance bullet points with action verbs and ATS keywords"
+                        >
+                          {improvingExpIndex === idx ? (
+                            <>
+                              <FaSpinner className="animate-spin text-xs" />
+                              <span>Enhancing for ATS...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FaMagic className="text-xs" />
+                              <span>Improve for ATS</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <textarea
+                      rows={5}
+                      placeholder="List your day-to-day responsibilities, key accomplishments, or draft notes. Click 'Improve for ATS' to optimize into high-impact bullet points with action verbs..."
+                      value={exp.description}
+                      onChange={(e) => updateExperience(idx, 'description', e.target.value)}
+                      className="w-full bg-white dark:bg-cyber-dark border border-zinc-700 px-4 py-2.5 text-sm focus:outline-none focus:border-accent-cyan font-sans leading-relaxed"
+                    />
+
+                    <p className="text-[11px] text-zinc-400 font-mono">
+                      Each line displays as an impact bullet point on your CV. All generated text remains 100% editable.
+                    </p>
+                  </div>
 
                   <div className="flex justify-end">
                     <button

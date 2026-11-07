@@ -2,6 +2,7 @@ import { db } from "../db/db";
 import { applicants, experiences, educations, skills, projects, cvs, users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { AIService } from "../services/AIService";
+import { extractTextFromFile } from "../utils/fileTextExtractor";
 
 interface ExperienceInput {
   company: string;
@@ -322,6 +323,68 @@ export const cvController = {
       return {
         success: false,
         message: e instanceof Error ? e.message : "Failed to generate summary",
+      };
+    }
+  },
+
+  parseCV: async (file: File) => {
+    try {
+      if (!file) {
+        return { success: false, message: "No CV file provided." };
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const rawText = await extractTextFromFile(buffer, file.name || "", file.type || "");
+
+      if (!rawText || rawText.trim().length < 20) {
+        return {
+          success: false,
+          message: "Could not extract readable text from the document. Please ensure it is a valid PDF, Word (DOCX), or text file.",
+        };
+      }
+
+      const parsedData = await AIService.extractCVData(rawText);
+
+      return {
+        success: true,
+        message: "CV parsed successfully!",
+        data: parsedData,
+      };
+    } catch (e: unknown) {
+      console.error("cvController.parseCV error:", e);
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Failed to parse CV",
+      };
+    }
+  },
+
+  improveExperience: async (body: {
+    role?: string;
+    company?: string;
+    description: string;
+  }) => {
+    try {
+      if (!body.description || !body.description.trim()) {
+        return {
+          success: false,
+          message: "Please enter your responsibilities or draft notes to improve.",
+        };
+      }
+
+      const improved = await AIService.improveExperience(body);
+
+      return {
+        success: true,
+        data: improved,
+        message: "Work experience achievements enhanced for ATS!",
+      };
+    } catch (e: unknown) {
+      console.error("cvController.improveExperience error:", e);
+      return {
+        success: false,
+        message: e instanceof Error ? e.message : "Failed to improve work experience",
       };
     }
   },

@@ -116,6 +116,28 @@ const app = new Elysia({ prefix: "/cv" })
     }
   )
 
-  .get("/me", async ({ user }) => cvController.getByUserId(user?.sub));
+  .get("/me", async ({ user }) => cvController.getByUserId(user?.sub))
+
+  .post(
+    "/parse-cv",
+    async ({ body }) => cvController.parseCV(body.cv),
+    {
+      body: t.Object({
+        cv: t.File(),
+      }),
+    }
+  )
+
+  .post(
+    "/improve-experience",
+    async ({ body }) => cvController.improveExperience(body),
+    {
+      body: t.Object({
+        role: t.Optional(t.String()),
+        company: t.Optional(t.String()),
+        description: t.String(),
+      }),
+    }
+  );
 
 export default app;

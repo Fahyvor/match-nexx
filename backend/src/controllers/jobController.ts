@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/db";
 import { jobs } from "../db/schema";
 import { randomUUID } from "crypto";
+import { AIService } from "../services/AIService";
 
 export const jobController = {
 
@@ -198,5 +199,50 @@ export const jobController = {
       success: true,
       message: "Job deleted successfully",
     };
+  },
+
+  // IMPROVE JOB DESCRIPTION WITH AI
+  improveDescription: async (data: {
+    title?: string;
+    company?: string;
+    description: string;
+    requirements?: string[];
+    experienceLevel?: string;
+    type?: string;
+    location?: string;
+  }) => {
+    if (!data.description || !data.description.trim()) {
+      return {
+        success: false,
+        message: "Please enter some details or a draft for the job description to improve.",
+      };
+    }
+
+    try {
+      const improved = await AIService.improveJobDescription({
+        title: data.title,
+        company: data.company,
+        description: data.description,
+        requirements: data.requirements,
+        experienceLevel: data.experienceLevel,
+        type: data.type,
+        location: data.location,
+      });
+
+      return {
+        success: true,
+        data: improved,
+        message: "Job description improved successfully!",
+      };
+    } catch (error) {
+      console.error("jobController.improveDescription error:", error);
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to improve job description.",
+      };
+    }
   },
 };

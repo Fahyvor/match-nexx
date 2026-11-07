@@ -40,9 +40,7 @@ export default new Elysia({ prefix: "/applicant" })
   applicantController.parseCV,
   {
     body: t.Object({
-      cv: t.File({
-        type: "application/pdf",
-      }),
+      cv: t.File(),
     }),
   }
 )

@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import type { RootState } from "../../redux/store";
 import SleekToast, { toast } from "sleek-toast";
 import type { AxiosError } from "axios";
+import { FaMagic, FaUndo, FaSpinner } from "react-icons/fa";
+import api from "../../utils/api";
 
 export default function CreateJobPage() {
   const [form, setForm] = useState<{
@@ -27,9 +29,57 @@ export default function CreateJobPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [improvingDescription, setImprovingDescription] = useState(false);
+  const [previousDescription, setPreviousDescription] = useState<string | null>(null);
   const { states } = useSelector((state: RootState) => state.states);
   const token = useSelector((state: RootState) => state.user.token);
   // console.log("Token", token)
+
+  const handleImproveDescription = async () => {
+    if (!form.description.trim() && !form.title.trim()) {
+      toast.error("Please enter a job title or write a quick draft for AI to improve.");
+      return;
+    }
+
+    try {
+      setImprovingDescription(true);
+      const draft = form.description.trim() || `Seeking a talented ${form.title} to join ${form.company || "our organization"}.`;
+
+      const response = await api.jobs.improveDescription({
+        title: form.title,
+        company: form.company,
+        description: draft,
+        requirements: form.requirements,
+        experienceLevel: form.experienceLevel,
+        type: form.type,
+        location: form.location,
+      });
+
+      const improved = response?.data?.data || response?.data?.improvedDescription || response?.data?.message;
+
+      if (improved && typeof improved === "string") {
+        setPreviousDescription(form.description);
+        setForm((prev) => ({ ...prev, description: improved }));
+        toast.success("Job description enhanced with AI! You can edit any part of it below.");
+      } else {
+        toast.error("Could not enhance description. You can still write it manually.");
+      }
+    } catch (err: unknown) {
+      console.error("Failed to improve description:", err);
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      toast.error(axiosErr.response?.data?.message || "Failed to improve job description with AI.");
+    } finally {
+      setImprovingDescription(false);
+    }
+  };
+
+  const handleRevertDescription = () => {
+    if (previousDescription !== null) {
+      setForm((prev) => ({ ...prev, description: previousDescription }));
+      setPreviousDescription(null);
+      toast.info("Reverted to original description.");
+    }
+  };
 
 
   const handleChange = (
@@ -253,17 +303,70 @@ export default function CreateJobPage() {
           )}
         </div>
 
-        <div className="">
-          <label className='text-xs font-mono tracking-widest text-white uppcase'>Job Description</label>
+        <div className="lg:col-span-2 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-mono tracking-widest text-white uppercase">
+                Job Description
+              </label>
+              {previousDescription !== null && (
+                <span className="text-[10px] font-mono uppercase bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan px-2 py-0.5 rounded">
+                  AI Enhanced • Editable
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {previousDescription !== null && (
+                <button
+                  type="button"
+                  onClick={handleRevertDescription}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono uppercase tracking-wider rounded border border-zinc-700 transition-colors cursor-pointer"
+                >
+                  <FaUndo className="text-[10px]" />
+                  <span>Revert to original</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleImproveDescription}
+                disabled={improvingDescription}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-accent-cyan to-accent-pink hover:opacity-95 text-black font-bold text-xs uppercase tracking-wider rounded transition-all cursor-pointer shadow-md disabled:opacity-50"
+              >
+                {improvingDescription ? (
+                  <>
+                    <FaSpinner className="animate-spin text-xs" />
+                    <span>Improving with AI...</span>
+                  </>
+                ) : (
+                  <>
+                    <FaMagic className="text-xs" />
+                    <span>Improve with AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-zinc-400 font-mono">
+            Type or draft your description, then click &ldquo;Improve with AI&rdquo; to enhance clarity, structure, and appeal. You can edit any part of the text.
+          </p>
+
           <textarea
-            placeholder="Job Description"
+            placeholder="Provide an overview of the role, key responsibilities, or draft notes. Click 'Improve with AI' to enhance it professionally..."
             value={form.description}
             onChange={handleChange}
-            rows={4}
+            rows={10}
             name="description"
-            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-700"
+            className="w-full bg-white dark:bg-cyber-dark/50 border border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:border-accent-cyan transition-colors placeholder:text-zinc-600 font-sans leading-relaxed"
             required
           />
+
+          <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono">
+            <span>All text remains 100% editable before and after submission.</span>
+            <span>{form.description.length} characters</span>
+          </div>
         </div>
 
         <div className="flex gap-4">

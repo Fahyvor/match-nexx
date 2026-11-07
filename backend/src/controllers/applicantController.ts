@@ -8,7 +8,8 @@ import type { Context } from "elysia";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { supabase } from "../config/supabase";
-import { PDFParse } from "pdf-parse";
+import { extractTextFromFile } from "../utils/fileTextExtractor";
+import { AIService } from "../services/AIService";
 
 type AuthUser = {
   sub: string;
@@ -38,7 +39,7 @@ type ElysiaSet = Context["set"];
 
 export class ApplicantController {
 
-  // --- NEW PARSE CV METHOD ---
+  // --- AI-POWERED PARSE CV METHOD ---
   parseCV = async ({
     body,
     set,
@@ -55,51 +56,37 @@ export class ApplicantController {
         return { success: false, message: "No CV file provided." };
       }
 
-      // 1. Read file stream into a buffer
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      const rawText = await extractTextFromFile(buffer, file.name || "", file.type || "");
 
-      // 2. Extract raw text from the PDF file
-      const parser = new PDFParse({ data: buffer });
-      let rawText: string;
-      try {
-        const pdfData = await parser.getText();
-        rawText = pdfData.text;
-      } finally {
-        await parser.destroy();
+      if (!rawText || rawText.trim().length < 20) {
+        set.status = 400;
+        return {
+          success: false,
+          message: "Could not extract readable text from document. Please upload a PDF, Word (DOCX), or text file.",
+        };
       }
 
-      // 3. Clean and parse details using Regular Expressions (Regex)
-      // Note: For 100% accurate results, you could feed rawText into an LLM API here.
-      const phoneRegex = /(?:\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4,6}/g;
-      const linkedinRegex = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+/i;
-      const githubRegex = /(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9_-]+/i;
+      const parsed = await AIService.extractCVData(rawText);
 
-      const phoneMatches = rawText.match(phoneRegex);
-      const linkedinMatches = rawText.match(linkedinRegex);
-      const githubMatches = rawText.match(githubRegex);
-
-      // Simple structural fallback strategies for headline & summary
-      const cleanLines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
-      const headline = cleanLines[0] ? `${cleanLines[0]} Professional` : "";
-      const summary = cleanLines.slice(1, 4).join(" ");
-
-      const extractedProfile = {
-        headline: headline.slice(0, 50),
-        summary: summary.slice(0, 200),
-        phone: phoneMatches ? phoneMatches[0] : "",
-        location: "", // Can be filled out manually by user
-        portfolio: "",
-        github: githubMatches ? githubMatches[0] : "",
-        linkedin: linkedinMatches ? linkedinMatches[0] : "",
+      // Support legacy consumer fields (e.g. JobApplication.tsx) while exposing the full parsed data
+      const responseData = {
+        headline: parsed.personalInfo?.position || "",
+        summary: parsed.professionalSummary || "",
+        phone: parsed.personalInfo?.phone || "",
+        location: parsed.personalInfo?.address || "",
+        portfolio: parsed.links?.portfolio || "",
+        github: parsed.links?.github || "",
+        linkedin: parsed.links?.linkedIn || "",
+        ...parsed,
       };
 
       return {
         success: true,
         message: "CV successfully parsed.",
-        data: extractedProfile,
+        data: responseData,
       };
-
     } catch (e: unknown) {
       set.status = 500;
       const message = e instanceof Error ? e.message : "Internal parsing error";

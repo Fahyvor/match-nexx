@@ -1,5 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 import { createHash } from "node:crypto";
+import dotenv from "dotenv";
+import path from "node:path";
+
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -36,11 +41,33 @@ interface GenerateSummaryInput {
   role?: string;
 }
 
+export interface ImproveJobDescriptionInput {
+  title?: string;
+  company?: string;
+  description: string;
+  requirements?: string[];
+  experienceLevel?: string;
+  type?: string;
+  location?: string;
+}
+
+export interface ImproveExperienceInput {
+  role?: string;
+  company?: string;
+  description: string;
+}
+
 export interface ParsedCVData {
   personalInfo: {
+    firstName?: string;
+    lastName?: string;
     phone: string;
+    email?: string;
     position: string;
+    address?: string;
   };
+
+  professionalSummary?: string;
 
   links: {
     portfolio: string;
@@ -65,6 +92,7 @@ export interface ParsedCVData {
     department: string;
     startDate: string;
     endDate: string;
+    cgpa?: string;
   }[];
 
   projects: {
@@ -75,6 +103,15 @@ export interface ParsedCVData {
   }[];
 
   skills: string[];
+
+  references?: {
+    name: string;
+    position?: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+    relationship?: string;
+  }[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -241,31 +278,46 @@ const callGemini = async (
 
   const op = options?.op ?? "gemini.call";
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const preferredModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
   return monitored(op, async () => {
-    const response = await withRetry(() =>
-      withTimeout(
-        gemini.models.generateContent({
-          model: "gemini-3.5-flash-lite",
-          contents: prompt,
-          config: {
-            temperature: options?.temperature ?? 0.3,
-            maxOutputTokens: options?.maxTokens ?? 1000,
-            ...(options?.jsonMode ? { responseMimeType: "application/json" } : {}),
-          },
-        }),
-        timeoutMs,
-        op
-      )
-    );
+    const modelsToTry = [preferredModel, "gemini-2.0-flash", "gemini-1.5-flash"];
+    let lastError: unknown;
 
-    const content = response.text;
+    for (const model of modelsToTry) {
+      try {
+        const response = await withRetry(() =>
+          withTimeout(
+            gemini.models.generateContent({
+              model,
+              contents: prompt,
+              config: {
+                temperature: options?.temperature ?? 0.3,
+                maxOutputTokens: options?.maxTokens ?? 1000,
+                ...(options?.jsonMode ? { responseMimeType: "application/json" } : {}),
+              },
+            }),
+            timeoutMs,
+            op
+          )
+        );
 
-    if (!content) {
-      throw new Error("Gemini returned an empty response");
+        const content = response.text;
+        if (content && content.trim()) {
+          return content.trim();
+        }
+      } catch (err: unknown) {
+        lastError = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("not found") || msg.includes("404") || msg.includes("invalid model")) {
+          log("warn", { op, event: "model_fallback", failedModel: model, error: msg });
+          continue;
+        }
+        throw err;
+      }
     }
 
-    return content.trim();
+    throw lastError || new Error("Gemini returned an empty response");
   });
 };
 
@@ -300,6 +352,72 @@ const setInCache = (key: string, data: ParsedCVData) => {
   }
   extractCache.set(key, { data, expiresAt: Date.now() + CACHE_TTL_MS });
 };
+
+/**
+ * Fallback regex & heuristic parser when AI calls cannot be reached.
+ * Ensures the user's CV is always parsed into editable fields.
+ */
+function heuristicExtractCVData(rawText: string): ParsedCVData {
+  const emailMatch = rawText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const phoneMatch = rawText.match(/(?:\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4,6}/);
+  const linkedinMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/(?:in\/)?[A-Za-z0-9_-]+/i);
+  const githubMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9_-]+/i);
+  const twitterMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/[A-Za-z0-9_]+/i);
+  const portfolioMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.(?:com|dev|io|me|tech|ng|co|net)[^\s]*/i);
+
+  const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  let firstName = "";
+  let lastName = "";
+  let position = "";
+
+  for (let i = 0; i < Math.min(lines.length, 5); i++) {
+    const line = lines[i];
+    if (line.includes("@") || line.includes("http") || /^\+?\d/.test(line)) continue;
+    const words = line.split(/\s+/);
+    if (!firstName && words.length >= 2 && words.length <= 4 && !/resume|curriculum|vitae|page/i.test(line)) {
+      firstName = words[0];
+      lastName = words.slice(1).join(" ");
+    } else if (!position && words.length <= 6 && !/resume|curriculum|vitae/i.test(line)) {
+      position = line;
+    }
+  }
+
+  // Common skills search
+  const commonSkills = [
+    "JavaScript", "TypeScript", "React", "Node.js", "Python", "Java", "C++", "C#", "SQL",
+    "PostgreSQL", "MongoDB", "HTML", "CSS", "Tailwind CSS", "Next.js", "Express", "Docker",
+    "Kubernetes", "AWS", "Azure", "Git", "REST API", "GraphQL", "Linux", "Figma", "Redux",
+    "Communication", "Leadership", "Project Management", "Problem Solving", "Agile", "Scrum"
+  ];
+  const foundSkills = commonSkills.filter((s) =>
+    new RegExp(`\\b${s.replace("+", "\\+")}\\b`, "i").test(rawText)
+  );
+
+  return {
+    personalInfo: {
+      firstName: firstName || "",
+      lastName: lastName || "",
+      phone: phoneMatch ? phoneMatch[0] : "",
+      email: emailMatch ? emailMatch[0] : "",
+      position: position || "",
+      address: "",
+    },
+    professionalSummary: lines.slice(1, 4).join(" ").slice(0, 300),
+    links: {
+      portfolio: portfolioMatch ? portfolioMatch[0] : "",
+      linkedIn: linkedinMatch ? linkedinMatch[0] : "",
+      github: githubMatch ? githubMatch[0] : "",
+      twitter: twitterMatch ? twitterMatch[0] : "",
+      facebook: "",
+    },
+    experiences: [],
+    educations: [],
+    projects: [],
+    skills: foundSkills,
+    references: [],
+  };
+}
 
 export const AIService = {
   /**
@@ -385,15 +503,7 @@ ${educationText}
     } catch (e) {
       console.error("AIService.generateProfessionalSummary error:", e);
 
-      /**
-       * Fallback
-       *
-       * CV should still be generated if
-       * Gemini is unavailable.
-       */
-
       const topSkills = skills.slice(0, 3).filter(Boolean).join(", ");
-
       const latestRole = experience[0]?.role;
       const latestCompany = experience[0]?.company;
 
@@ -413,19 +523,19 @@ ${educationText}
    * Extract structured information from CV text
    */
   extractCVData: async (rawText: string): Promise<ParsedCVData> => {
+    if (!rawText?.trim()) {
+      throw new Error("CV text is empty");
+    }
+
+    const cacheKey = hashText(rawText.trim());
+    const cached = getFromCache(cacheKey);
+    if (cached) {
+      recordCacheHit("extractCVData");
+      log("info", { op: "extractCVData", event: "cache_hit" });
+      return cached;
+    }
+
     try {
-      if (!rawText?.trim()) {
-        throw new Error("CV text is empty");
-      }
-
-      const cacheKey = hashText(rawText.trim());
-      const cached = getFromCache(cacheKey);
-      if (cached) {
-        recordCacheHit("extractCVData");
-        log("info", { op: "extractCVData", event: "cache_hit" });
-        return cached;
-      }
-
       const prompt = `
 Extract structured information from the CV text below.
 
@@ -433,9 +543,15 @@ Return ONLY valid JSON matching EXACTLY this structure:
 
 {
   "personalInfo": {
+    "firstName": "",
+    "lastName": "",
     "phone": "",
-    "position": ""
+    "email": "",
+    "position": "",
+    "address": ""
   },
+
+  "professionalSummary": "",
 
   "links": {
     "portfolio": "",
@@ -449,8 +565,8 @@ Return ONLY valid JSON matching EXACTLY this structure:
     {
       "company": "",
       "role": "",
-      "startDate": "",
-      "endDate": "",
+      "startDate": "YYYY-MM-DD or YYYY-MM or YYYY",
+      "endDate": "YYYY-MM-DD or YYYY-MM or YYYY",
       "isCurrent": false,
       "description": ""
     }
@@ -461,8 +577,9 @@ Return ONLY valid JSON matching EXACTLY this structure:
       "institution": "",
       "degree": "",
       "department": "",
-      "startDate": "",
-      "endDate": ""
+      "startDate": "YYYY",
+      "endDate": "YYYY",
+      "cgpa": ""
     }
   ],
 
@@ -475,43 +592,33 @@ Return ONLY valid JSON matching EXACTLY this structure:
     }
   ],
 
-  "skills": []
+  "skills": [],
+
+  "references": [
+    {
+      "name": "",
+      "position": "",
+      "company": "",
+      "email": "",
+      "phone": "",
+      "relationship": ""
+    }
+  ]
 }
 
 STRICT RULES:
-
-1. Do not invent information.
-
-2. If a field cannot be found, use:
-   - "" for strings
-   - [] for arrays
-   - false for booleans
-
-3. "position" should contain the candidate's most recent or primary professional job title.
-
-4. Preserve dates in the format they appear in the CV.
-
-5. "isCurrent" must only be true when the CV explicitly indicates:
-   - Present
-   - Current
-   - Currently
-   - or an equivalent expression.
-
-6. Extract all relevant work experiences.
-
-7. Extract all relevant education entries.
-
-8. Extract projects when they are explicitly listed.
-
-9. Extract technologies associated with each project.
-
-10. Extract professional skills.
-
-11. Extract URLs exactly when possible.
-
-12. Do not add explanations outside the JSON.
-
-13. Do not wrap the JSON in markdown code fences.
+1. Do not invent information. If a field cannot be found, use "" for strings, [] for arrays, false for booleans.
+2. Separate firstName and lastName accurately if full name is provided.
+3. "position" should contain the candidate's most recent, current, or target professional job title.
+4. "address" should contain candidate location (city, state, country) if present.
+5. "professionalSummary" should contain their summary, career objective, or profile statement.
+6. Preserve or standardize dates. If a role is currently held, set "isCurrent" to true and "endDate" to "".
+7. Extract all relevant work experiences with clear responsibilities/achievements in "description".
+8. Extract all relevant education entries (institution, degree, department/field, dates, cgpa).
+9. Extract projects when explicitly listed with names, descriptions, and technologies.
+10. Extract individual professional and technical skills into the "skills" array.
+11. Extract any listed references into "references".
+12. Return ONLY valid JSON without markdown fences.
 
 CV TEXT:
 
@@ -524,7 +631,7 @@ ${rawText}
         temperature: 0,
         maxTokens: 4000,
         jsonMode: true,
-        timeoutMs: 20000,
+        timeoutMs: 25000,
         op: "extractCVData",
       });
 
@@ -539,11 +646,10 @@ ${rawText}
       try {
         parsed = JSON.parse(cleanedText) as ParsedCVData;
       } catch (parseError) {
-        console.error("Failed to parse Gemini CV response:");
-        console.error(cleanedText);
-        console.error(parseError);
-
-        throw new Error("Could not parse CV. Please try again or fill the form manually.");
+        console.warn("Gemini CV JSON parse failed, falling back to heuristic parser:", parseError);
+        const fallback = heuristicExtractCVData(rawText);
+        setInCache(cacheKey, fallback);
+        return fallback;
       }
 
       if (!parsed || typeof parsed !== "object") {
@@ -551,9 +657,15 @@ ${rawText}
       }
 
       parsed.personalInfo ??= {
+        firstName: "",
+        lastName: "",
         phone: "",
+        email: "",
         position: "",
+        address: "",
       };
+
+      parsed.professionalSummary ??= "";
 
       parsed.links ??= {
         portfolio: "",
@@ -567,18 +679,173 @@ ${rawText}
       parsed.educations ??= [];
       parsed.projects ??= [];
       parsed.skills ??= [];
+      parsed.references ??= [];
 
       setInCache(cacheKey, parsed);
-
       return parsed;
     } catch (e) {
-      console.error("AIService.extractCVData error:", e);
+      console.warn("AIService.extractCVData AI call failed, using heuristic fallback parser:", e);
+      const fallback = heuristicExtractCVData(rawText);
+      setInCache(cacheKey, fallback);
+      return fallback;
+    }
+  },
 
-      if (e instanceof Error && e.message.includes("Could not parse CV")) {
-        throw e;
+  /**
+   * Improve and enhance a job description using AI
+   */
+  improveJobDescription: async ({
+    title,
+    company,
+    description,
+    requirements,
+    experienceLevel,
+    type,
+    location,
+  }: ImproveJobDescriptionInput): Promise<string> => {
+    try {
+      const prompt = `
+You are an expert technical talent recruiter and copywriter.
+Enhance and professionally rewrite the following job description.
+
+Job Context:
+- Role Title: ${title || "Not specified"}
+- Company Name: ${company || "Our Company"}
+- Experience Level: ${experienceLevel || "Not specified"}
+- Job Type: ${type || "Not specified"}
+- Location: ${location || "Not specified"}
+- Stated Requirements: ${requirements?.length ? requirements.join(", ") : "None specified"}
+
+Draft / Input from Recruiter:
+"""
+${description}
+"""
+
+Requirements for your improved output:
+1. Make it compelling, modern, well-structured, and ATS-friendly.
+2. Structure clearly with clean sections:
+   • About the Role: A strong, attractive opening paragraph introducing the mission, impact, and scope.
+   • What You'll Do (Key Responsibilities): 4 to 7 impactful, actionable bullet points describing day-to-day duties.
+   • What We're Looking For (Qualifications): Essential skills, technologies, and experience directly reflecting the role and requirements.
+   • Nice to Have: 2-3 bonus skills or strengths (if applicable).
+   • Why Join Us: Highlighting team culture, growth opportunities, and positive workplace environment.
+3. Preserve all specific technologies, requirements, and constraints specified in the recruiter's input.
+4. Do not invent rigid requirements that were not implied by the input.
+5. Do NOT include markdown code fences or conversational meta-talk (do not say "Here is the improved job description:").
+6. Return ONLY the improved job description ready to paste and edit.
+`.trim();
+
+      const improved = await callGemini(prompt, {
+        temperature: 0.5,
+        maxTokens: 1400,
+        timeoutMs: 18000,
+        op: "improveJobDescription",
+      });
+
+      return improved;
+    } catch (e) {
+      console.warn("AIService.improveJobDescription AI call failed, using structured template fallback:", e);
+
+      const roleName = title || "Team Member";
+      const compName = company || "Our Company";
+      const reqList = requirements?.length
+        ? requirements.map((r) => `• ${r}`).join("\n")
+        : "• Proven background and relevant professional skills\n• Strong problem-solving abilities and communication";
+
+      const cleanedInputLines = description
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      const bullets = cleanedInputLines.length > 0
+        ? cleanedInputLines.map((l) => `• ${l.replace(/^[•\-\*]\s*/, "")}`).join("\n")
+        : `• Collaborate with the team to deliver high-quality work\n• Own key projects from design through execution\n• Maintain high standards and continuously improve processes`;
+
+      return `### About the Role
+We are seeking a talented ${roleName} to join our team at ${compName}. In this role, you will play a pivotal part in delivering high-impact solutions, collaborating across cross-functional teams, and driving forward our core initiatives.
+
+### Key Responsibilities
+${bullets}
+
+### What We're Looking For
+${reqList}
+
+### What We Offer
+• Dynamic, collaborative work environment
+• Opportunities for professional growth and career advancement
+• Competitive compensation and support for ongoing learning`;
+    }
+  },
+
+  /**
+   * Improve and ATS-optimize work experience responsibilities and achievements
+   */
+  improveExperience: async ({
+    role,
+    company,
+    description,
+  }: ImproveExperienceInput): Promise<string> => {
+    try {
+      const prompt = `
+You are an expert executive resume writer and ATS optimization specialist.
+Improve and rewrite the following work experience responsibilities and achievements for a CV/resume so that it passes Applicant Tracking Systems (ATS) and impresses recruiters.
+
+Candidate Role: ${role || "Professional"}
+Company: ${company || "Company"}
+
+User's Raw Input / Responsibilities Draft:
+"""
+${description}
+"""
+
+Requirements:
+1. ATS Optimization: Use strong industry-standard keywords and phrasing aligned with the role.
+2. Action-Driven Bullets: Produce 3 to 5 powerful, high-impact bullet points.
+3. Every bullet point MUST begin with a strong action verb (e.g., "Spearheaded", "Architected", "Engineered", "Optimized", "Delivered", "Streamlined", "Resolved", "Collaborated", "Championed").
+4. Focus on measurable impact, scope, performance improvements, and business outcomes where sensible based on the user's input.
+5. Do NOT invent untrue credentials, degrees, or unrelated technologies.
+6. Do NOT wrap in markdown code blocks or add conversational introductory/closing text (do NOT say "Here are your improved bullet points:").
+7. Start each bullet point with "• " on a new line.
+8. Return ONLY the bullet points text.
+`.trim();
+
+      const improved = await callGemini(prompt, {
+        temperature: 0.4,
+        maxTokens: 800,
+        timeoutMs: 15000,
+        op: "improveExperience",
+      });
+
+      return improved;
+    } catch (e) {
+      console.warn("AIService.improveExperience AI call failed, using heuristic bullet generator:", e);
+
+      const lines = description
+        .split("\n")
+        .map((l) => l.trim().replace(/^[•\-\*]\s*/, ""))
+        .filter(Boolean);
+
+      const actionVerbs = [
+        "Delivered",
+        "Engineered",
+        "Streamlined",
+        "Collaborated on",
+        "Optimized",
+        "Coordinated",
+      ];
+
+      if (lines.length === 0) {
+        return `• Executed core responsibilities for ${role || "the role"} at ${company || "the company"}, ensuring high standards of delivery.\n• Collaborated with cross-functional team members to achieve operational milestones.\n• Identified and implemented process improvements to enhance productivity and outcomes.`;
       }
 
-      throw new Error("Could not process CV. Please try again or fill the form manually.");
+      return lines
+        .map((line, idx) => {
+          const startsWithVerb = /^[A-Z][a-z]+ed\b/.test(line);
+          const verb = actionVerbs[idx % actionVerbs.length];
+          const formattedLine = startsWithVerb ? line : `${verb} ${line.charAt(0).toLowerCase()}${line.slice(1)}`;
+          return `• ${formattedLine}`;
+        })
+        .join("\n");
     }
   },
 

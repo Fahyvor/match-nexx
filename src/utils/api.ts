@@ -239,6 +239,17 @@ class ApiClient {
     create: (data: JobData) =>
       this.client.post('/jobs/create-job', data),
 
+    improveDescription: (data: {
+      title?: string;
+      company?: string;
+      description: string;
+      requirements?: string[];
+      experienceLevel?: string;
+      type?: string;
+      location?: string;
+    }) =>
+      this.client.post('/jobs/improve-description', data),
+
     update: (id: string, data: Partial<JobData>) =>
       this.client.put(`/jobs/update-job/${id}`, data),
 
@@ -317,6 +328,20 @@ class ApiClient {
 
     generateSummary: (data: CvGenerateSummaryPayload) =>
       this.client.post('/cv/generate-summary', data),
+
+    parseCV: (file: File) => {
+      const formData = new FormData();
+      formData.append('cv', file);
+      return this.client.post('/cv/parse-cv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+
+    improveExperience: (data: {
+      role?: string;
+      company?: string;
+      description: string;
+    }) => this.client.post('/cv/improve-experience', data),
   };
 
   // Payment endpoints
